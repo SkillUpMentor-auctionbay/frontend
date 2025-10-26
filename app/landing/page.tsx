@@ -1,0 +1,41 @@
+"use client";
+import Image from "next/image";
+import { Button } from "../../components/ui/button";
+
+export default function LandingPage() {
+  return (
+    <div className="flex flex-col w-screen h-screen justify-between items-center">
+      <div className="w-full flex justify-between items-center py-5 px-8 ">
+        <Image src="/logo.png" width={64} height={64} alt="Auction Bay Logo" />
+        <div className=" flex items-center justify-between w-[172px]">
+            <Button 
+                variant={"ghost"}
+                className="w-12"
+            >
+                Log in
+            </Button>
+            <p className="font-light text-base w-4 text-black">or</p>
+            <Button variant={"secondary"} className="w-[92px]">Sign up</Button>
+        </div>
+      </div>
+        <div className="px-6 py-24 text-center">
+          <h1 className="text-6xl font-bold text-text-primary mb-6 text-balance">E-auctions made easy!</h1>
+          <p className=" text-md font-light text-text-primary mb-10  mx-auto">
+            Simple way for selling your unused products, or <br/>getting a deal on product you want!
+          </p>
+          <Button>
+            Start bidding
+          </Button>
+        </div>
+      <div className="h-1/2 w-full flex flex-col justify-start items-center overflow-hidden">
+        <Image
+            src="/landing-page-screenshot-full.png"
+            width={1440}
+            height={1024}
+            alt="Screenshot of Auction Bay landing page"
+            className="w-4/5 border-4 rounded-2xl border-gray-950"
+        />
+      </div>
+    </div>
+  );
+}

@@ -6,8 +6,6 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -37,15 +35,72 @@
   --color-popover: var(--popover);
   --color-card-foreground: var(--card-foreground);
   --color-card: var(--card);
+  
+  --color-primary: var(--color-primary-50); /* PRIMARY */
+  --color-text-primary: var(--color-gray-90);
+
+  /* Custom Color Palettes */
+  --color-primary-10: #FDFFDA;
+  --color-primary-20: #FBFFB5;
+  --color-primary-30: #F9FF90;
+  --color-primary-40: #F7FF75;
+  --color-primary-50: #F4FF47;
+  --color-primary-60: #D0DB33;
+  --color-primary-70: #ACB723;
+  --color-primary-80: #8A9316;
+  --color-primary-90: #717A0D;
+
+  --color-gray-10: #EDF4F2;
+  --color-gray-20: #DDE9E6;
+  --color-gray-30: #B0BFBD;
+  --color-gray-40: #74817F;
+  --color-gray-50: #272D2D;
+  --color-gray-60: #1C2526;
+  --color-gray-70: #131E20;
+  --color-gray-80: #0C161A;
+  --color-gray-90: #071015;
+
+  --color-coral-10: #FFE8DC;
+  --color-coral-20: #FFCCBA;
+  --color-coral-30: #FFAA98;
+  --color-coral-40: #FF897E;
+  --color-coral-50: #FF5454;
+  --color-coral-60: #DB3D4B;
+  --color-coral-70: #B72A42;
+  --color-coral-80: #931A3A;
+  --color-coral-90: #7A1034;
+
+  --color-ocean-10: #CDF5FE;
+  --color-ocean-20: #9CE6FE;
+  --color-ocean-30: #6BD1FE;
+  --color-ocean-40: #46BBFD;
+  --color-ocean-50: #0A97FC;
+  --color-ocean-60: #0775D8;
+  --color-ocean-70: #0557B5;
+  --color-ocean-80: #033D92;
+  --color-ocean-90: #012B78;
+
+  --color-gold-10: #FFF9D1;
+  --color-gold-20: #FFF2A4;
+  --color-gold-30: #FFE976;
+  --color-gold-40: #FFE054;
+  --color-gold-50: #FFD11C; 
+  --color-gold-60: #DBAE14;
+  --color-gold-70: #B78E0E;
+  --color-gold-80: #936E08;
+  --color-gold-90: #7A5805;
+
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
+
 }
 
 :root {
   --radius: 0.625rem;
-  --background: oklch(1 0 0);
+  /* --background: oklch(1 0 0); */
+  --background: oklch(0.9726 0.0026 106.45);
   --foreground: oklch(0.145 0 0);
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.145 0 0);
