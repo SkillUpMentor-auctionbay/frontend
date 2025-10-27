@@ -6,16 +6,13 @@ export default function LandingPage() {
   return (
     <div className="flex flex-col w-screen h-screen justify-between items-center">
       <div className="w-full flex justify-between items-center py-5 px-8 ">
-        <Image src="/logo.png" width={64} height={64} alt="Auction Bay Logo" />
+        <div className="rounded-full bg-primary p-4">
+              <Image src="/logo.svg" width={32} height={32} alt="Auction Bay Logo" />
+        </div>
         <div className=" flex items-center justify-between w-[172px]">
-            <Button 
-                variant={"ghost"}
-                className="w-12"
-            >
-                Log in
-            </Button>
-            <p className="font-light text-base w-4 text-black">or</p>
-            <Button variant={"secondary"} className="w-[92px]">Sign up</Button>
+            <p className="font-bold text-base leading-6 w-12">Log in</p>
+            <p className="font-light text-base leading-6 w-4 text-black">or</p>
+            <Button variant={"secondary"} >Sign up</Button>
         </div>
       </div>
         <div className="px-6 py-24 text-center">
