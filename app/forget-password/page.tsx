@@ -4,8 +4,9 @@ import Link from "next/link";
 import { Button } from "../../components/ui/button";
 import { InputField } from "../../components/ui/input";
 import { AuthLayout } from "../../components/auth/AuthLayout";
+import { Icon } from "../../components/ui/icon";
 
-export default function LoginPage() {
+export default function ForgetPasswordPage() {
   return (
     <AuthLayout>
       {/* Logo */}
@@ -19,10 +20,10 @@ export default function LoginPage() {
       <div className="text-gray-90 flex-1 flex flex-col justify-center">
         <div className="text-center">
           <h1 className="text-3xl font-bold mb-2">
-            Welcome back!
+            Forgot password?
           </h1>
           <p className="font-light text-base mb-8">
-            Please enter your details
+            No worries, we will send you reset instructions
           </p>
         </div>
 
@@ -33,33 +34,18 @@ export default function LoginPage() {
               type="email"
               placeholder="Enter your email"
             />
-
-            <InputField
-              label="Password"
-              type="password"
-              placeholder="Enter your password"
-              rightIcon="Eye"
-            />
-
-            <div className="text-right">
-              <Link href="/forget-password" className="text-xs text-gray-40 hover:cursor-pointer hover:underline">
-                Forgot password?
-              </Link>
-            </div>
           </div>
 
-          <Button className="w-full bg-primary-50 text-gray-900 hover:bg-primary-60 rounded-2xl font-medium">
-            Login
+          <Button className="w-full mb-8 bg-primary-50 text-gray-900 hover:bg-primary-60 rounded-2xl font-medium">
+            Reset Password
           </Button>
+          <Link href="/login" className="text-gray-40 flex items-center leading-4 gap-2 justify-center hover:cursor-pointer hover:underline">
+            <Icon name="Chevron right" size={16} className="rotate-180"/>
+            <span className="font-light text-xs">
+              Back to Login
+            </span>
+          </Link>
         </div>
-      </div>
-
-      {/* Bottom navigation */}
-      <div className="text-center text-base flex items-center justify-center gap-1 text-gray-90">
-        <span className="font-light">Don't have an account?</span>
-        <Link href="/register" className="font-bold hover:cursor-pointer hover:underline">
-          Sign Up
-        </Link>
       </div>
     </AuthLayout>
   );
