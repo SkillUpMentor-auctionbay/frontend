@@ -40,7 +40,7 @@ const buttonVariants = cva(
 )
 
 const ctaButtonVariants = cva(
-  "inline-flex items-center hover:cursor-pointer justify-center gap-1 whitespace-nowrap rounded-full p-[15px] transition-all disabled:pointer-events-none disabled:opacity-50 shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]",
+  "inline-flex  items-center hover:cursor-pointer justify-center gap-1 whitespace-nowrap rounded-full p-[15px] transition-all disabled:pointer-events-none disabled:opacity-50 shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]",
   {
     variants: {
       variant: {
@@ -49,9 +49,9 @@ const ctaButtonVariants = cva(
         alternative: "bg-gray-10 text-gray-90 hover:bg-gray-20 active:bg-gray-30",
       },
       size: {
-        default: "size-[54px]", // 54px total (15px padding + 24px content + 15px padding)
-        sm: "size-[42px]", // 42px total (15px padding + 12px content + 15px padding)
-        lg: "size-[72px]", // 72px total (15px padding + 42px content + 15px padding)
+        default: "size-[54px]",
+        sm: "size-[42px]",
+        lg: "size-[72px]",
       },
     },
     defaultVariants: {
@@ -128,10 +128,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(({
       ref={ref}
       {...props}
     >
-      {/* CTA style: single centered icon */}
       {buttonStyle === 'cta' && icon && renderIcon(icon)}
-
-      {/* Regular style: left icon, children, right icon */}
       {buttonStyle === 'regular' && (
         <>
           {leftIcon && renderIcon(leftIcon)}
