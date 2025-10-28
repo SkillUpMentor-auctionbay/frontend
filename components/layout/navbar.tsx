@@ -18,7 +18,6 @@ const Navbar = React.forwardRef<HTMLElement, NavbarProps>(
       <nav
         ref={ref}
         className={cn(
-          "border-b border-gray-200",
           className
         )}
         {...props}

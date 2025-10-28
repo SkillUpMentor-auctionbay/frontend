@@ -40,7 +40,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({
         activeTab={activeTab}
         onTabChange={handleTabChange}
       />
-      <main>
+      <main className="h-[calc(100vh-104px)]">
         {children}
       </main>
     </div>

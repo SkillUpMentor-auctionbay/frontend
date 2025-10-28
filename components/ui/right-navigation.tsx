@@ -19,22 +19,18 @@ const RightNavigation = React.forwardRef<HTMLDivElement, RightNavigationProps>(
     const { user } = useAuth();
     const { data: profilePictureUrl, isLoading, error } = useProfilePicture();
 
-    // Generate initials from user name and surname
     const initials = generateInitials(user?.name, user?.surname);
-
-    // Determine if we should show the profile picture or fallback
     const showProfilePicture = profilePictureUrl && !error && !isLoading;
 
     return (
       <div
         ref={ref}
         className={cn(
-          "bg-white border border-gray-20 inline-flex h-16 items-center gap-2 p-1 rounded-4xl",
+          "inline-flex h-16 items-center gap-2 p-1 rounded-4xl bg-white",
           className
         )}
         {...props}
       >
-        {/* Notifications CTA Button - Alternative style */}
         <Button
           variant="alternative"
           buttonStyle="cta"
@@ -43,7 +39,6 @@ const RightNavigation = React.forwardRef<HTMLDivElement, RightNavigationProps>(
           className="shrink-0"
         />
 
-        {/* Add CTA Button - Primary style */}
         <Button
           variant="primary"
           buttonStyle="cta"
@@ -52,7 +47,6 @@ const RightNavigation = React.forwardRef<HTMLDivElement, RightNavigationProps>(
           className="shrink-0"
         />
 
-        {/* Avatar - Large size */}
         <div className="relative h-full w-14 shrink-0">
           <Avatar size="lg" className="size-full">
             {showProfilePicture && (
@@ -60,8 +54,6 @@ const RightNavigation = React.forwardRef<HTMLDivElement, RightNavigationProps>(
                 src={profilePictureUrl}
                 alt="User avatar"
                 onError={(e) => {
-                  // This will be handled by React Query error state
-                  // But we keep this as additional safety
                   console.error('Avatar image failed to load:', e);
                 }}
               />

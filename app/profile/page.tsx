@@ -3,6 +3,8 @@
 import { useAuth } from "../../contexts/AuthContext";
 import { Button } from "../../components/ui/button";
 import { AppLayout } from "../../components/layout/app-layout";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "../../components/ui/tabs";
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "../../components/ui/card";
 
 export default function ProfilePage() {
   const { user, logout, isLoggingOut } = useAuth();
@@ -17,7 +19,97 @@ export default function ProfilePage() {
 
   return (
     <AppLayout>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="w-full h-full flex flex-col gap-4">
+        <h1 className="text-3xl font-bold mt-4 px-8">
+          Hello {user?.name} {user?.surname} !
+        </h1>
+        
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 px-8">
+          <Card className="bg-gray-50 h-[202px]">
+            <CardContent className="flex flex-col justify-between w-full h-full text-primary">
+              <div>
+                <h4 className=" text-xl font-bold">Earnings</h4>
+                <h4 className=" text-base font-light">All-time</h4>
+              </div>
+              <div className="text-[80px] font-bold leading-none">
+                <h1>324 €</h1>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="h-[202px]">
+            <CardContent className="flex flex-col justify-between w-full h-full text-text-primary">
+              <div>
+                <h4 className=" text-xl font-bold">Posted auctions</h4>
+                <h4 className=" text-base font-light">All-time</h4>
+              </div>
+              <div className="text-[80px] font-bold leading-none">
+                <h1>18</h1>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="h-[202px]">
+            <CardContent className="flex flex-col justify-between w-full h-full text-text-primary">
+              <div>
+                <h4 className=" text-xl font-bold">Currently bidding</h4>
+              </div>
+              <div className="text-[80px] font-bold leading-none">
+                <h1>5</h1>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="h-[202px]">
+            <CardContent className="flex flex-col justify-between w-full h-full text-text-primary">
+              <div>
+                <h4 className=" text-xl font-bold">Currently winning</h4>
+              </div>
+              <div className="text-[80px] font-bold leading-none text-green-card-winning">
+                <h1>2</h1>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        <Tabs defaultValue="my-auctions" className="w-full flex-1 flex flex-col">
+          <div className="flex justify-center">
+            <TabsList className="mb-4">
+              <TabsTrigger value="my-auctions">My auctions</TabsTrigger>
+              <TabsTrigger value="bidding">Bidding</TabsTrigger>
+              <TabsTrigger value="won">Won</TabsTrigger>
+            </TabsList>
+          </div>
+
+          <TabsContent value="my-auctions" className="flex-1">
+            <div className="bg-red-200 h-full">
+              <h2 className="text-xl font-semibold mb-4">My Auctions</h2>
+              <div>
+                Actual auctions in a grid
+              </div>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="bidding" className="flex-1">
+            <div className="h-full">
+              <h2 className="text-xl font-semibold mb-4">Bidding</h2>
+              <div>
+                Active bids and bidding history
+              </div>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="won" className="flex-1">
+            <div className="h-full">
+              <h2 className="text-xl font-semibold mb-4">Won Auctions</h2>
+              <div>
+                Auctions you've won
+              </div>
+            </div>
+          </TabsContent>
+        </Tabs>
+      </div>
+      {/* <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="flex justify-between items-center mb-8">
           <div>
             <h1 className="text-3xl font-bold text-gray-900">Profile</h1>
@@ -58,7 +150,7 @@ export default function ProfilePage() {
             </div>
           </div>
         </div>
-      </div>
+      </div> */}
     </AppLayout>
   );
 }
