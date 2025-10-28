@@ -1,7 +1,7 @@
 "use client";
 import Image from "next/image";
 import Link from "next/link";
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { Button } from "../components/ui/button";
 import { useAuth } from "../contexts/AuthContext";
@@ -12,7 +12,6 @@ export default function Home() {
   const pathname = usePathname();
 
   useEffect(() => {
-    // Only redirect if we're sure about authentication status and currently on the root page
     if (!isLoading && isAuthenticated && pathname === "/") {
       router.push("/auctions");
     }

@@ -1,10 +1,10 @@
 "use client";
-import Image from "next/image";
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "../../components/ui/button";
 import { InputField } from "../../components/ui/input";
+import { Logo } from "../../components/ui/logo";
 import { AuthLayout } from "../../components/auth/AuthLayout";
 import { useAuth } from "../../contexts/AuthContext";
 import { formatRegisterError } from "../../utils/errorUtils";
@@ -28,7 +28,7 @@ export default function RegisterPage() {
 
   useEffect(() => {
     if (!isLoading && isAuthenticated) {
-      router.push("/auctions");
+      router.push("/profile");
     }
   }, [isAuthenticated, isLoading, router]);
 
@@ -88,9 +88,7 @@ export default function RegisterPage() {
       <AuthLayout>
       {/* Logo */}
       <div className="flex justify-center">
-        <div className="rounded-full bg-primary p-4 w-16">
-          <Image src="/logo.svg" width={32} height={32} alt="Auction Bay Logo" />
-        </div>
+        <Logo size="md" />
       </div>
 
       {/* Main content */}
