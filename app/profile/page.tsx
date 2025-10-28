@@ -6,6 +6,7 @@ import { AppLayout } from "../../components/layout/app-layout";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "../../components/ui/tabs";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "../../components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { AuctionCard } from "@/components/ui/auction-card";
 
 export default function ProfilePage() {
   const { user, logout, isLoggingOut } = useAuth();
@@ -25,7 +26,7 @@ export default function ProfilePage() {
           Hello {user?.name} {user?.surname} !
         </h1>
         
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 px-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 px-8">
           <Card className="bg-gray-50 h-[202px]">
             <CardContent className="flex flex-col justify-between w-full h-full text-primary">
               <div>
@@ -82,22 +83,165 @@ export default function ProfilePage() {
             </TabsList>
           </div>
 
-          <TabsContent value="my-auctions" className="flex-1">
-            <div className="h-full">
-              <h2 className="text-xl font-semibold mb-4">My Auctions</h2>
-              <div>
-                Actual auctions in a grid
+          <TabsContent value="my-auctions" className="flex-1 overflow-y-auto">
+            <div className="px-8 pb-8">
+              <div className="grid grid-cols-1 xs:grid-cols:2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
+                <AuctionCard
+                  variant="editable"
+                  title="Rode vintage microphone"
+                  price="123 €"
+                  status="in-progress"
+                  timeLeft="30h"
+                  onDelete={() => console.log("Delete auction")}
+                  onEdit={() => console.log("Edit auction")}
+                />
+                <AuctionCard
+                  variant="editable"
+                  title="Old chair"
+                  price="65 €"
+                  status="in-progress"
+                  timeLeft="30h"
+                  onDelete={() => console.log("Delete auction")}
+                  onEdit={() => console.log("Edit auction")}
+                />
+                <AuctionCard
+                  variant="editable"
+                  title="Antique Wooden Table"
+                  price="320 €"
+                  status="winning"
+                  timeLeft="2h"
+                  onDelete={() => console.log("Delete auction")}
+                  onEdit={() => console.log("Edit auction")}
+                />
+                <AuctionCard
+                  variant="editable"
+                  title="Modern Floor Lamp"
+                  price="85 €"
+                  status="outbid"
+                  timeLeft="30h"
+                  onDelete={() => console.log("Delete auction")}
+                  onEdit={() => console.log("Edit auction")}
+                />
+                <AuctionCard
+                  variant="editable"
+                  title="Vintage Bookshelf"
+                  price="200 €"
+                  status="in-progress"
+                  timeLeft="30h"
+                  onDelete={() => console.log("Delete auction")}
+                  onEdit={() => console.log("Edit auction")}
+                />
+                <AuctionCard
+                  title="Leather Sofa"
+                  price="450 €"
+                  status="done"
+                  timeLeft=""
+                />
+                <AuctionCard
+                  title="Coffee Table"
+                  price="180 €"
+                  status="done"
+                  timeLeft=""
+                />
+                <AuctionCard
+                  title="Dining Chairs Set"
+                  price="280 €"
+                  status="done"
+                  timeLeft=""
+                />
+                <AuctionCard
+                  title="Office Desk"
+                  price="150 €"
+                  status="done"
+                  timeLeft=""
+                />
+                <AuctionCard
+                  title="Floor Lamp"
+                  price="75 €"
+                  status="done"
+                  timeLeft=""
+                />
+                <AuctionCard
+                  title="Wall Mirror"
+                  price="90 €"
+                  status="done"
+                  timeLeft=""
+                />
+                <AuctionCard
+                  title="Storage Cabinet"
+                  price="220 €"
+                  status="done"
+                  timeLeft=""
+                />
+                <AuctionCard
+                  title="Garden Bench"
+                  price="130 €"
+                  status="done"
+                  timeLeft=""
+                />
+                <AuctionCard
+                  title="Bar Stools"
+                  price="60 €"
+                  status="done"
+                  timeLeft=""
+                />
+                <AuctionCard
+                  title="Bookshelf"
+                  price="110 €"
+                  status="done"
+                  timeLeft=""
+                />
+                <AuctionCard
+                  title="Side Table"
+                  price="80 €"
+                  status="done"
+                  timeLeft=""
+                />
+                <AuctionCard
+                  title="Desk Lamp"
+                  price="45 €"
+                  status="done"
+                  timeLeft=""
+                />
+                <AuctionCard
+                  title="Bookshelf"
+                  price="120 €"
+                  status="done"
+                  timeLeft=""
+                />
+                <AuctionCard
+                  title="Nightstand"
+                  price="65 €"
+                  status="done"
+                  timeLeft=""
+                />
+                <AuctionCard
+                  title="TV Stand"
+                  price="180 €"
+                  status="done"
+                  timeLeft=""
+                />
+                <AuctionCard
+                  title="Armchair"
+                  price="250 €"
+                  status="done"
+                  timeLeft=""
+                />
+                <AuctionCard
+                  title="Ottoman"
+                  price="95 €"
+                  status="done"
+                  timeLeft=""
+                />
+                <AuctionCard
+                  title="Coffee Table"
+                  price="160 €"
+                  status="done"
+                  timeLeft=""
+                />
               </div>
-              <Badge variant={"in-progress"}>Outbid</Badge>
-              <Badge variant={"winning"}>Winning</Badge>
-              <Badge variant={"outbid"}>Outbid</Badge>
-              <Badge variant={"done"}>Done</Badge>
-
-              <Badge variant={"time"}>Outbid</Badge>
-              <Badge variant={"time-outbid"}>24h</Badge>
-
             </div>
-          </TabsContent>
+        </TabsContent>
 
           <TabsContent value="bidding" className="flex-1">
             <div className="h-full">
