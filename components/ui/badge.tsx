@@ -3,24 +3,28 @@ import { Slot } from "@radix-ui/react-slot"
 import { cva, type VariantProps } from "class-variance-authority"
 
 import { cn } from "@/lib/utils"
+import { Icon, type IconProps } from "./icon"
 
 const badgeVariants = cva(
-  "inline-flex items-center justify-center rounded-full border px-2 py-0.5 text-xs font-medium w-fit whitespace-nowrap shrink-0 [&>svg]:size-3 gap-1 [&>svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden",
+  "inline-flex items-center justify-center gap-2 font-light whitespace-nowrap shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50 transition-colors",
   {
     variants: {
+      size: {
+        default: "px-2 py-0.5 rounded-2xl text-base leading-6",
+        small: "px-1 py-0.5 rounded-lg text-xs leading-3",
+      },
       variant: {
-        default:
-          "border-transparent bg-primary text-primary-foreground [a&]:hover:bg-primary/90",
-        secondary:
-          "border-transparent bg-secondary text-secondary-foreground [a&]:hover:bg-secondary/90",
-        destructive:
-          "border-transparent bg-destructive text-white [a&]:hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/60",
-        outline:
-          "text-foreground [a&]:hover:bg-accent [a&]:hover:text-accent-foreground",
+        "in-progress": "bg-primary-30 text-text-primary",
+        outbid: "bg-coral-30 text-text-primary",
+        winning: "bg-green-card-winning text-text-primary",
+        done: "bg-gray-50 text-white",
+        time: "text-text-primary",
+        "time-outbid": "bg-coral-30 text-text-primary",
       },
     },
     defaultVariants: {
-      variant: "default",
+      size: "default",
+      variant: "in-progress",
     },
   }
 )
@@ -28,18 +32,40 @@ const badgeVariants = cva(
 function Badge({
   className,
   variant,
+  size,
   asChild = false,
+  children,
+  showTimeIcon = false,
+  timeIconSize,
   ...props
 }: React.ComponentProps<"span"> &
-  VariantProps<typeof badgeVariants> & { asChild?: boolean }) {
+  VariantProps<typeof badgeVariants> & {
+    asChild?: boolean
+    showTimeIcon?: boolean
+    timeIconSize?: number | string
+  }) {
   const Comp = asChild ? Slot : "span"
+
+  const getTimeIconSize = () => {
+    if (timeIconSize) return timeIconSize
+    return size === "small" ? 12 : 20
+  }
 
   return (
     <Comp
       data-slot="badge"
-      className={cn(badgeVariants({ variant }), className)}
+      className={cn(badgeVariants({ variant, size }), className)}
       {...props}
-    />
+    >
+      {children}
+      {showTimeIcon && (
+        <Icon
+          name="Time"
+          size={getTimeIconSize()}
+          className="shrink-0"
+        />
+      )}
+    </Comp>
   )
 }
 

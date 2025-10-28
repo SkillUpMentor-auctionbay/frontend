@@ -5,6 +5,7 @@ import { Button } from "../../components/ui/button";
 import { AppLayout } from "../../components/layout/app-layout";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "../../components/ui/tabs";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "../../components/ui/card";
+import { Badge } from "@/components/ui/badge";
 
 export default function ProfilePage() {
   const { user, logout, isLoggingOut } = useAuth();
@@ -82,11 +83,19 @@ export default function ProfilePage() {
           </div>
 
           <TabsContent value="my-auctions" className="flex-1">
-            <div className="bg-red-200 h-full">
+            <div className="h-full">
               <h2 className="text-xl font-semibold mb-4">My Auctions</h2>
               <div>
                 Actual auctions in a grid
               </div>
+              <Badge variant={"in-progress"}>Outbid</Badge>
+              <Badge variant={"winning"}>Winning</Badge>
+              <Badge variant={"outbid"}>Outbid</Badge>
+              <Badge variant={"done"}>Done</Badge>
+
+              <Badge variant={"time"}>Outbid</Badge>
+              <Badge variant={"time-outbid"}>24h</Badge>
+
             </div>
           </TabsContent>
 
