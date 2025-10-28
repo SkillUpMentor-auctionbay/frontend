@@ -1,12 +1,24 @@
 "use client";
 import Image from "next/image";
 import Link from "next/link";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { Button } from "../../components/ui/button";
 import { InputField } from "../../components/ui/input";
 import { AuthLayout } from "../../components/auth/AuthLayout";
 import { Icon } from "../../components/ui/icon";
+import { useAuth } from "../../contexts/AuthContext";
 
 export default function ForgetPasswordPage() {
+  const { isAuthenticated, isLoading } = useAuth();
+  const router = useRouter();
+
+  // Redirect authenticated users to auctions page
+  useEffect(() => {
+    if (!isLoading && isAuthenticated) {
+      router.push("/auctions");
+    }
+  }, [isAuthenticated, isLoading, router]);
   return (
     <AuthLayout>
       {/* Logo */}

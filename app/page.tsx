@@ -1,9 +1,22 @@
 "use client";
 import Image from "next/image";
 import Link from "next/link";
+import { useState, useEffect } from "react";
+import { useRouter, usePathname } from "next/navigation";
 import { Button } from "../components/ui/button";
+import { useAuth } from "../contexts/AuthContext";
 
 export default function Home() {
+  const { isAuthenticated, isLoading } = useAuth();
+  const router = useRouter();
+  const pathname = usePathname();
+
+  useEffect(() => {
+    // Only redirect if we're sure about authentication status and currently on the root page
+    if (!isLoading && isAuthenticated && pathname === "/") {
+      router.push("/auctions");
+    }
+  }, [isAuthenticated, isLoading, router, pathname]);
   return (
     <div className="flex flex-col w-screen h-screen justify-between items-center">
       <div className="w-full flex justify-between items-center py-5 px-8 ">

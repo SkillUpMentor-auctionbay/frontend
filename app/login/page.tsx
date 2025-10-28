@@ -1,13 +1,53 @@
 "use client";
 import Image from "next/image";
 import Link from "next/link";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { Button } from "../../components/ui/button";
 import { InputField } from "../../components/ui/input";
 import { AuthLayout } from "../../components/auth/AuthLayout";
+import { useAuth } from "../../contexts/AuthContext";
+import { formatLoginError } from "../../utils/errorUtils";
+import { authDebug } from "../../utils/authDebug";
+import ErrorBoundary from "../../components/ErrorBoundary";
 
 export default function LoginPage() {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const { login, isLoggingIn, loginError, isAuthenticated, isLoading, clearErrors } = useAuth();
+  const router = useRouter();
+
+  useEffect(() => {
+    authDebug("LoginPage - useEffect triggered", {
+      isAuthenticated,
+      isLoading,
+      pathname: typeof window !== "undefined" ? window.location.pathname : "SSR"
+    });
+
+    if (!isLoading && isAuthenticated) {
+      authDebug("LoginPage - Redirecting authenticated user to /auctions");
+      router.push("/auctions");
+    }
+  }, [isAuthenticated, isLoading, router]);
+
+  // Clear errors when component unmounts
+  useEffect(() => {
+    return () => {
+      clearErrors();
+    };
+  }, []);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      await login(email, password);
+    } catch (error) {
+    }
+  };
+
   return (
-    <AuthLayout>
+    <ErrorBoundary>
+      <AuthLayout>
       {/* Logo */}
       <div className="flex justify-center">
         <div className="rounded-full bg-primary p-4 w-16">
@@ -26,12 +66,15 @@ export default function LoginPage() {
           </p>
         </div>
 
-        <div className="space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-6">
           <div className="space-y-4">
             <InputField
               label="E-mail"
               type="email"
               placeholder="Enter your email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
             />
 
             <InputField
@@ -39,7 +82,16 @@ export default function LoginPage() {
               type="password"
               placeholder="Enter your password"
               rightIcon="Eye"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
             />
+
+            {loginError && (
+              <div className="text-red-500 text-sm text-center">
+                {formatLoginError(loginError)}
+              </div>
+            )}
 
             <div className="text-right">
               <Link href="/forget-password" className="text-xs text-gray-40 hover:cursor-pointer hover:underline">
@@ -48,10 +100,14 @@ export default function LoginPage() {
             </div>
           </div>
 
-          <Button className="w-full bg-primary-50 text-gray-900 hover:bg-primary-60 rounded-2xl font-medium">
-            Login
+          <Button
+            type="submit"
+            className="w-full bg-primary-50 text-gray-900 hover:bg-primary-60 rounded-2xl font-medium"
+            disabled={isLoggingIn}
+          >
+            {isLoggingIn ? "Logging in..." : "Login"}
           </Button>
-        </div>
+        </form>
       </div>
 
       {/* Bottom navigation */}
@@ -61,6 +117,7 @@ export default function LoginPage() {
           Sign Up
         </Link>
       </div>
-    </AuthLayout>
+      </AuthLayout>
+    </ErrorBoundary>
   );
 }
