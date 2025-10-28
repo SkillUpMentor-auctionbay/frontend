@@ -3,10 +3,25 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { authAPI } from "../services/api";
-import { User, LoginRequest, RegisterRequest, LoginResponse, AuthError } from "../types/auth";
+import { User, LoginRequest, RegisterRequest, LoginResponse, RegisterResponse, AuthError } from "../types/auth";
 import { useCallback, useRef } from "react";
-import { authDebug, checkAuthState } from "../utils/authDebug";
 import { storeToken, clearToken, getToken } from "../utils/tokenValidation";
+
+const handleAuthSuccess = (
+  data: LoginResponse | RegisterResponse,
+  queryClient: any,
+  router: any
+) => {
+  const tokenStored = storeToken(data.access_token);
+  if (!tokenStored) {
+    return;
+  }
+
+  queryClient.setQueryData(["user"], data.user);
+  queryClient.invalidateQueries({ queryKey: ["user"], refetchType: "active" });
+
+  router.push("/auctions");
+};
 
 export function useAuthMutation() {
   const queryClient = useQueryClient();
@@ -14,37 +29,10 @@ export function useAuthMutation() {
 
   const loginMutation = useMutation({
     mutationFn: (data: LoginRequest) => authAPI.login(data),
-    onSuccess: (data, variables) => {
-      console.log("🔍 Login success - API response:", data);
-      console.log("🔍 Access token from response:", data.access_token);
-      console.log("🔍 Access token type:", typeof data.access_token);
-
-      // Validate and store token properly
-      const tokenStored = storeToken(data.access_token);
-      console.log("🔍 Token storage result:", tokenStored);
-
-      if (!tokenStored) {
-        console.error("❌ Critical: Failed to store token after successful login");
-        console.error("❌ Token value that failed:", data.access_token);
-        authDebug("Login success but invalid token received:", data.access_token);
-        // Don't proceed if token storage failed
-        return;
-      }
-
-      console.log("✅ Token stored successfully");
-      console.log("🔍 User data from response:", data.user);
-
-      // Update user data in query cache
-      queryClient.setQueryData(["user"], data.user);
-      queryClient.invalidateQueries({ queryKey: ["user"], refetchType: "active" });
-
-      console.log("✅ User data cached, redirecting to /auctions");
-
-      router.push("/auctions");
+    onSuccess: (data) => {
+      handleAuthSuccess(data, queryClient, router);
     },
     onError: (error: AuthError) => {
-      console.error("❌ Login mutation error:", error);
-      authDebug("Login failed, clearing token");
       clearToken();
       queryClient.clear();
     },
@@ -52,37 +40,10 @@ export function useAuthMutation() {
 
   const registerMutation = useMutation({
     mutationFn: (data: RegisterRequest) => authAPI.register(data),
-    onSuccess: (data, variables) => {
-      console.log("🔍 Register success - API response:", data);
-      console.log("🔍 Access token from response:", data.access_token);
-      console.log("🔍 Access token type:", typeof data.access_token);
-
-      // Validate and store token properly
-      const tokenStored = storeToken(data.access_token);
-      console.log("🔍 Token storage result:", tokenStored);
-
-      if (!tokenStored) {
-        console.error("❌ Critical: Failed to store token after successful registration");
-        console.error("❌ Token value that failed:", data.access_token);
-        authDebug("Register success but invalid token received:", data.access_token);
-        // Don't proceed if token storage failed
-        return;
-      }
-
-      console.log("✅ Token stored successfully");
-      console.log("🔍 User data from response:", data.user);
-
-      // Update user data in query cache
-      queryClient.setQueryData(["user"], data.user);
-      queryClient.invalidateQueries({ queryKey: ["user"], refetchType: "active" });
-
-      console.log("✅ User data cached, redirecting to /auctions");
-
-      router.push("/auctions");
+    onSuccess: (data) => {
+      handleAuthSuccess(data, queryClient, router);
     },
-    onError: (error: AuthError) => {
-      console.error("❌ Register mutation error:", error);
-      authDebug("Registration failed, clearing token");
+    onError: () => {
       clearToken();
       queryClient.clear();
     },
@@ -91,15 +52,11 @@ export function useAuthMutation() {
   const logoutMutation = useMutation({
     mutationFn: () => authAPI.logout(),
     onSuccess: () => {
-      authDebug("Logout successful, clearing token");
       clearToken();
-
       queryClient.clear();
-
       router.push("/");
     },
-    onError: (error: AuthError) => {
-      authDebug("Logout failed, clearing token anyway");
+    onError: () => {
       clearToken();
       queryClient.clear();
       router.push("/");
@@ -107,18 +64,9 @@ export function useAuthMutation() {
   });
 
   const logout = useCallback(async () => {
-    try {
-      console.log("🔍 Starting logout process");
-      await logoutMutation.mutateAsync();
-      console.log("✅ Logout completed successfully");
-    } catch (error) {
-      console.error("❌ Logout error:", error);
-      // Re-throw the error so it can be handled by the caller
-      throw error;
-    }
+    await logoutMutation.mutateAsync();
   }, [logoutMutation]);
 
-  // Create a stable clearErrors function that doesn't cause infinite loops
   const clearErrors = useRef(() => {
     loginMutation.reset();
     registerMutation.reset();
@@ -140,13 +88,7 @@ export function useAuthMutation() {
 }
 
 export function useAuthQuery() {
-  // Use proper token validation
   const hasToken = getToken();
-
-  console.log("🔍 useAuthQuery - hasToken:", hasToken);
-  console.log("🔍 useAuthQuery - hasToken type:", typeof hasToken);
-  authDebug("useAuthQuery - hasToken:", hasToken);
-  checkAuthState();
 
   const { data: user, isLoading, error } = useQuery<User | undefined, Error>({
     queryKey: ["user"],
@@ -156,21 +98,7 @@ export function useAuthQuery() {
     staleTime: 5 * 60 * 1000,
   });
 
-  console.log("🔍 useAuthQuery - user:", user);
-  console.log("🔍 useAuthQuery - isLoading:", isLoading);
-  console.log("🔍 useAuthQuery - error:", error);
-
   const isAuthenticated = !!user && !error && hasToken;
-
-  console.log("🔍 useAuthQuery - isAuthenticated:", isAuthenticated);
-  console.log("🔍 useAuthQuery - isAuthenticated calculation:", {
-    user: !!user,
-    error: !!error,
-    hasToken: !!hasToken
-  });
-
-  authDebug("useAuthQuery - isAuthenticated:", isAuthenticated);
-  authDebug("useAuthQuery - details:", { user: !!user, error: !!error, hasToken });
 
   return {
     user,

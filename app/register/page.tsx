@@ -26,14 +26,12 @@ export default function RegisterPage() {
   const { register, isRegistering, registerError, isAuthenticated, isLoading, clearErrors } = useAuth();
   const router = useRouter();
 
-  // Redirect authenticated users to auctions page
   useEffect(() => {
     if (!isLoading && isAuthenticated) {
       router.push("/auctions");
     }
   }, [isAuthenticated, isLoading, router]);
 
-  // Clear errors when component unmounts
   useEffect(() => {
     return () => {
       clearErrors();
@@ -46,7 +44,6 @@ export default function RegisterPage() {
       [field]: value
     }));
 
-    // Clear confirm password error when user types
     if (field === "password" || field === "confirmPassword") {
       setErrors(prev => ({ ...prev, confirmPassword: "" }));
     }
@@ -78,11 +75,7 @@ export default function RegisterPage() {
       return;
     }
 
-    try {
-      await register(formData.name, formData.surname, formData.email, formData.password);
-    } catch (error) {
-      console.error("Registration failed:", error);
-    }
+    await register(formData.name, formData.surname, formData.email, formData.password);
   };
 
   const isFormValid = formData.name && formData.surname && formData.email &&

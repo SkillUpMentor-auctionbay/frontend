@@ -1,7 +1,7 @@
-import axios, { AxiosResponse } from "axios";
-import { User, LoginRequest, LoginResponse, RegisterRequest, RegisterResponse } from "../types/auth";
+import axios, { AxiosResponse, AxiosError } from "axios";
+import { User, LoginRequest, LoginResponse, RegisterRequest, RegisterResponse, AuthError } from "../types/auth";
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -10,7 +10,6 @@ const api = axios.create({
   },
 });
 
-// Request interceptor to add auth token
 api.interceptors.request.use(
   (config) => {
     if (typeof window !== "undefined") {
@@ -38,38 +37,63 @@ api.interceptors.response.use(
   }
 );
 
+const handleApiError = (error: AxiosError): AuthError => {
+  if (error.response) {
+    const data = error.response.data as any;
+    return {
+      message: data?.message || error.message,
+      status: error.response.status,
+      code: data?.code,
+      details: data?.details || data?.validationErrors
+    };
+  } else if (error.request) {
+    return {
+      message: "Network error. Please check your connection.",
+      code: "NETWORK_ERROR"
+    };
+  } else {
+    return {
+      message: error.message || "An unexpected error occurred"
+    };
+  }
+};
+
 // Auth API functions
 export const authAPI = {
   login: async (data: LoginRequest): Promise<LoginResponse> => {
-    console.log("🔍 API login request:", data);
-    const response: AxiosResponse<LoginResponse> = await api.post("/api/v1/auth/login", data);
-    console.log("🔍 API login response:", response.data);
-    console.log("🔍 API login response access_token:", response.data.access_token);
-    console.log("🔍 API login response access_token type:", typeof response.data.access_token);
-    return response.data;
+    try {
+      const response: AxiosResponse<LoginResponse> = await api.post("/api/v1/auth/login", data);
+      return response.data;
+    } catch (error) {
+      throw handleApiError(error as AxiosError);
+    }
   },
 
   register: async (data: RegisterRequest): Promise<RegisterResponse> => {
-    console.log("🔍 API register request:", data);
-    const response: AxiosResponse<RegisterResponse> = await api.post("/api/v1/auth/signup", data);
-    console.log("🔍 API register response:", response.data);
-    console.log("🔍 API register response access_token:", response.data.access_token);
-    console.log("🔍 API register response access_token type:", typeof response.data.access_token);
-    return response.data;
+    try {
+      const response: AxiosResponse<RegisterResponse> = await api.post("/api/v1/auth/signup", data);
+      return response.data;
+    } catch (error) {
+      throw handleApiError(error as AxiosError);
+    }
   },
 
   logout: async (): Promise<void> => {
-    console.log("🔍 API logout request");
-    const response: AxiosResponse<void> = await api.post("/api/v1/auth/logout");
-    console.log("🔍 API logout response:", response.data);
-    return response.data;
+    try {
+      const response: AxiosResponse<void> = await api.post("/api/v1/auth/logout");
+      return response.data;
+    } catch (error) {
+      throw handleApiError(error as AxiosError);
+    }
   },
 
   me: async (): Promise<LoginResponse["user"]> => {
-    console.log("🔍 API me request");
-    const response: AxiosResponse<LoginResponse["user"]> = await api.get("/api/v1/users/me");
-    console.log("🔍 API me response:", response.data);
-    return response.data;
+    try {
+      const response: AxiosResponse<LoginResponse["user"]> = await api.get("/api/v1/users/me");
+      return response.data;
+    } catch (error) {
+      throw handleApiError(error as AxiosError);
+    }
   },
 };
 

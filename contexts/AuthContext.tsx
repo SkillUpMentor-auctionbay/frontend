@@ -42,7 +42,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
     isLoggingOut
   } = useAuthMutation();
 
-  // Wrapper functions to match expected signatures
   const login = async (email: string, password: string): Promise<void> => {
     await loginMutation({ email, password });
   };

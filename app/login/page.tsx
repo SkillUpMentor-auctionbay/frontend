@@ -8,7 +8,6 @@ import { InputField } from "../../components/ui/input";
 import { AuthLayout } from "../../components/auth/AuthLayout";
 import { useAuth } from "../../contexts/AuthContext";
 import { formatLoginError } from "../../utils/errorUtils";
-import { authDebug } from "../../utils/authDebug";
 import ErrorBoundary from "../../components/ErrorBoundary";
 
 export default function LoginPage() {
@@ -18,19 +17,11 @@ export default function LoginPage() {
   const router = useRouter();
 
   useEffect(() => {
-    authDebug("LoginPage - useEffect triggered", {
-      isAuthenticated,
-      isLoading,
-      pathname: typeof window !== "undefined" ? window.location.pathname : "SSR"
-    });
-
     if (!isLoading && isAuthenticated) {
-      authDebug("LoginPage - Redirecting authenticated user to /auctions");
       router.push("/auctions");
     }
   }, [isAuthenticated, isLoading, router]);
 
-  // Clear errors when component unmounts
   useEffect(() => {
     return () => {
       clearErrors();
