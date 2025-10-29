@@ -138,7 +138,7 @@ export default function ProfilePage() {
 
   return (
     <AppLayout>
-      <div className="w-full h-full flex flex-col gap-4">
+      <div className="w-full h-full flex flex-col gap-4 ">
         <h1 className="text-3xl font-bold mt-4 px-8">
           Hello {user?.name} {user?.surname} !
         </h1>
@@ -191,7 +191,7 @@ export default function ProfilePage() {
           </Card>
         </div>
 
-        <Tabs defaultValue="my-auctions" onValueChange={handleTabChange} className="w-full flex-1 flex flex-col">
+        <Tabs defaultValue="my-auctions" onValueChange={handleTabChange} className="w-full h-[calc(100%-286px)]">
           <div className="flex justify-center">
             <TabsList className="mb-4">
               <TabsTrigger value="my-auctions">My auctions</TabsTrigger>
@@ -200,7 +200,7 @@ export default function ProfilePage() {
             </TabsList>
           </div>
 
-          <TabsContent value="my-auctions" className="flex-1 overflow-y-auto">
+          <TabsContent value="my-auctions" className="   overflow-y-auto">
             <AuctionTabContent
               filter="OWN"
               auctions={myAuctions}
@@ -211,7 +211,7 @@ export default function ProfilePage() {
             />
           </TabsContent>
 
-          <TabsContent value="bidding" className="flex-1">
+          <TabsContent value="bidding" className="flex-1 overflow-y-auto">
             <AuctionTabContent
               filter="BID"
               auctions={biddingAuctions}
@@ -220,7 +220,7 @@ export default function ProfilePage() {
             />
           </TabsContent>
 
-          <TabsContent value="won" className="flex-1">
+          <TabsContent value="won" className="flex-1 overflow-y-auto">
             <AuctionTabContent
               filter="WON"
               auctions={wonAuctions}

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { useAuth } from "../../contexts/AuthContext";
 import { ReactNode } from "react";
@@ -13,13 +13,21 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
   const { isAuthenticated, isLoading } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
+  const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
-    // Only redirect if we're sure about authentication status and not already on login page
-    if (!isLoading && !isAuthenticated && pathname !== "/login") {
+    setIsClient(true);
+  }, []);
+
+  useEffect(() => {
+    if (isClient && !isLoading && !isAuthenticated && pathname !== "/login") {
       router.push("/login");
     }
-  }, [isAuthenticated, isLoading, router, pathname]);
+  }, [isAuthenticated, isLoading, router, pathname, isClient]);
+
+  if (!isClient) {
+    return null;
+  }
 
   if (isLoading) {
     return (
@@ -30,6 +38,9 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
   }
 
   if (!isAuthenticated) {
+    if (typeof window !== 'undefined' && pathname !== "/login") {
+      router.push("/login");
+    }
     return null;
   }
 
