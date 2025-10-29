@@ -97,4 +97,47 @@ export const authAPI = {
   },
 };
 
+// Auctions API functions
+export const auctionsAPI = {
+  getAuctions: async (filter: "ALL" | "OWN" | "BID" | "WON" = "ALL", page = 1, limit = 50) => {
+    console.log(`🚀 [auctionsAPI.getAuctions] Making API request:`, {
+      filter,
+      page,
+      limit,
+      url: "/api/v1/auctions",
+      timestamp: new Date().toISOString()
+    });
+
+    try {
+      const response: AxiosResponse = await api.get("/api/v1/auctions", {
+        params: { filter, page, limit }
+      });
+
+      console.log(`📥 [auctionsAPI.getAuctions] API Response received:`, {
+        status: response.status,
+        statusText: response.statusText,
+        headers: response.headers,
+        data: {
+          auctionsCount: response.data?.auctions?.length || 0,
+          pagination: response.data?.pagination,
+          totalAuctions: response.data?.pagination?.total || 0,
+          sampleAuction: response.data?.auctions?.[0] || null
+        },
+        responseTime: new Date().toISOString()
+      });
+
+      return response.data;
+    } catch (error) {
+      console.error(`❌ [auctionsAPI.getAuctions] API Error:`, {
+        filter,
+        page,
+        limit,
+        error: error,
+        timestamp: new Date().toISOString()
+      });
+      throw handleApiError(error as AxiosError);
+    }
+  }
+};
+
 export default api;

@@ -6,10 +6,101 @@ import { AppLayout } from "../../components/layout/app-layout";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "../../components/ui/tabs";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "../../components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { AuctionCard } from "@/components/ui/auction-card";
+import { AuctionTabContent, AuctionData } from "@/components/ui/auction-tab-content";
+import { useAuctionsQuery } from "@/hooks/useAuctionsQuery";
+import { useUserStatistics } from "@/hooks/useUserStatistics";
+import { useAuctionMutations, useAuctionPrefetcher } from "@/hooks/useAuctionMutations";
+import { auctionsAPI } from "@/services/api";
+import { useState, useEffect } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 
 export default function ProfilePage() {
   const { user, logout, isLoggingOut } = useAuth();
+  const { deleteAuction, editAuction, isDeleting, isEditing } = useAuctionMutations();
+  const { prefetchAuctions } = useAuctionPrefetcher();
+
+  const [activeTab, setActiveTab] = useState<string>("my-auctions");
+
+  // Get user statistics from API
+  const {
+    data: statistics,
+    isLoading: isStatisticsLoading,
+    error: statisticsError
+  } = useUserStatistics();
+
+  console.log(`👤 [ProfilePage] Component rendering - Active tab: ${activeTab}, User: ${user?.email}`);
+  console.log(`📊 [ProfilePage] Statistics data:`, statistics);
+
+  const {
+    data: myAuctionsData,
+    isLoading: isLoadingMyAuctions,
+    error: myAuctionsError,
+  } = useAuctionsQuery("OWN", 1, 50, {
+    enabled: activeTab === "my-auctions"
+  });
+
+  const {
+    data: biddingAuctionsData,
+    isLoading: isLoadingBidding,
+    error: biddingError,
+  } = useAuctionsQuery("BID", 1, 50, {
+    enabled: activeTab === "bidding"
+  });
+
+  const {
+    data: wonAuctionsData,
+    isLoading: isLoadingWon,
+    error: wonError,
+  } = useAuctionsQuery("WON", 1, 50, {
+    enabled: activeTab === "won"
+  });
+
+  const myAuctions = (myAuctionsData as any)?.auctions as AuctionData[] || [];
+  const biddingAuctions = (biddingAuctionsData as any)?.auctions as AuctionData[] || [];
+  const wonAuctions = (wonAuctionsData as any)?.auctions as AuctionData[] || [];
+
+  // Use statistics from API instead of client-side calculations
+  const totalEarnings = statistics?.totalEarnings || 0;
+  const postedAuctionsCount = statistics?.totalPostedAuctions || 0;
+  const biddingCount = statistics?.currentlyBidding || 0;
+  const winningCount = statistics?.currentlyWinning || 0;
+
+  console.log(`📊 [ProfilePage] Using API statistics:`, {
+    activeTab,
+    totalEarnings,
+    postedAuctionsCount,
+    biddingCount,
+    winningCount,
+    isLoadingStatistics: isStatisticsLoading,
+    statisticsError
+  });
+
+  useEffect(() => {
+    console.log(`⏰ [ProfilePage] Setting up prefetch timer for active tab: ${activeTab}`);
+
+    const timer = setTimeout(() => {
+      console.log(`🚀 [ProfilePage] Prefetching other tabs (active: ${activeTab})`);
+
+      if (activeTab === "my-auctions") {
+        console.log(`📦 [ProfilePage] Prefetching BID and WON tabs`);
+        prefetchAuctions("BID");
+        prefetchAuctions("WON");
+      } else if (activeTab === "bidding") {
+        console.log(`📦 [ProfilePage] Prefetching OWN and WON tabs`);
+        prefetchAuctions("OWN");
+        prefetchAuctions("WON");
+      } else if (activeTab === "won") {
+        console.log(`📦 [ProfilePage] Prefetching OWN and BID tabs`);
+        prefetchAuctions("OWN");
+        prefetchAuctions("BID");
+      }
+    }, 2000);
+
+    return () => {
+      console.log(`🧹 [ProfilePage] Cleaning up prefetch timer for tab: ${activeTab}`);
+      clearTimeout(timer);
+    };
+  }, [activeTab, prefetchAuctions]);
 
   const handleLogout = async () => {
     try {
@@ -17,6 +108,32 @@ export default function ProfilePage() {
     } catch (error) {
       console.error("Logout failed:", error);
     }
+  };
+
+  const handleEditAuction = async (auctionId: string) => {
+    try {
+      await editAuction({
+        auctionId,
+        data: { /* TODO: Add edit form data */ }
+      });
+      console.log("Auction edited successfully");
+    } catch (error) {
+      console.error("Failed to edit auction:", error);
+    }
+  };
+
+  const handleDeleteAuction = async (auctionId: string) => {
+    try {
+      await deleteAuction(auctionId);
+      console.log("Auction deleted successfully");
+    } catch (error) {
+      console.error("Failed to delete auction:", error);
+    }
+  };
+
+  const handleTabChange = (value: string) => {
+    console.log(`🔄 [ProfilePage] Tab change: ${activeTab} → ${value}`);
+    setActiveTab(value);
   };
 
   return (
@@ -34,7 +151,7 @@ export default function ProfilePage() {
                 <h4 className=" text-base font-light">All-time</h4>
               </div>
               <div className="text-[80px] font-bold leading-none">
-                <h1>324 €</h1>
+                <h1>{isStatisticsLoading ? "..." : totalEarnings.toFixed(0)} €</h1>
               </div>
             </CardContent>
           </Card>
@@ -46,7 +163,7 @@ export default function ProfilePage() {
                 <h4 className=" text-base font-light">All-time</h4>
               </div>
               <div className="text-[80px] font-bold leading-none">
-                <h1>18</h1>
+                <h1>{isStatisticsLoading ? "..." : postedAuctionsCount}</h1>
               </div>
             </CardContent>
           </Card>
@@ -57,7 +174,7 @@ export default function ProfilePage() {
                 <h4 className=" text-xl font-bold">Currently bidding</h4>
               </div>
               <div className="text-[80px] font-bold leading-none">
-                <h1>5</h1>
+                <h1>{isStatisticsLoading ? "..." : biddingCount}</h1>
               </div>
             </CardContent>
           </Card>
@@ -67,14 +184,14 @@ export default function ProfilePage() {
               <div>
                 <h4 className=" text-xl font-bold">Currently winning</h4>
               </div>
-              <div className="text-[80px] font-bold leading-none text-green-card-winning">
-                <h1>2</h1>
+              <div className={`text-[80px] font-bold leading-none ${winningCount != 0 && 'text-green-card-winning'}`}>
+                <h1>{winningCount}</h1>
               </div>
             </CardContent>
           </Card>
         </div>
 
-        <Tabs defaultValue="my-auctions" className="w-full flex-1 flex flex-col">
+        <Tabs defaultValue="my-auctions" onValueChange={handleTabChange} className="w-full flex-1 flex flex-col">
           <div className="flex justify-center">
             <TabsList className="mb-4">
               <TabsTrigger value="my-auctions">My auctions</TabsTrigger>
@@ -84,226 +201,35 @@ export default function ProfilePage() {
           </div>
 
           <TabsContent value="my-auctions" className="flex-1 overflow-y-auto">
-            <div className="px-8 pb-8">
-              <div className="grid grid-cols-1 xs:grid-cols:2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
-                <AuctionCard
-                  variant="editable"
-                  title="Rode vintage microphone"
-                  price="123 €"
-                  status="in-progress"
-                  timeLeft="30h"
-                  onDelete={() => console.log("Delete auction")}
-                  onEdit={() => console.log("Edit auction")}
-                />
-                <AuctionCard
-                  variant="editable"
-                  title="Old chair"
-                  price="65 €"
-                  status="in-progress"
-                  timeLeft="30h"
-                  onDelete={() => console.log("Delete auction")}
-                  onEdit={() => console.log("Edit auction")}
-                />
-                <AuctionCard
-                  variant="editable"
-                  title="Antique Wooden Table"
-                  price="320 €"
-                  status="winning"
-                  timeLeft="2h"
-                  onDelete={() => console.log("Delete auction")}
-                  onEdit={() => console.log("Edit auction")}
-                />
-                <AuctionCard
-                  variant="editable"
-                  title="Modern Floor Lamp"
-                  price="85 €"
-                  status="outbid"
-                  timeLeft="30h"
-                  onDelete={() => console.log("Delete auction")}
-                  onEdit={() => console.log("Edit auction")}
-                />
-                <AuctionCard
-                  variant="editable"
-                  title="Vintage Bookshelf"
-                  price="200 €"
-                  status="in-progress"
-                  timeLeft="30h"
-                  onDelete={() => console.log("Delete auction")}
-                  onEdit={() => console.log("Edit auction")}
-                />
-                <AuctionCard
-                  title="Leather Sofa"
-                  price="450 €"
-                  status="done"
-                  timeLeft=""
-                />
-                <AuctionCard
-                  title="Coffee Table"
-                  price="180 €"
-                  status="done"
-                  timeLeft=""
-                />
-                <AuctionCard
-                  title="Dining Chairs Set"
-                  price="280 €"
-                  status="done"
-                  timeLeft=""
-                />
-                <AuctionCard
-                  title="Office Desk"
-                  price="150 €"
-                  status="done"
-                  timeLeft=""
-                />
-                <AuctionCard
-                  title="Floor Lamp"
-                  price="75 €"
-                  status="done"
-                  timeLeft=""
-                />
-                <AuctionCard
-                  title="Wall Mirror"
-                  price="90 €"
-                  status="done"
-                  timeLeft=""
-                />
-                <AuctionCard
-                  title="Storage Cabinet"
-                  price="220 €"
-                  status="done"
-                  timeLeft=""
-                />
-                <AuctionCard
-                  title="Garden Bench"
-                  price="130 €"
-                  status="done"
-                  timeLeft=""
-                />
-                <AuctionCard
-                  title="Bar Stools"
-                  price="60 €"
-                  status="done"
-                  timeLeft=""
-                />
-                <AuctionCard
-                  title="Bookshelf"
-                  price="110 €"
-                  status="done"
-                  timeLeft=""
-                />
-                <AuctionCard
-                  title="Side Table"
-                  price="80 €"
-                  status="done"
-                  timeLeft=""
-                />
-                <AuctionCard
-                  title="Desk Lamp"
-                  price="45 €"
-                  status="done"
-                  timeLeft=""
-                />
-                <AuctionCard
-                  title="Bookshelf"
-                  price="120 €"
-                  status="done"
-                  timeLeft=""
-                />
-                <AuctionCard
-                  title="Nightstand"
-                  price="65 €"
-                  status="done"
-                  timeLeft=""
-                />
-                <AuctionCard
-                  title="TV Stand"
-                  price="180 €"
-                  status="done"
-                  timeLeft=""
-                />
-                <AuctionCard
-                  title="Armchair"
-                  price="250 €"
-                  status="done"
-                  timeLeft=""
-                />
-                <AuctionCard
-                  title="Ottoman"
-                  price="95 €"
-                  status="done"
-                  timeLeft=""
-                />
-                <AuctionCard
-                  title="Coffee Table"
-                  price="160 €"
-                  status="done"
-                  timeLeft=""
-                />
-              </div>
-            </div>
-        </TabsContent>
+            <AuctionTabContent
+              filter="OWN"
+              auctions={myAuctions}
+              isLoading={isLoadingMyAuctions}
+              error={myAuctionsError?.message}
+              onEdit={handleEditAuction}
+              onDelete={handleDeleteAuction}
+            />
+          </TabsContent>
 
           <TabsContent value="bidding" className="flex-1">
-            <div className="h-full">
-              <h2 className="text-xl font-semibold mb-4">Bidding</h2>
-              <div>
-                Active bids and bidding history
-              </div>
-            </div>
+            <AuctionTabContent
+              filter="BID"
+              auctions={biddingAuctions}
+              isLoading={isLoadingBidding}
+              error={biddingError?.message}
+            />
           </TabsContent>
 
           <TabsContent value="won" className="flex-1">
-            <div className="h-full">
-              <h2 className="text-xl font-semibold mb-4">Won Auctions</h2>
-              <div>
-                Auctions you've won
-              </div>
-            </div>
+            <AuctionTabContent
+              filter="WON"
+              auctions={wonAuctions}
+              isLoading={isLoadingWon}
+              error={wonError?.message}
+            />
           </TabsContent>
         </Tabs>
       </div>
-      {/* <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="flex justify-between items-center mb-8">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">Profile</h1>
-            <p className="text-gray-600 mt-2">Manage your account and view your activity</p>
-          </div>
-          <div className="flex items-center space-x-4">
-            <span className="text-gray-700">
-              Welcome, {user?.name || user?.email}
-            </span>
-            <Button
-              onClick={handleLogout}
-              disabled={isLoggingOut}
-              className="bg-red-500 hover:bg-red-600 text-white"
-            >
-              {isLoggingOut ? "Logging out..." : "Logout"}
-            </Button>
-          </div>
-        </div>
-
-        <div className="text-center">
-          <div className="bg-white rounded-lg shadow-md p-8 max-w-2xl mx-auto">
-            <h3 className="text-xl font-semibold mb-4">Your Profile Dashboard</h3>
-            <p className="text-gray-600 mb-4">
-              Here you'll be able to:
-            </p>
-            <ul className="text-left text-gray-600 space-y-2">
-              <li>• Browse available auctions</li>
-              <li>• Create new auctions</li>
-              <li>• Place bids on items</li>
-              <li>• View your bidding history</li>
-              <li>• Manage your account settings</li>
-            </ul>
-
-            <div className="mt-8 p-4 bg-blue-50 rounded-lg">
-              <p className="text-sm text-blue-800">
-                🚧 This page is still under development. More features coming soon!
-              </p>
-            </div>
-          </div>
-        </div>
-      </div> */}
     </AppLayout>
   );
 }

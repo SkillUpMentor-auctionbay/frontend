@@ -1,39 +1,36 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
-import api from "../services/api";
-import { blobToDataURL } from "../utils/imageUtils";
+import { useMemo } from "react";
 import { useAuth } from "./useAuth";
-
 
 export function useProfilePicture() {
   const { user } = useAuth();
 
-  return useQuery<string, Error>({
-    queryKey: ["profile-picture", user?.id],
-    queryFn: async () => {
-      try {
-        const response = await api.get("/api/v1/users/me/profile-picture", {
-          responseType: "blob",
-        });
+  const profilePictureUrl = useMemo(() => {
+    if (!user?.profilePictureUrl) {
+      return null;
+    }
 
-        const dataURL = await blobToDataURL(response.data);
-        return dataURL;
-      } catch (error) {
-        throw error;
-      }
-    },
-    enabled: !!user,
-    staleTime: 5 * 60 * 1000,
-    retry: (failureCount, error) => {
-      if (error && typeof error === 'object' && 'response' in error) {
-        const axiosError = error as any;
-        if (axiosError.response?.status === 404) {
-          return false;
-        }
-      }
-      return failureCount < 2;
-    },
-    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 5000),
-  });
+    // If the profilePictureUrl is already a full URL (starts with http), use it as is
+    if (user.profilePictureUrl.startsWith('http')) {
+      return user.profilePictureUrl;
+    }
+
+    // If the profilePictureUrl already starts with /static/, just prepend the API base URL
+    if (user.profilePictureUrl.startsWith('/static/')) {
+      const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
+      return `${API_BASE_URL}${user.profilePictureUrl}`;
+    }
+
+    // Otherwise, it's just the filename, so construct the full URL
+    const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
+    return `${API_BASE_URL}/static/profile-pictures/${user.profilePictureUrl}`;
+  }, [user?.profilePictureUrl]);
+
+  return {
+    data: profilePictureUrl,
+    isLoading: false,
+    error: null,
+    isSuccess: !!profilePictureUrl,
+  };
 }
