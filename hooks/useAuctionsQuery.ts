@@ -55,7 +55,8 @@ function transformAuctionData(response: any): AuctionData[] {
     price: `${item.currentPrice} €`,
     status: mapApiStatusToCardStatus(item.status),
     timeLeft: formatTimeLeft(item.endTime),
-    imageUrl: item.imageUrl
+    imageUrl: item.imageUrl,
+    sellerId: item.sellerId
   }));
 }
 

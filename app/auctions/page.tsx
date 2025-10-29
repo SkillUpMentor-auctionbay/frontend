@@ -3,9 +3,20 @@
 import { useAuth } from "../../contexts/AuthContext";
 import { Button } from "../../components/ui/button";
 import { AppLayout } from "../../components/layout/app-layout";
+import { AuctionTabContent } from "../../components/ui/auction-tab-content";
+import { useAuctionsQuery } from "../../hooks/useAuctionsQuery";
+import { useAuctionMutations } from "../../hooks/useAuctionMutations";
 
 export default function AuctionsPage() {
   const { user, logout, isLoggingOut } = useAuth();
+  const { deleteAuction, editAuction, isDeleting, isEditing } = useAuctionMutations();
+
+  // Fetch all auctions
+  const {
+    data: allAuctionsData,
+    isLoading: isLoadingAllAuctions,
+    error: allAuctionsError,
+  } = useAuctionsQuery("ALL", 1, 50);
 
   const handleLogout = async () => {
     try {
@@ -15,48 +26,38 @@ export default function AuctionsPage() {
     }
   };
 
+  const handleEditAuction = async (auctionId: string) => {
+    try {
+      await editAuction({ auctionId, data: {} });
+      console.log("Auction edited successfully");
+    } catch (error) {
+      console.error("Failed to edit auction:", error);
+    }
+  };
+
+  const handleDeleteAuction = async (auctionId: string) => {
+    try {
+      await deleteAuction(auctionId);
+      console.log("Auction deleted successfully");
+    } catch (error) {
+      console.error("Failed to delete auction:", error);
+    }
+  };
+
   return (
     <AppLayout>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="flex justify-between items-center mb-8">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">Auctions</h1>
-            <p className="text-gray-600 mt-2">Browse and participate in active auctions</p>
-          </div>
-          <div className="flex items-center space-x-4">
-            <span className="text-gray-700">
-              Welcome, {user?.name || user?.email}
-            </span>
-            <Button
-              onClick={handleLogout}
-              disabled={isLoggingOut}
-              className="bg-red-500 hover:bg-red-600 text-white"
-            >
-              {isLoggingOut ? "Logging out..." : "Logout"}
-            </Button>
-          </div>
-        </div>
+      <div className="flex flex-col h-full">
+        <h1 className="px-8 py-4 text-[32px] font-bold shrink-0">Auctions</h1>
 
-        <div className="text-center">
-          <div className="bg-white rounded-lg shadow-md p-8 max-w-2xl mx-auto">
-            <h3 className="text-xl font-semibold mb-4">Your Auction Dashboard</h3>
-            <p className="text-gray-600 mb-4">
-              Here you'll be able to:
-            </p>
-            <ul className="text-left text-gray-600 space-y-2">
-              <li>• Browse available auctions</li>
-              <li>• Create new auctions</li>
-              <li>• Place bids on items</li>
-              <li>• View your bidding history</li>
-              <li>• Manage your account settings</li>
-            </ul>
-
-            <div className="mt-8 p-4 bg-blue-50 rounded-lg">
-              <p className="text-sm text-blue-800">
-                🚧 This page is still under development. More features coming soon!
-              </p>
-            </div>
-          </div>
+        <div className="flex-1 overflow-hidden">
+          <AuctionTabContent
+            filter="ALL"
+            auctions={allAuctionsData?.auctions}
+            isLoading={isLoadingAllAuctions}
+            error={allAuctionsError?.message}
+            onEdit={handleEditAuction}
+            onDelete={handleDeleteAuction}
+          />
         </div>
       </div>
     </AppLayout>
