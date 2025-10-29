@@ -7,6 +7,7 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
 import { useAuth } from "@/contexts/AuthContext"
 import { useProfilePicture } from "@/hooks/useProfilePicture"
 import { generateInitials } from "@/utils/imageUtils"
+import { CreateAuctionDialog } from "@/components/auctions/create-auction-dialog"
 
 export interface RightNavigationProps {
   className?: string
@@ -39,13 +40,14 @@ const RightNavigation = React.forwardRef<HTMLDivElement, RightNavigationProps>(
           className="shrink-0"
         />
 
-        <Button
-          variant="primary"
-          buttonStyle="cta"
-          icon="Add"
-          onClick={onAddClick}
-          className="shrink-0"
-        />
+        <CreateAuctionDialog>
+          <Button
+            variant="primary"
+            buttonStyle="cta"
+            icon="Add"
+            className="shrink-0"
+          />
+        </CreateAuctionDialog>
 
         <div className="relative h-full w-14 shrink-0">
           <Avatar size="lg" className="size-full">
