@@ -11,7 +11,6 @@ export default function AuctionsPage() {
   const { user, logout, isLoggingOut } = useAuth();
   const { deleteAuction, editAuction, isDeleting, isEditing } = useAuctionMutations();
 
-  // Fetch all auctions
   const {
     data: allAuctionsData,
     isLoading: isLoadingAllAuctions,

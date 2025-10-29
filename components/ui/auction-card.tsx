@@ -10,8 +10,8 @@ const auctionCardVariants = cva(
   {
     variants: {
       variant: {
-        default: "h-[250px] min-h-[250px] w-full",
-        editable: "h-[298px] min-h-[250px] w-full",
+        default: "min-h-[250px] w-full",
+        editable: "min-h-[298px] w-full",
       },
     },
     defaultVariants: {
@@ -27,6 +27,7 @@ export interface AuctionCardProps
   price?: string
   status?: "in-progress" | "outbid" | "winning" | "done"
   timeLeft?: string
+  isTimeUrgent?: boolean
   imageUrl?: string
   onDelete?: () => void
   onEdit?: () => void
@@ -39,6 +40,7 @@ const AuctionCard = React.forwardRef<HTMLDivElement, AuctionCardProps>(({
   price,
   status = "in-progress",
   timeLeft = "24h",
+  isTimeUrgent = false,
   imageUrl,
   onDelete,
   onEdit,
@@ -61,7 +63,7 @@ const AuctionCard = React.forwardRef<HTMLDivElement, AuctionCardProps>(({
             {status === "in-progress" ? "In progress" : status === "outbid" ? "Outbid" : status === "winning" ? "Winning" : "Done"}
           </Badge>
           <Badge
-            variant="time"
+            variant={isTimeUrgent ? "time-urgent" : "time"}
             size="small"
             showTimeIcon={true}
           >
@@ -80,8 +82,8 @@ const AuctionCard = React.forwardRef<HTMLDivElement, AuctionCardProps>(({
         </p>
       </div>
 
-      <div className="flex flex-col gap-2 items-start justify-center p-1 relative flex-1 min-h-0 min-w-0 shrink-0 w-full">
-        <div className="relative w-full rounded-xl shrink-0 flex-1 min-h-0">
+      <div className="flex flex-col gap-2 items-start justify-center p-1 relative flex-1 min-h-0 min-w-0 w-full">
+        <div className="relative w-full rounded-xl flex-1 min-h-0">
           {imageUrl ? (
             <img
               src={getImageUrl(imageUrl)}

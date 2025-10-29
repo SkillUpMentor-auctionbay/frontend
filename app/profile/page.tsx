@@ -184,7 +184,7 @@ export default function ProfilePage() {
               <div>
                 <h4 className=" text-xl font-bold">Currently winning</h4>
               </div>
-              <div className={`text-[80px] font-bold leading-none ${winningCount != 0 && 'text-green-card-winning'}`}>
+              <div className={`text-[80px] font-bold leading-none ${winningCount != 0 && 'text-[#ADFF90]'}`}>
                 <h1>{winningCount}</h1>
               </div>
             </CardContent>

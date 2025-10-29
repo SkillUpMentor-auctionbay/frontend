@@ -16,9 +16,10 @@ const badgeVariants = cva(
       variant: {
         "in-progress": "bg-primary-30 text-text-primary",
         outbid: "bg-coral-30 text-text-primary",
-        winning: "bg-green-card-winning text-text-primary",
+        winning: "bg-[#ADFF90] text-text-primary",
         done: "bg-gray-50 text-white",
         time: "text-text-primary",
+        "time-urgent": "bg-coral-30 text-text-primary",
         "time-outbid": "bg-coral-30 text-text-primary",
       },
     },

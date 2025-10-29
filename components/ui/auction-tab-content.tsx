@@ -11,6 +11,7 @@ export interface AuctionData {
   price: string;
   status: "in-progress" | "outbid" | "winning" | "done";
   timeLeft: string;
+  isTimeUrgent?: boolean;
   imageUrl?: string;
   sellerId?: string;
 }
@@ -87,7 +88,7 @@ export function AuctionTabContent({
 
   return (
     <div className="px-8 pb-8 h-full overflow-y-auto">
-      <div className="grid grid-cols-1 xs:grid-cols:2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
+      <div className="grid grid-cols-1 xs:grid-cols:2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 items-stretch">
         {auctions.map((auction) => {
           const isEditable = checkIfEditable(auction);
           return (
@@ -98,6 +99,7 @@ export function AuctionTabContent({
               price={auction.price}
               status={auction.status}
               timeLeft={auction.timeLeft}
+              isTimeUrgent={auction.isTimeUrgent}
               imageUrl={auction.imageUrl}
               onDelete={isEditable ? () => onDelete?.(auction.id) : undefined}
               onEdit={isEditable ? () => onEdit?.(auction.id) : undefined}

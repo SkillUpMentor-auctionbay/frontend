@@ -45,6 +45,20 @@ function formatTimeLeft(endTime: string): string {
   }
 }
 
+function isTimeUrgent(endTime: string): boolean {
+  const endTimeDate = new Date(endTime).getTime();
+  const now = new Date().getTime();
+  const diff = endTimeDate - now;
+
+  if (diff <= 0) return true; // Ended is considered urgent
+
+  const hours = Math.floor(diff / (1000 * 60 * 60));
+  const days = Math.floor(hours / 24);
+
+  // Consider urgent if less than 1 day (24 hours) left
+  return days < 1;
+}
+
 // Transform API response to our AuctionData format
 function transformAuctionData(response: any): AuctionData[] {
   if (!response?.auctions) return [];
@@ -55,6 +69,7 @@ function transformAuctionData(response: any): AuctionData[] {
     price: `${item.currentPrice} €`,
     status: mapApiStatusToCardStatus(item.status),
     timeLeft: formatTimeLeft(item.endTime),
+    isTimeUrgent: isTimeUrgent(item.endTime),
     imageUrl: item.imageUrl,
     sellerId: item.sellerId
   }));
