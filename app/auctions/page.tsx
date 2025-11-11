@@ -1,36 +1,48 @@
 "use client";
 
-import { useAuth } from "../../contexts/AuthContext";
-import { Button } from "../../components/ui/button";
 import { AppLayout } from "../../components/layout/app-layout";
-import { AuctionTabContent } from "../../components/ui/auction-tab-content";
+import { AuctionTabContent, AuctionData } from "../../components/ui/auction-tab-content";
+import { EditAuctionDialog } from "../../components/auctions/edit-auction-dialog";
 import { useAuctionsQuery } from "../../hooks/useAuctionsQuery";
 import { useAuctionMutations } from "../../hooks/useAuctionMutations";
+import { useState, useMemo } from "react";
+
+interface AuctionsResponse {
+  auctions: AuctionData[];
+  pagination?: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+  };
+}
 
 export default function AuctionsPage() {
-  const { user, logout, isLoggingOut } = useAuth();
-  const { deleteAuction, editAuction, isDeleting, isEditing } = useAuctionMutations();
+  const { deleteAuction } = useAuctionMutations();
+  const [editingAuction, setEditingAuction] = useState<AuctionData | null>(null);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
 
   const {
     data: allAuctionsData,
     isLoading: isLoadingAllAuctions,
     error: allAuctionsError,
-  } = useAuctionsQuery("ALL", 1, 50);
+  } = useAuctionsQuery("ALL", 1, 500);
 
-  const handleLogout = async () => {
-    try {
-      await logout();
-    } catch (error) {
-      console.error("Logout failed:", error);
+  const allAuctions = (allAuctionsData as AuctionsResponse)?.auctions || [];
+
+  const handleEditAuction = (auctionId: string) => {
+    const auction = allAuctions?.find(a => a.id === auctionId);
+    if (auction) {
+      setEditingAuction(auction);
+      setIsEditDialogOpen(true);
     }
   };
 
-  const handleEditAuction = async (auctionId: string) => {
-    try {
-      await editAuction({ auctionId, data: {} });
+  const handleEditSubmit = async (formData: any) => {
+    if (formData.success) {
       console.log("Auction edited successfully");
-    } catch (error) {
-      console.error("Failed to edit auction:", error);
+      setEditingAuction(null);
+      setIsEditDialogOpen(false);
     }
   };
 
@@ -43,6 +55,27 @@ export default function AuctionsPage() {
     }
   };
 
+  const handleEditDialogChange = (open: boolean) => {
+    setIsEditDialogOpen(open);
+    if (!open) {
+      setEditingAuction(null);
+    }
+  };
+
+  const convertToEditAuctionData = useMemo(() => (auction: AuctionData) => ({
+    id: auction.id,
+    title: auction.title,
+    description: auction.description || '',
+    startingPrice: auction.startingPrice || 0,
+    currentPrice: auction.currentPrice || 0,
+    endTime: auction.endTime || new Date().toISOString(),
+    imageUrl: auction.imageUrl,
+    sellerId: auction.sellerId || '',
+    status: auction.status || 'in-progress',
+    createdAt: auction.createdAt || new Date().toISOString(),
+    updatedAt: auction.updatedAt || new Date().toISOString(),
+  }), []);
+
   return (
     <AppLayout>
       <div className="flex flex-col h-full">
@@ -51,7 +84,7 @@ export default function AuctionsPage() {
         <div className="flex-1 overflow-hidden">
           <AuctionTabContent
             filter="ALL"
-            auctions={allAuctionsData?.auctions}
+            auctions={allAuctions}
             isLoading={isLoadingAllAuctions}
             error={allAuctionsError?.message}
             onEdit={handleEditAuction}
@@ -59,6 +92,13 @@ export default function AuctionsPage() {
           />
         </div>
       </div>
+
+      <EditAuctionDialog
+        auction={editingAuction ? convertToEditAuctionData(editingAuction) : null}
+        onSubmit={handleEditSubmit}
+        open={isEditDialogOpen}
+        onOpenChange={handleEditDialogChange}
+      />
     </AppLayout>
   );
 }

@@ -47,6 +47,11 @@ const AuctionCard = React.forwardRef<HTMLDivElement, AuctionCardProps>(({
   ...props
 }, ref) => {
   const isEditable = variant === "editable"
+  const [imageError, setImageError] = React.useState(false)
+
+  const handleImageError = React.useCallback(() => {
+    setImageError(true)
+  }, [])
 
   return (
     <div
@@ -84,11 +89,14 @@ const AuctionCard = React.forwardRef<HTMLDivElement, AuctionCardProps>(({
 
       <div className="flex flex-col gap-2 items-start justify-center p-1 relative flex-1 min-h-0 min-w-0 w-full">
         <div className="relative w-full rounded-xl flex-1 min-h-0">
-          {imageUrl ? (
+          {imageUrl && !imageError ? (
             <img
               src={getImageUrl(imageUrl)}
               alt={title || "Auction item"}
               className="absolute inset-0 w-full h-full object-cover rounded-xl"
+              loading="lazy"
+              decoding="async"
+              onError={handleImageError}
             />
           ) : (
             <div className="absolute inset-0 w-full h-full bg-gray-20 rounded-xl flex items-center justify-center">

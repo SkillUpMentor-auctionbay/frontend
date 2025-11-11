@@ -1,126 +1,138 @@
 "use client";
 
 import { useAuth } from "../../contexts/AuthContext";
-import { Button } from "../../components/ui/button";
 import { AppLayout } from "../../components/layout/app-layout";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "../../components/ui/tabs";
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "../../components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "../../components/ui/card";
 import { AuctionTabContent, AuctionData } from "@/components/ui/auction-tab-content";
+import { EditAuctionDialog } from "@/components/auctions/edit-auction-dialog";
 import { useAuctionsQuery } from "@/hooks/useAuctionsQuery";
 import { useUserStatistics } from "@/hooks/useUserStatistics";
 import { useAuctionMutations, useAuctionPrefetcher } from "@/hooks/useAuctionMutations";
-import { auctionsAPI } from "@/services/api";
-import { useState, useEffect } from "react";
-import { useQueryClient } from "@tanstack/react-query";
+import { useState, useEffect, useMemo } from "react";
+
+interface AuctionsResponse {
+  auctions: AuctionData[];
+  pagination?: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+  };
+}
 
 export default function ProfilePage() {
-  const { user, logout, isLoggingOut } = useAuth();
-  const { deleteAuction, editAuction, isDeleting, isEditing } = useAuctionMutations();
+  const { user } = useAuth();
+  const { deleteAuction } = useAuctionMutations();
   const { prefetchAuctions } = useAuctionPrefetcher();
 
   const [activeTab, setActiveTab] = useState<string>("my-auctions");
+  const [editingAuction, setEditingAuction] = useState<AuctionData | null>(null);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
 
-  // Get user statistics from API
   const {
     data: statistics,
     isLoading: isStatisticsLoading,
     error: statisticsError
   } = useUserStatistics();
 
-  console.log(`👤 [ProfilePage] Component rendering - Active tab: ${activeTab}, User: ${user?.email}`);
-  console.log(`📊 [ProfilePage] Statistics data:`, statistics);
-
   const {
     data: myAuctionsData,
     isLoading: isLoadingMyAuctions,
     error: myAuctionsError,
-  } = useAuctionsQuery("OWN", 1, 50, {
-    enabled: activeTab === "my-auctions"
+    isFetching: isFetchingMyAuctions,
+  } = useAuctionsQuery("OWN", 1, 500, {
+    enabled: activeTab === "my-auctions",
+    refetchInterval: 30 * 1000
   });
 
   const {
     data: biddingAuctionsData,
     isLoading: isLoadingBidding,
     error: biddingError,
-  } = useAuctionsQuery("BID", 1, 50, {
-    enabled: activeTab === "bidding"
+    isFetching: isFetchingBidding,
+  } = useAuctionsQuery("BID", 1, 500, {
+    enabled: activeTab === "bidding",
+    refetchInterval: 30 * 1000
   });
 
   const {
     data: wonAuctionsData,
     isLoading: isLoadingWon,
     error: wonError,
-  } = useAuctionsQuery("WON", 1, 50, {
-    enabled: activeTab === "won"
+    isFetching: isFetchingWon,
+  } = useAuctionsQuery("WON", 1, 500, {
+    enabled: activeTab === "won",
+    refetchInterval: 30 * 1000
   });
 
-  const myAuctions = (myAuctionsData as any)?.auctions as AuctionData[] || [];
-  const biddingAuctions = (biddingAuctionsData as any)?.auctions as AuctionData[] || [];
-  const wonAuctions = (wonAuctionsData as any)?.auctions as AuctionData[] || [];
+  const myAuctions = (myAuctionsData as AuctionsResponse)?.auctions || [];
+  const biddingAuctions = (biddingAuctionsData as AuctionsResponse)?.auctions || [];
+  const wonAuctions = (wonAuctionsData as AuctionsResponse)?.auctions || [];
 
-  // Use statistics from API instead of client-side calculations
   const totalEarnings = statistics?.totalEarnings || 0;
   const postedAuctionsCount = statistics?.totalPostedAuctions || 0;
   const biddingCount = statistics?.currentlyBidding || 0;
   const winningCount = statistics?.currentlyWinning || 0;
 
-  console.log(`📊 [ProfilePage] Using API statistics:`, {
-    activeTab,
-    totalEarnings,
-    postedAuctionsCount,
-    biddingCount,
-    winningCount,
-    isLoadingStatistics: isStatisticsLoading,
-    statisticsError
-  });
+  const isCurrentlyFetching =
+    (activeTab === "my-auctions" && isFetchingMyAuctions) ||
+    (activeTab === "bidding" && isFetchingBidding) ||
+    (activeTab === "won" && isFetchingWon);
 
   useEffect(() => {
-    console.log(`⏰ [ProfilePage] Setting up prefetch timer for active tab: ${activeTab}`);
-
     const timer = setTimeout(() => {
-      console.log(`🚀 [ProfilePage] Prefetching other tabs (active: ${activeTab})`);
-
       if (activeTab === "my-auctions") {
-        console.log(`📦 [ProfilePage] Prefetching BID and WON tabs`);
         prefetchAuctions("BID");
         prefetchAuctions("WON");
       } else if (activeTab === "bidding") {
-        console.log(`📦 [ProfilePage] Prefetching OWN and WON tabs`);
         prefetchAuctions("OWN");
         prefetchAuctions("WON");
       } else if (activeTab === "won") {
-        console.log(`📦 [ProfilePage] Prefetching OWN and BID tabs`);
         prefetchAuctions("OWN");
         prefetchAuctions("BID");
       }
     }, 2000);
 
-    return () => {
-      console.log(`🧹 [ProfilePage] Cleaning up prefetch timer for tab: ${activeTab}`);
-      clearTimeout(timer);
-    };
+    return () => clearTimeout(timer);
   }, [activeTab, prefetchAuctions]);
 
-  const handleLogout = async () => {
-    try {
-      await logout();
-    } catch (error) {
-      console.error("Logout failed:", error);
+  const handleEditAuction = (auctionId: string) => {
+    const auction = myAuctions?.find(a => a.id === auctionId);
+    if (auction) {
+      setEditingAuction(auction);
+      setIsEditDialogOpen(true);
     }
   };
 
-  const handleEditAuction = async (auctionId: string) => {
-    try {
-      await editAuction({
-        auctionId,
-        data: { /* TODO: Add edit form data */ }
-      });
+  const handleEditSubmit = async (formData: any) => {
+    if (formData.success) {
       console.log("Auction edited successfully");
-    } catch (error) {
-      console.error("Failed to edit auction:", error);
+      setEditingAuction(null);
+      setIsEditDialogOpen(false);
     }
   };
+
+  const handleEditDialogChange = (open: boolean) => {
+    setIsEditDialogOpen(open);
+    if (!open) {
+      setEditingAuction(null);
+    }
+  };
+
+  const convertToEditAuctionData = useMemo(() => (auction: AuctionData) => ({
+    id: auction.id,
+    title: auction.title,
+    description: auction.description || '',
+    startingPrice: auction.startingPrice || parseFloat(auction.price.replace(' €', '').replace(',', '')) || 0,
+    currentPrice: auction.currentPrice || parseFloat(auction.price.replace(' €', '').replace(',', '')) || 0,
+    endTime: auction.endTime || new Date().toISOString(),
+    imageUrl: auction.imageUrl,
+    sellerId: auction.sellerId || '',
+    status: auction.status || 'in-progress',
+    createdAt: auction.createdAt || new Date().toISOString(),
+    updatedAt: auction.updatedAt || new Date().toISOString(),
+  }), []);
 
   const handleDeleteAuction = async (auctionId: string) => {
     try {
@@ -132,8 +144,12 @@ export default function ProfilePage() {
   };
 
   const handleTabChange = (value: string) => {
-    console.log(`🔄 [ProfilePage] Tab change: ${activeTab} → ${value}`);
     setActiveTab(value);
+
+    if (isEditDialogOpen) {
+      setIsEditDialogOpen(false);
+      setEditingAuction(null);
+    }
   };
 
   return (
@@ -184,7 +200,7 @@ export default function ProfilePage() {
               <div>
                 <h4 className=" text-xl font-bold">Currently winning</h4>
               </div>
-              <div className={`text-[80px] font-bold leading-none ${winningCount != 0 && 'text-[#ADFF90]'}`}>
+              <div className={`text-[80px] font-bold leading-none ${winningCount != 0 && 'text-green-card-winning'}`}>
                 <h1>{winningCount}</h1>
               </div>
             </CardContent>
@@ -230,6 +246,13 @@ export default function ProfilePage() {
           </TabsContent>
         </Tabs>
       </div>
+
+      <EditAuctionDialog
+        auction={editingAuction ? convertToEditAuctionData(editingAuction) : null}
+        onSubmit={handleEditSubmit}
+        open={isEditDialogOpen}
+        onOpenChange={handleEditDialogChange}
+      />
     </AppLayout>
   );
 }

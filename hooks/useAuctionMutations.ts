@@ -3,57 +3,95 @@
 import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import { auctionsAPI } from "../services/api";
 import { AuctionFilter } from "../components/ui/auction-tab-content";
+import { UpdateAuctionRequest } from "../types/auction";
 
-// Hook for managing auction mutations (delete, edit, etc.)
 export function useAuctionMutations() {
   const queryClient = useQueryClient();
 
-  // Delete auction mutation
   const deleteAuctionMutation = useMutation({
     mutationFn: async (auctionId: string) => {
-      // TODO: Implement delete API call when available
-      // await auctionsAPI.deleteAuction(auctionId);
-      console.log("Deleting auction:", auctionId);
-
-      // Simulate API call delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
-
+      await auctionsAPI.deleteAuction(auctionId);
       return auctionId;
     },
-    onSuccess: () => {
-      // Invalidate OWN auctions query to refetch the data
+    onMutate: async (auctionId: string) => {
+      await queryClient.cancelQueries({ queryKey: ["auctions", "OWN"] });
+      await queryClient.cancelQueries({ queryKey: ["auctions", "ALL"] });
+
+      const previousOwnData = queryClient.getQueryData(["auctions", "OWN", 1, 20]);
+      const previousAllData = queryClient.getQueryData(["auctions", "ALL", 1, 20]);
+
+      queryClient.setQueriesData(
+        { queryKey: ["auctions", "OWN"] },
+        (old: any) => {
+          if (!old?.auctions) return old;
+
+          return {
+            ...old,
+            auctions: old.auctions.filter((auction: any) => auction.id !== auctionId),
+            pagination: {
+              ...old.pagination,
+              total: old.pagination.total - 1
+            }
+          };
+        }
+      );
+
+      queryClient.setQueriesData(
+        { queryKey: ["auctions", "ALL"] },
+        (old: any) => {
+          if (!old?.auctions) return old;
+
+          return {
+            ...old,
+            auctions: old.auctions.filter((auction: any) => auction.id !== auctionId),
+            pagination: {
+              ...old.pagination,
+              total: old.pagination.total - 1
+            }
+          };
+        }
+      );
+
+      return { previousOwnData, previousAllData };
+    },
+     onError: (error, auctionId, context) => {
+       if (context?.previousOwnData) {
+         queryClient.setQueryData(["auctions", "OWN", 1, 20], context.previousOwnData);
+       }
+       if (context?.previousAllData) {
+         queryClient.setQueryData(["auctions", "ALL", 1, 20], context.previousAllData);
+       }
+     },
+    onSettled: () => {
       queryClient.invalidateQueries({
         queryKey: ["auctions", "OWN"],
         refetchType: "active"
       });
+      queryClient.invalidateQueries({
+        queryKey: ["auctions", "ALL"],
+        refetchType: "active"
+      });
     },
-    onError: (error) => {
-      console.error("Failed to delete auction:", error);
-    }
   });
 
-  // Edit auction mutation
   const editAuctionMutation = useMutation({
-    mutationFn: async ({ auctionId, data }: { auctionId: string; data: any }) => {
-      // TODO: Implement edit API call when available
-      // await auctionsAPI.updateAuction(auctionId, data);
-      console.log("Editing auction:", auctionId, data);
-
-      // Simulate API call delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
-
-      return { auctionId, data };
+    mutationFn: async ({ auctionId, data }: { auctionId: string; data: UpdateAuctionRequest }) => {
+      const response = await auctionsAPI.updateAuction(auctionId, data);
+      return response;
     },
-    onSuccess: () => {
-      // Invalidate OWN auctions query to refetch the data
-      queryClient.invalidateQueries({
-        queryKey: ["auctions", "OWN"],
-        refetchType: "active"
-      });
-    },
-    onError: (error) => {
-      console.error("Failed to edit auction:", error);
-    }
+     onSuccess: (response) => {
+       queryClient.invalidateQueries({
+         queryKey: ["auctions", "OWN"],
+         refetchType: "active"
+       });
+
+       queryClient.invalidateQueries({
+         queryKey: ["auctions", "ALL"],
+         refetchType: "active"
+       });
+     },
+     onError: (error) => {
+     }
   });
 
   return {
@@ -66,7 +104,6 @@ export function useAuctionMutations() {
   };
 }
 
-// Hook for prefetching auction data
 export function useAuctionPrefetcher() {
   const queryClient = useQueryClient();
 
@@ -80,11 +117,10 @@ export function useAuctionPrefetcher() {
           pagination: response.pagination
         };
       },
-      staleTime: 5 * 60 * 1000, // 5 minutes
+      staleTime: 5 * 60 * 1000
     });
   };
 
-  // Prefetch all tabs data (useful for background loading)
   const prefetchAllTabs = () => {
     prefetchAuctions("OWN");
     prefetchAuctions("BID");
@@ -97,7 +133,6 @@ export function useAuctionPrefetcher() {
   };
 }
 
-// Hook for invalidating auction queries (useful after mutations)
 export function useAuctionInvalidator() {
   const queryClient = useQueryClient();
 
@@ -108,7 +143,6 @@ export function useAuctionInvalidator() {
         refetchType: "active"
       });
     } else {
-      // Invalidate all auction queries
       queryClient.invalidateQueries({
         queryKey: ["auctions"],
         refetchType: "active"

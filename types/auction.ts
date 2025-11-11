@@ -1,11 +1,9 @@
-// Auction-related types for the frontend
-
 export interface CreateAuctionRequest {
   title: string;
   description: string;
   startingPrice: number;
-  endTime: string; // ISO date string
-  imageUrl?: string; // Optional, will be set after image upload if provided
+  endTime: string;
+  imageUrl?: string;
 }
 
 export interface CreateAuctionResponse {
@@ -43,7 +41,6 @@ export interface ValidationError {
   message: string;
 }
 
-// Form validation types
 export interface AuctionFormData {
   title: string;
   description: string;
@@ -59,4 +56,41 @@ export interface FormValidationErrors {
   endDate?: string;
   image?: string;
   general?: string;
+}
+
+export interface AuctionData {
+  id: string;
+  title: string;
+  description: string;
+  startingPrice: number;
+  currentPrice: number;
+  endTime: string;
+  imageUrl?: string;
+  sellerId: string;
+  status: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface EditAuctionFormData {
+  id: string;
+  title: string;
+  description: string;
+  startingPrice: string;
+  endDate: string;
+  image?: File;
+  existingImageUrl?: string;
+  success?: boolean;
+}
+
+export interface UpdateAuctionRequest {
+  title?: string;
+  description?: string;
+  endTime?: string;
+  imageUrl?: string;
+}
+
+export interface UpdateAuctionResponse {
+  message: string;
+  auction: AuctionData;
 }

@@ -2,18 +2,15 @@
 
 import { AuctionCard } from "./auction-card";
 import { useAuth } from "../../contexts/AuthContext";
+import { AuctionData as CoreAuctionData } from "../../types/auction";
 
 export type AuctionFilter = "ALL" | "OWN" | "BID" | "WON";
 
-export interface AuctionData {
-  id: string;
-  title: string;
+export interface AuctionData extends Omit<CoreAuctionData, 'status'> {
   price: string;
-  status: "in-progress" | "outbid" | "winning" | "done";
   timeLeft: string;
-  isTimeUrgent?: boolean;
-  imageUrl?: string;
-  sellerId?: string;
+  isTimeUrgent: boolean;
+  status: "in-progress" | "outbid" | "winning" | "done";
 }
 
 interface AuctionTabContentProps {
@@ -35,10 +32,11 @@ export function AuctionTabContent({
 }: AuctionTabContentProps) {
   const { user } = useAuth();
 
-  // For "ALL" filter, individual auctions can be editable if owned by current user
-  // For "OWN" filter, all auctions are editable
-  // For other filters, no auctions are editable
   const checkIfEditable = (auction: AuctionData) => {
+    if (auction.status === "done" || new Date(auction.endTime) <= new Date()) {
+      return false;
+    }
+
     if (filter === "ALL") {
       return auction.sellerId === user?.id;
     }
@@ -89,7 +87,7 @@ export function AuctionTabContent({
   return (
     <div className="px-8 pb-8 h-full overflow-y-auto">
       <div className="grid grid-cols-1 xs:grid-cols:2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 items-stretch">
-        {auctions.map((auction) => {
+        {auctions?.map((auction) => {
           const isEditable = checkIfEditable(auction);
           return (
             <AuctionCard

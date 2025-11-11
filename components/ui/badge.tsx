@@ -11,7 +11,7 @@ const badgeVariants = cva(
     variants: {
       size: {
         default: "px-2 py-0.5 rounded-2xl text-base leading-6",
-        small: "px-1 py-0.5 rounded-lg text-xs leading-3",
+        small: "px-1 py-0.5 rounded-lg text-[10px] leading-3",
       },
       variant: {
         "in-progress": "bg-primary-30 text-text-primary",
