@@ -9,6 +9,7 @@ import { useProfilePicture } from "@/hooks/useProfilePicture"
 import { useProfilePictureUpload } from "@/hooks/useProfilePictureUpload"
 import { generateInitials } from "@/utils/imageUtils"
 import { useQueryClient } from "@tanstack/react-query"
+import { userAPI } from "@/services/api"
 
 export interface ProfileSettingsProps {
   className?: string
@@ -67,6 +68,7 @@ const ProfileSettings = React.forwardRef<HTMLDivElement, ProfileSettingsProps>(
     const [showSurnameError, setShowSurnameError] = React.useState(false)
     const [showEmailError, setShowEmailError] = React.useState(false)
     const [isSubmitting, setIsSubmitting] = React.useState(false)
+    const [apiError, setApiError] = React.useState<string | null>(null)
 
     // Profile picture upload state
     const [profilePictureFile, setProfilePictureFile] = React.useState<File | null>(null)
@@ -115,6 +117,9 @@ const ProfileSettings = React.forwardRef<HTMLDivElement, ProfileSettingsProps>(
       if (field === "name") setShowNameError(false)
       if (field === "surname") setShowSurnameError(false)
       if (field === "email") setShowEmailError(false)
+
+      // Clear API errors when user starts typing
+      setApiError(null)
     }
 
     const handlePasswordChange = (field: keyof PasswordData) => (
@@ -134,6 +139,7 @@ const ProfileSettings = React.forwardRef<HTMLDivElement, ProfileSettingsProps>(
       setShowSurnameError(false)
       setShowEmailError(false)
       setUploadError(null)
+      setApiError(null)
       // Notify parent of view change
       onViewChange?.(view)
     }
@@ -201,14 +207,48 @@ const ProfileSettings = React.forwardRef<HTMLDivElement, ProfileSettingsProps>(
     const handleSubmit = async (e: React.FormEvent) => {
       e.preventDefault()
 
-      setIsSubmitting(true)
+      // Clear previous API errors
+      setApiError(null)
 
       try {
         if (currentView === 'profile') {
-          await onSubmit?.(formData)
+          // Check if data has changed
+          const isDataUnchanged =
+            formData.name === user?.name &&
+            formData.surname === user?.surname &&
+            formData.email === user?.email
+
+          // If no changes, just close the dialog
+          if (isDataUnchanged) {
+            onCancel?.()
+            return
+          }
+
+          // Validate form before API call
+          if (!validateForm()) {
+            return
+          }
+
+          setIsSubmitting(true)
+
+          // Call profile update API
+          await userAPI.updateUserProfile({
+            name: formData.name,
+            surname: formData.surname,
+            email: formData.email,
+          })
+
+          // Update user context with fresh data
+          queryClient.invalidateQueries({ queryKey: ["user"] })
+
+          // Close dialog on successful update
+          onCancel?.()
+
         } else if (currentView === 'password') {
+          setIsSubmitting(true)
           await onSubmit?.(passwordData)
         } else if (currentView === 'picture' && profilePictureFile) {
+          setIsSubmitting(true)
           // Upload profile picture
           await uploadProfilePicture(profilePictureFile)
           // Clear state after successful upload
@@ -217,6 +257,13 @@ const ProfileSettings = React.forwardRef<HTMLDivElement, ProfileSettingsProps>(
         }
       } catch (error) {
         console.error("Failed to update profile:", error)
+
+        // Handle API errors gracefully
+        if (error && typeof error === 'object' && 'message' in error) {
+          setApiError(error.message as string)
+        } else {
+          setApiError("An unexpected error occurred. Please try again.")
+        }
       } finally {
         setIsSubmitting(false)
       }
@@ -245,6 +292,9 @@ const ProfileSettings = React.forwardRef<HTMLDivElement, ProfileSettingsProps>(
       setProfilePicturePreview(null)
       setUploadError(null)
 
+      // Clear API errors
+      setApiError(null)
+
       onCancel?.()
     }
 
@@ -256,6 +306,12 @@ const ProfileSettings = React.forwardRef<HTMLDivElement, ProfileSettingsProps>(
       >
         <form onSubmit={handleSubmit} className="flex flex-col gap-8">
 
+          {/* API Error Banner */}
+          {apiError && (
+            <div className="bg-coral-10 border border-coral-30 text-coral-90 px-4 py-3 rounded-md">
+              <p className="text-sm font-medium">{apiError}</p>
+            </div>
+          )}
 
           {/* Dynamic Content based on current view */}
           <div className="flex flex-col gap-6">

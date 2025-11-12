@@ -33,6 +33,23 @@ export interface RegisterResponse {
   access_token: string;
 }
 
+export interface UpdateUserProfileRequest {
+  name: string;
+  surname: string;
+  email: string;
+}
+
+export interface UpdateUserProfileResponse {
+  id: string;
+  email: string;
+  name: string;
+  surname: string;
+  profilePictureUrl?: string;
+  createdAt: Date;
+  updatedAt: Date;
+  tokenVersion: number;
+}
+
 // Error types for better type safety
 export interface AuthError {
   message: string;
