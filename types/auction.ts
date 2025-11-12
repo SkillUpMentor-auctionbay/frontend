@@ -94,3 +94,40 @@ export interface UpdateAuctionResponse {
   message: string;
   auction: AuctionData;
 }
+
+export interface Seller {
+  id: string;
+  name: string;
+  surname: string;
+  profilePictureUrl?: string;
+}
+
+export interface Bidder {
+  id: string;
+  name: string;
+  surname: string;
+  profilePictureUrl?: string;
+}
+
+export interface Bid {
+  id: string;
+  amount: number;
+  createdAt: string;
+  bidder: Bidder;
+}
+
+export interface DetailedAuctionResponse {
+  id: string;
+  title: string;
+  description: string;
+  imageUrl?: string;
+  startingPrice: number;
+  currentPrice: number;
+  endTime: string;
+  status: 'IN_PROGRESS' | 'WINNING' | 'OUTBID' | 'DONE';
+  myBid?: number;
+  bidCount: number;
+  seller: Seller;
+  createdAt: string;
+  bids: Bid[];
+}

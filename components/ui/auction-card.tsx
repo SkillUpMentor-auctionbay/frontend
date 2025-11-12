@@ -31,6 +31,7 @@ export interface AuctionCardProps
   imageUrl?: string
   onDelete?: () => void
   onEdit?: () => void
+  onClick?: () => void
 }
 
 const AuctionCard = React.forwardRef<HTMLDivElement, AuctionCardProps>(({
@@ -44,6 +45,7 @@ const AuctionCard = React.forwardRef<HTMLDivElement, AuctionCardProps>(({
   imageUrl,
   onDelete,
   onEdit,
+  onClick,
   ...props
 }, ref) => {
   const isEditable = variant === "editable"
@@ -53,10 +55,29 @@ const AuctionCard = React.forwardRef<HTMLDivElement, AuctionCardProps>(({
     setImageError(true)
   }, [])
 
+  const handleCardClick = React.useCallback((e: React.MouseEvent) => {
+    // Prevent navigation if clicking on buttons
+    if ((e.target as HTMLElement).closest('button')) {
+      return
+    }
+    onClick?.()
+  }, [onClick])
+
+  const handleButtonClick = React.useCallback((e: React.MouseEvent, buttonHandler?: () => void) => {
+    e.stopPropagation()
+    buttonHandler?.()
+  }, [])
+
   return (
     <div
       ref={ref}
-      className={cn(auctionCardVariants({ variant }), className, "bg-white")}
+      className={cn(
+        auctionCardVariants({ variant }),
+        className,
+        "bg-white",
+        onClick && "cursor-pointer hover:shadow-lg transition-shadow"
+      )}
+      onClick={handleCardClick}
       {...props}
     >
       <div className="flex flex-col gap-2 p-2 pt-2 pb-1 shrink-0 w-full">
@@ -109,14 +130,14 @@ const AuctionCard = React.forwardRef<HTMLDivElement, AuctionCardProps>(({
           <div className="flex gap-1 items-center relative shrink-0 w-full">
             <Button
               variant="tertiary"
-              onClick={onDelete}
+              onClick={(e) => handleButtonClick(e, onDelete)}
               leftIcon="Delete"
               iconSize={16}
             >
             </Button>
             <Button
               variant="secondary"
-              onClick={onEdit}
+              onClick={(e) => handleButtonClick(e, onEdit)}
               className="flex-1 "
               leftIcon="Edit"
               iconSize={16}

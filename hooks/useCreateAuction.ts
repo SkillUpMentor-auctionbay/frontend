@@ -11,6 +11,38 @@ import {
   ValidationError
 } from "../types/auction";
 
+// Date parsing utility for European date format (DD.MM.YYYY)
+const parseEuropeanDate = (dateString: string): Date | null => {
+  // Remove any whitespace and check if the string is empty
+  const trimmedDate = dateString.trim();
+  if (!trimmedDate) return null;
+
+  // Validate DD.MM.YYYY format
+  const regex = /^(\d{2})\.(\d{2})\.(\d{4})$/;
+  if (!regex.test(trimmedDate)) return null;
+
+  const [, day, month, year] = trimmedDate.match(regex)!;
+
+  // Create date using noon UTC to avoid timezone issues
+  const date = new Date(`${year}-${month}-${day}T12:00:00Z`);
+
+  // Additional validation: check if the constructed date is valid
+  if (isNaN(date.getTime())) return null;
+
+  // Check if the date components match (e.g., February 30th would be adjusted to March 2nd)
+  const constructedDay = parseInt(day, 10);
+  const constructedMonth = parseInt(month, 10);
+  const constructedYear = parseInt(year, 10);
+
+  if (date.getUTCDate() !== constructedDay ||
+      date.getUTCMonth() + 1 !== constructedMonth ||
+      date.getUTCFullYear() !== constructedYear) {
+    return null;
+  }
+
+  return date;
+};
+
 // Validation functions
 const validateAuctionForm = (formData: AuctionFormData): FormValidationErrors => {
   const errors: FormValidationErrors = {};
@@ -60,11 +92,11 @@ const validateAuctionForm = (formData: AuctionFormData): FormValidationErrors =>
   if (!formData.endDate || formData.endDate.trim().length === 0) {
     errors.endDate = "End date is required";
   } else {
-    const endDate = new Date(formData.endDate);
+    const endDate = parseEuropeanDate(formData.endDate);
     const now = new Date();
 
-    if (isNaN(endDate.getTime())) {
-      errors.endDate = "End date must be a valid date";
+    if (!endDate) {
+      errors.endDate = "Use DD.MM.YYYY format (e.g., 10.12.2025)";
     } else if (endDate <= now) {
       errors.endDate = "End date must be in the future";
     }
@@ -89,8 +121,12 @@ const validateAuctionForm = (formData: AuctionFormData): FormValidationErrors =>
 };
 
 const convertFormDataToRequest = (formData: AuctionFormData): CreateAuctionRequest => {
-  // Convert date to ISO string
-  const endDate = new Date(formData.endDate);
+  // Convert European date format to ISO string
+  const endDate = parseEuropeanDate(formData.endDate);
+
+  if (!endDate) {
+    throw new Error("Invalid date format. Please use DD.MM.YYYY format.");
+  }
 
   return {
     title: formData.title.trim(),

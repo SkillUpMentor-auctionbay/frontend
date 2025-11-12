@@ -242,7 +242,7 @@ const AddAuctionCard = React.forwardRef<HTMLDivElement, AddAuctionCardProps>(
               <div>
                 <InputField
                   label="End date"
-                  type="date"
+                  type="text"
                   placeholder="dd.mm.yyyy"
                   value={formData.endDate}
                   onChange={(e) => handleInputChange("endDate", e.target.value)}

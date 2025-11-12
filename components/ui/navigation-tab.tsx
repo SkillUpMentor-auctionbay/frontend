@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils";
 import { Icon } from "./icon";
 
 export interface NavigationTabProps {
-  activeTab: "auctions" | "profile";
+  activeTab: "auctions" | "profile" | null;
   onTabChange: (tab: "auctions" | "profile") => void;
   className?: string;
 }

@@ -10,6 +10,8 @@ export interface AppLayoutProps {
   showProtectedRoute?: boolean;
 }
 
+type ActiveTab = "auctions" | "profile" | null;
+
 const AppLayout: React.FC<AppLayoutProps> = ({
   children,
   showProtectedRoute = true
@@ -17,9 +19,16 @@ const AppLayout: React.FC<AppLayoutProps> = ({
   const router = useRouter();
   const pathname = usePathname();
 
-  const getActiveTab = (): "auctions" | "profile" => {
+  const getActiveTab = (): ActiveTab => {
     if (pathname === "/profile") {
       return "profile";
+    }
+    if (pathname === "/auctions") {
+      return "auctions";
+    }
+    // If we're on a specific auction page (/auctions/[id]), return null
+    if (pathname.startsWith("/auctions/") && pathname !== "/auctions") {
+      return null;
     }
     return "auctions";
   };

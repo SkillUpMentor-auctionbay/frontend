@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { AuctionCard } from "./auction-card";
 import { useAuth } from "../../contexts/AuthContext";
 import { AuctionData as CoreAuctionData } from "../../types/auction";
@@ -31,6 +32,7 @@ export function AuctionTabContent({
   onDelete,
 }: AuctionTabContentProps) {
   const { user } = useAuth();
+  const router = useRouter();
 
   const checkIfEditable = (auction: AuctionData) => {
     if (auction.status === "done" || new Date(auction.endTime) <= new Date()) {
@@ -41,6 +43,10 @@ export function AuctionTabContent({
       return auction.sellerId === user?.id;
     }
     return filter === "OWN";
+  };
+
+  const handleAuctionClick = (auctionId: string) => {
+    router.push(`/auctions/${auctionId}`);
   };
 
   if (isLoading) {
@@ -99,6 +105,7 @@ export function AuctionTabContent({
               timeLeft={auction.timeLeft}
               isTimeUrgent={auction.isTimeUrgent}
               imageUrl={auction.imageUrl}
+              onClick={() => handleAuctionClick(auction.id)}
               onDelete={isEditable ? () => onDelete?.(auction.id) : undefined}
               onEdit={isEditable ? () => onEdit?.(auction.id) : undefined}
             />

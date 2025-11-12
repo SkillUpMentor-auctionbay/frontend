@@ -9,6 +9,24 @@ import { useEditAuction } from "@/hooks/useEditAuction";
 import { EditAuctionFormData } from "@/types/auction";
 import { AuctionData } from "@/types/auction";
 
+// Date formatting utility for European date format (DD.MM.YYYY)
+const formatEuropeanDate = (dateString: string): string => {
+  if (!dateString) return '';
+
+  try {
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return '';
+
+    const day = date.getUTCDate().toString().padStart(2, '0');
+    const month = (date.getUTCMonth() + 1).toString().padStart(2, '0');
+    const year = date.getUTCFullYear();
+
+    return `${day}.${month}.${year}`;
+  } catch {
+    return '';
+  }
+};
+
 export interface EditAuctionCardProps {
   className?: string;
   auction: AuctionData;
@@ -38,7 +56,7 @@ const EditAuctionCard = React.forwardRef<HTMLDivElement, EditAuctionCardProps>(
       title: auction.title,
       description: auction.description,
       startingPrice: auction.startingPrice?.toString() || '0',
-      endDate: auction.endTime ? new Date(auction.endTime).toISOString().split('T')[0] : '',
+      endDate: auction.endTime ? formatEuropeanDate(auction.endTime) : '',
       existingImageUrl: auction.imageUrl,
     }));
 
@@ -49,7 +67,7 @@ const EditAuctionCard = React.forwardRef<HTMLDivElement, EditAuctionCardProps>(
           title: auction.title || '',
           description: auction.description || '',
           startingPrice: auction.startingPrice?.toString() || '0',
-          endDate: auction.endTime ? new Date(auction.endTime).toISOString().split('T')[0] : '',
+          endDate: auction.endTime ? formatEuropeanDate(auction.endTime) : '',
           existingImageUrl: auction.imageUrl || undefined,
         });
       }
@@ -87,7 +105,7 @@ const EditAuctionCard = React.forwardRef<HTMLDivElement, EditAuctionCardProps>(
       try {
         const hasChanges = formData.title !== auction.title ||
                           formData.description !== auction.description ||
-                          formData.endDate !== new Date(auction.endTime).toISOString().split('T')[0] ||
+                          formData.endDate !== formatEuropeanDate(auction.endTime) ||
                           (formData.image !== undefined) ||
                           (formData.existingImageUrl === undefined && auction.imageUrl !== undefined);
 
@@ -193,7 +211,7 @@ const EditAuctionCard = React.forwardRef<HTMLDivElement, EditAuctionCardProps>(
           <div className="w-full">
             <InputField
               label="End date"
-              type="date"
+              type="text"
               placeholder="dd.mm.yyyy"
               value={formData.endDate}
               onChange={(e) => handleInputChange("endDate", e.target.value)}

@@ -1,6 +1,6 @@
 import axios, { AxiosResponse, AxiosError } from "axios";
 import { User, LoginRequest, LoginResponse, RegisterRequest, RegisterResponse, AuthError } from "../types/auth";
-import { CreateAuctionRequest, CreateAuctionResponse, ImageUploadResponse, AuctionError, UpdateAuctionRequest, UpdateAuctionResponse } from "../types/auction";
+import { CreateAuctionRequest, CreateAuctionResponse, ImageUploadResponse, AuctionError, UpdateAuctionRequest, UpdateAuctionResponse, DetailedAuctionResponse } from "../types/auction";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
 
@@ -132,6 +132,15 @@ export const auctionsAPI = {
      } catch (error) {
        throw handleApiError(error as AxiosError);
      }
+  },
+
+  getAuctionById: async (auctionId: string): Promise<DetailedAuctionResponse> => {
+    try {
+      const response: AxiosResponse<DetailedAuctionResponse> = await api.get(`/api/v1/auctions/${auctionId}`);
+      return response.data;
+    } catch (error) {
+      throw handleApiError(error as AxiosError);
+    }
   },
 
   createAuction: async (data: CreateAuctionRequest): Promise<CreateAuctionResponse> => {

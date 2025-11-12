@@ -7,7 +7,7 @@ import { NavigationTab } from "@/components/ui/navigation-tab";
 import { RightNavigation } from "@/components/ui/right-navigation";
 
 export interface NavbarProps {
-  activeTab: "auctions" | "profile";
+  activeTab: "auctions" | "profile" | null;
   onTabChange: (tab: "auctions" | "profile") => void;
   className?: string;
 }
