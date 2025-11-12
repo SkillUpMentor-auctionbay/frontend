@@ -32,7 +32,6 @@ export interface PasswordData {
 
 export type ViewType = 'profile' | 'password' | 'picture'
 
-// Helper function to get title based on current view
 const getViewTitle = (view: ViewType): string => {
   switch (view) {
     case 'password':
@@ -67,15 +66,16 @@ const ProfileSettings = React.forwardRef<HTMLDivElement, ProfileSettingsProps>(
     const [showNameError, setShowNameError] = React.useState(false)
     const [showSurnameError, setShowSurnameError] = React.useState(false)
     const [showEmailError, setShowEmailError] = React.useState(false)
+    const [showCurrentPasswordError, setShowCurrentPasswordError] = React.useState(false)
+    const [showNewPasswordError, setShowNewPasswordError] = React.useState(false)
+    const [showRepeatPasswordError, setShowRepeatPasswordError] = React.useState(false)
     const [isSubmitting, setIsSubmitting] = React.useState(false)
     const [apiError, setApiError] = React.useState<string | null>(null)
 
-    // Profile picture upload state
     const [profilePictureFile, setProfilePictureFile] = React.useState<File | null>(null)
     const [profilePicturePreview, setProfilePicturePreview] = React.useState<string | null>(null)
     const [uploadError, setUploadError] = React.useState<string | null>(null)
 
-    // Profile picture upload hook
     const {
       uploadProfilePicture,
       isUploading: isProfilePictureUploading,
@@ -85,13 +85,10 @@ const ProfileSettings = React.forwardRef<HTMLDivElement, ProfileSettingsProps>(
     } = useProfilePictureUpload({
       onSuccess: (imageUrl) => {
         console.log("Profile picture uploaded successfully:", imageUrl);
-        // Close dialog immediately to prevent flash of old image
         onCancel?.();
-        // Clear local state after dialog starts closing
         setProfilePictureFile(null);
         setProfilePicturePreview(null);
         setUploadError(null);
-        // Invalidate user query to refresh user data across the app
         queryClient.invalidateQueries({ queryKey: ["user"] });
       },
       onError: (error) => {
@@ -102,7 +99,6 @@ const ProfileSettings = React.forwardRef<HTMLDivElement, ProfileSettingsProps>(
     const initials = generateInitials(user?.name, user?.surname)
     const showProfilePicture = profilePictureUrl && !error && !isLoading
 
-    // Ref for hidden file input
     const fileInputRef = React.useRef<HTMLInputElement>(null)
 
     const handleInputChange = (field: keyof ProfileSettingsData) => (
@@ -113,12 +109,10 @@ const ProfileSettings = React.forwardRef<HTMLDivElement, ProfileSettingsProps>(
         [field]: e.target.value
       }))
 
-      // Clear error states when user starts typing
       if (field === "name") setShowNameError(false)
       if (field === "surname") setShowSurnameError(false)
       if (field === "email") setShowEmailError(false)
 
-      // Clear API errors when user starts typing
       setApiError(null)
     }
 
@@ -129,18 +123,25 @@ const ProfileSettings = React.forwardRef<HTMLDivElement, ProfileSettingsProps>(
         ...prev,
         [field]: e.target.value
       }))
+
+      if (field === "currentPassword") setShowCurrentPasswordError(false)
+      if (field === "newPassword") setShowNewPasswordError(false)
+      if (field === "repeatNewPassword") setShowRepeatPasswordError(false)
+
+      setApiError(null)
     }
 
     const handleViewChange = (view: ViewType) => {
       setCurrentView(view)
-      // Clear errors when switching views
       setErrors({})
       setShowNameError(false)
       setShowSurnameError(false)
       setShowEmailError(false)
+      setShowCurrentPasswordError(false)
+      setShowNewPasswordError(false)
+      setShowRepeatPasswordError(false)
       setUploadError(null)
       setApiError(null)
-      // Notify parent of view change
       onViewChange?.(view)
     }
 
@@ -148,7 +149,6 @@ const ProfileSettings = React.forwardRef<HTMLDivElement, ProfileSettingsProps>(
       const file = e.target.files?.[0];
       if (!file) return;
 
-      // Validate file
       const maxSizeInBytes = 5 * 1024 * 1024; // 5MB
       const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
 
@@ -162,14 +162,12 @@ const ProfileSettings = React.forwardRef<HTMLDivElement, ProfileSettingsProps>(
         return;
       }
 
-      // Create preview
       const reader = new FileReader();
       reader.onloadend = () => {
         setProfilePicturePreview(reader.result as string);
       };
       reader.readAsDataURL(file);
 
-      // Store file for upload
       setProfilePictureFile(file);
       setUploadError(null);
     }
@@ -204,54 +202,89 @@ const ProfileSettings = React.forwardRef<HTMLDivElement, ProfileSettingsProps>(
       return isValid
     }
 
+    const validatePasswordForm = (): boolean => {
+      let isValid = true
+
+      if (!passwordData.currentPassword.trim()) {
+        setShowCurrentPasswordError(true)
+        isValid = false
+      }
+
+      if (!passwordData.newPassword.trim()) {
+        setShowNewPasswordError(true)
+        isValid = false
+      } else if (passwordData.newPassword.length < 6) {
+        setShowNewPasswordError(true)
+        isValid = false
+      }
+
+      if (passwordData.newPassword && passwordData.currentPassword &&
+          passwordData.newPassword === passwordData.currentPassword) {
+        setShowNewPasswordError(true)
+        isValid = false
+      }
+
+      if (!passwordData.repeatNewPassword.trim()) {
+        setShowRepeatPasswordError(true)
+        isValid = false
+      } else if (passwordData.repeatNewPassword !== passwordData.newPassword) {
+        setShowRepeatPasswordError(true)
+        isValid = false
+      }
+
+      return isValid
+    }
+
     const handleSubmit = async (e: React.FormEvent) => {
       e.preventDefault()
 
-      // Clear previous API errors
       setApiError(null)
 
       try {
         if (currentView === 'profile') {
-          // Check if data has changed
           const isDataUnchanged =
             formData.name === user?.name &&
             formData.surname === user?.surname &&
             formData.email === user?.email
 
-          // If no changes, just close the dialog
           if (isDataUnchanged) {
             onCancel?.()
             return
           }
 
-          // Validate form before API call
           if (!validateForm()) {
             return
           }
 
           setIsSubmitting(true)
 
-          // Call profile update API
           await userAPI.updateUserProfile({
             name: formData.name,
             surname: formData.surname,
             email: formData.email,
           })
 
-          // Update user context with fresh data
           queryClient.invalidateQueries({ queryKey: ["user"] })
 
-          // Close dialog on successful update
           onCancel?.()
 
         } else if (currentView === 'password') {
+          if (!validatePasswordForm()) {
+            return
+          }
+
           setIsSubmitting(true)
-          await onSubmit?.(passwordData)
+
+          await userAPI.changePassword({
+            currentPassword: passwordData.currentPassword,
+            newPassword: passwordData.newPassword,
+          })
+
+          onCancel?.()
+
         } else if (currentView === 'picture' && profilePictureFile) {
           setIsSubmitting(true)
-          // Upload profile picture
           await uploadProfilePicture(profilePictureFile)
-          // Clear state after successful upload
           setProfilePictureFile(null)
           setProfilePicturePreview(null)
         }
@@ -286,6 +319,9 @@ const ProfileSettings = React.forwardRef<HTMLDivElement, ProfileSettingsProps>(
       setShowNameError(false)
       setShowSurnameError(false)
       setShowEmailError(false)
+      setShowCurrentPasswordError(false)
+      setShowNewPasswordError(false)
+      setShowRepeatPasswordError(false)
 
       // Clear profile picture upload state
       setProfilePictureFile(null)
@@ -306,20 +342,16 @@ const ProfileSettings = React.forwardRef<HTMLDivElement, ProfileSettingsProps>(
       >
         <form onSubmit={handleSubmit} className="flex flex-col gap-8">
 
-          {/* API Error Banner */}
           {apiError && (
             <div className="bg-coral-10 border border-coral-30 text-coral-90 px-4 py-3 rounded-md">
               <p className="text-sm font-medium">{apiError}</p>
             </div>
           )}
 
-          {/* Dynamic Content based on current view */}
           <div className="flex flex-col gap-6">
             {currentView === 'profile' && (
               <>
-                {/* Form Fields */}
                 <div className="flex flex-col gap-4">
-                  {/* Name and Surname in same row */}
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <InputField
@@ -352,7 +384,6 @@ const ProfileSettings = React.forwardRef<HTMLDivElement, ProfileSettingsProps>(
                     </div>
                   </div>
 
-                  {/* Email field taking full width */}
                   <div className="space-y-2">
                     <InputField
                       label="Email"
@@ -370,7 +401,6 @@ const ProfileSettings = React.forwardRef<HTMLDivElement, ProfileSettingsProps>(
                   </div>
                 </div>
 
-                {/* Navigation Links */}
                 <div className="flex flex-col gap-4">
                   <span
                     className="text-gray-50 text-[16px] leading-6 font-normal hover:underline cursor-pointer"
@@ -398,6 +428,11 @@ const ProfileSettings = React.forwardRef<HTMLDivElement, ProfileSettingsProps>(
                     type="password"
                     disabled={isSubmitting}
                   />
+                  {showCurrentPasswordError && (
+                    <p className="text-sm text-coral-50">
+                      Current password is required
+                    </p>
+                  )}
                 </div>
 
                 <div className="space-y-2">
@@ -408,6 +443,15 @@ const ProfileSettings = React.forwardRef<HTMLDivElement, ProfileSettingsProps>(
                     type="password"
                     disabled={isSubmitting}
                   />
+                  {showNewPasswordError && (
+                    <p className="text-sm text-coral-50">
+                      {!passwordData.newPassword.trim()
+                        ? "New password is required"
+                        : passwordData.newPassword === passwordData.currentPassword
+                        ? "New password must be different from current password"
+                        : "New password must be at least 6 characters long"}
+                    </p>
+                  )}
                 </div>
 
                 <div className="space-y-2">
@@ -418,6 +462,13 @@ const ProfileSettings = React.forwardRef<HTMLDivElement, ProfileSettingsProps>(
                     type="password"
                     disabled={isSubmitting}
                   />
+                  {showRepeatPasswordError && (
+                    <p className="text-sm text-coral-50">
+                      {!passwordData.repeatNewPassword.trim()
+                        ? "Please repeat your new password"
+                        : "Passwords do not match"}
+                    </p>
+                  )}
                 </div>
               </div>
             )}
@@ -444,7 +495,6 @@ const ProfileSettings = React.forwardRef<HTMLDivElement, ProfileSettingsProps>(
                   </Avatar>
                 </div>
 
-                {/* Hidden file input */}
                 <input
                   ref={fileInputRef}
                   type="file"
@@ -453,7 +503,6 @@ const ProfileSettings = React.forwardRef<HTMLDivElement, ProfileSettingsProps>(
                   className="hidden"
                 />
 
-                {/* Upload button */}
                 <Button
                   variant="tertiary"
                   disabled={isSubmitting || isProfilePictureUploading}
@@ -463,7 +512,6 @@ const ProfileSettings = React.forwardRef<HTMLDivElement, ProfileSettingsProps>(
                   {isProfilePictureUploading ? "Uploading..." : "Upload new picture"}
                 </Button>
 
-                {/* Error message */}
                 {uploadError && (
                   <p className="text-sm text-coral-50 text-center max-w-[200px]">
                     {uploadError}
@@ -474,7 +522,6 @@ const ProfileSettings = React.forwardRef<HTMLDivElement, ProfileSettingsProps>(
             )}
           </div>
 
-          {/* Action Buttons */}
           <div className="flex gap-4 pt-2 justify-end">
             <Button
               variant="alternative"

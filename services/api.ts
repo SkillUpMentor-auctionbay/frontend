@@ -1,5 +1,5 @@
 import axios, { AxiosResponse, AxiosError } from "axios";
-import { User, LoginRequest, LoginResponse, RegisterRequest, RegisterResponse, UpdateUserProfileRequest, UpdateUserProfileResponse, AuthError } from "../types/auth";
+import { User, LoginRequest, LoginResponse, RegisterRequest, RegisterResponse, UpdateUserProfileRequest, UpdateUserProfileResponse, UpdatePasswordRequest, UpdatePasswordResponse, AuthError } from "../types/auth";
 import { CreateAuctionRequest, CreateAuctionResponse, ImageUploadResponse, AuctionError, UpdateAuctionRequest, UpdateAuctionResponse, DetailedAuctionResponse, PlaceBidRequest, PlaceBidResponse } from "../types/auction";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
@@ -205,6 +205,19 @@ export const userAPI = {
     try {
       const response: AxiosResponse<UpdateUserProfileResponse> = await api.patch(
         '/api/v1/users/me/update-profile',
+        data
+      );
+
+      return response.data;
+    } catch (error) {
+      throw handleApiError(error as AxiosError);
+    }
+  },
+
+  changePassword: async (data: UpdatePasswordRequest): Promise<UpdatePasswordResponse> => {
+    try {
+      const response: AxiosResponse<UpdatePasswordResponse> = await api.patch(
+        '/api/v1/users/me/update-password',
         data
       );
 

@@ -50,6 +50,15 @@ export interface UpdateUserProfileResponse {
   tokenVersion: number;
 }
 
+export interface UpdatePasswordRequest {
+  currentPassword: string;
+  newPassword: string;
+}
+
+export interface UpdatePasswordResponse {
+  message: string;
+}
+
 // Error types for better type safety
 export interface AuthError {
   message: string;
