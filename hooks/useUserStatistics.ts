@@ -15,10 +15,13 @@ interface UseUserStatisticsOptions {
   staleTime?: number;
 }
 
-export function useUserStatistics(options: UseUserStatisticsOptions = {}) {
+export function useUserStatistics(options: UseUserStatisticsOptions = {}, isAuthenticated?: boolean, isLoggingOut?: boolean) {
   const { enabled = true, staleTime = 5 * 60 * 1000 } = options;
 
-  console.log(`📊 [useUserStatistics] Initializing statistics query - enabled: ${enabled}`);
+  // Disable the query if user is not authenticated or is logging out
+  const queryEnabled = enabled && !!isAuthenticated && !isLoggingOut;
+
+  console.log(`📊 [useUserStatistics] Initializing statistics query - enabled: ${enabled}, isAuthenticated: ${isAuthenticated}, isLoggingOut: ${isLoggingOut}, queryEnabled: ${queryEnabled}`);
 
   return useQuery<UserStatistics, Error>({
     queryKey: ["user-statistics"],
@@ -42,7 +45,7 @@ export function useUserStatistics(options: UseUserStatisticsOptions = {}) {
         throw error;
       }
     },
-    enabled,
+    enabled: queryEnabled,
     staleTime,
     retry: (failureCount, error) => {
       console.log(`🔄 [useUserStatistics] Retry attempt ${failureCount}`, error);

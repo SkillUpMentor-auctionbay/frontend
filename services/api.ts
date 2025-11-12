@@ -30,7 +30,9 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      if (typeof window !== "undefined") {
+      // Only remove token and handle 401 if we're not in the middle of a logout request
+      const isLogoutRequest = error.config?.url?.includes('/logout');
+      if (!isLogoutRequest && typeof window !== "undefined") {
         localStorage.removeItem("token");
       }
     }
@@ -191,6 +193,38 @@ export const auctionsAPI = {
       const requestUrl = `/api/v1/auctions/me/auction/${auctionId}`;
 
       await api.delete(requestUrl);
+    } catch (error) {
+      throw handleApiError(error as AxiosError);
+    }
+  }
+};
+
+// User Profile API functions
+export const userAPI = {
+  changeProfilePicture: async (file: File): Promise<{ imageUrl: string }> => {
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const response: AxiosResponse<{ imageUrl: string }> = await api.patch(
+        '/api/v1/users/me/change-profile-picture',
+        formData,
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        }
+      );
+
+      return response.data;
+    } catch (error) {
+      throw handleApiError(error as AxiosError);
+    }
+  },
+
+  removeProfilePicture: async (): Promise<void> => {
+    try {
+      await api.delete('/api/v1/users/me/remove-profile-picture');
     } catch (error) {
       throw handleApiError(error as AxiosError);
     }

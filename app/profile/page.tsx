@@ -22,7 +22,7 @@ interface AuctionsResponse {
 }
 
 export default function ProfilePage() {
-  const { user } = useAuth();
+  const { user, isLoggingOut } = useAuth();
   const { deleteAuction } = useAuctionMutations();
   const { prefetchAuctions } = useAuctionPrefetcher();
 
@@ -34,7 +34,7 @@ export default function ProfilePage() {
     data: statistics,
     isLoading: isStatisticsLoading,
     error: statisticsError
-  } = useUserStatistics();
+  } = useUserStatistics({}, !!user, isLoggingOut);
 
   const {
     data: myAuctionsData,
