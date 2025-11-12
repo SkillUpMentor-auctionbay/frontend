@@ -1,6 +1,6 @@
 import axios, { AxiosResponse, AxiosError } from "axios";
 import { User, LoginRequest, LoginResponse, RegisterRequest, RegisterResponse, AuthError } from "../types/auth";
-import { CreateAuctionRequest, CreateAuctionResponse, ImageUploadResponse, AuctionError, UpdateAuctionRequest, UpdateAuctionResponse, DetailedAuctionResponse } from "../types/auction";
+import { CreateAuctionRequest, CreateAuctionResponse, ImageUploadResponse, AuctionError, UpdateAuctionRequest, UpdateAuctionResponse, DetailedAuctionResponse, PlaceBidRequest, PlaceBidResponse } from "../types/auction";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
 
@@ -191,6 +191,18 @@ export const auctionsAPI = {
       const requestUrl = `/api/v1/auctions/me/auction/${auctionId}`;
 
       await api.delete(requestUrl);
+    } catch (error) {
+      throw handleApiError(error as AxiosError);
+    }
+  }
+};
+
+// Bidding API functions
+export const biddingAPI = {
+  placeBid: async (auctionId: string, data: PlaceBidRequest): Promise<PlaceBidResponse> => {
+    try {
+      const response: AxiosResponse<PlaceBidResponse> = await api.post(`/api/v1/auctions/${auctionId}/bid`, data);
+      return response.data;
     } catch (error) {
       throw handleApiError(error as AxiosError);
     }

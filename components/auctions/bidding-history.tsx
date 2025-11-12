@@ -77,7 +77,7 @@ export function BiddingHistory({ bids, className }: BiddingHistoryProps) {
   }
 
   return (
-    <div className={`${className} bg-background-2 p-4 text-black flex flex-col gap-4 items-start rounded-2xl h-full`}>
+    <div className={`${className} bg-background-2 p-4 text-black flex flex-col gap-4 items-start rounded-2xl h-full overflow-y-auto`}>
       <div className="flex flex-col gap-4 items-start w-full">
         <h4 className="font-bold text-[23px] leading-[1.2] text-black">
           Bidding history({bids.length || 0})

@@ -55,6 +55,7 @@ export interface FormValidationErrors {
   startingPrice?: string;
   endDate?: string;
   image?: string;
+  amount?: string;
   general?: string;
 }
 
@@ -130,4 +131,17 @@ export interface DetailedAuctionResponse {
   seller: Seller;
   createdAt: string;
   bids: Bid[];
+}
+
+export interface PlaceBidRequest {
+  amount: number;
+}
+
+export interface PlaceBidResponse {
+  message: string;
+  bid: Bid;
+}
+
+export interface BidFormData {
+  amount: string;
 }

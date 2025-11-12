@@ -17,7 +17,7 @@ export function useAuctionDetailQuery(
   const {
     enabled = true,
     staleTime = 30 * 1000, // 30 seconds for auction details
-    refetchInterval = 60 * 1000 // Refetch every minute to show updated bids/prices
+    refetchInterval = 5 * 1000 // Refetch every 5 seconds to show updated bids/prices in real-time
   } = options;
 
   return useQuery({
