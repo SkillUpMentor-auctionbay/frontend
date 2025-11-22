@@ -4,6 +4,7 @@ import * as React from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { Navbar } from "./navbar";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
+import { useNotificationsStream } from "@/hooks/useNotificationsStream";
 
 export interface AppLayoutProps {
   children: React.ReactNode;
@@ -19,6 +20,9 @@ const AppLayout: React.FC<AppLayoutProps> = ({
   const router = useRouter();
   const pathname = usePathname();
 
+  // Global SSE connection for real-time notifications and toasts
+  useNotificationsStream();
+
   const getActiveTab = (): ActiveTab => {
     if (pathname === "/profile") {
       return "profile";
@@ -26,7 +30,6 @@ const AppLayout: React.FC<AppLayoutProps> = ({
     if (pathname === "/auctions") {
       return "auctions";
     }
-    // If we're on a specific auction page (/auctions/[id]), return null
     if (pathname.startsWith("/auctions/") && pathname !== "/auctions") {
       return null;
     }

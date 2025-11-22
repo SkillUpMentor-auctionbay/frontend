@@ -3,6 +3,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { auctionsAPI } from "../services/api";
 import { AuctionData, AuctionFilter } from "../components/ui/auction-tab-content";
+import { formatTimeLeft, isTimeUrgent } from "../utils/timeUtils";
 
 interface UseAuctionsQueryOptions {
   enabled?: boolean;
@@ -25,48 +26,16 @@ function mapApiStatusToCardStatus(apiStatus: string): AuctionData["status"] {
   }
 }
 
-function formatTimeLeft(endTime: string): string {
-  const endTimeDate = new Date(endTime).getTime();
-  const now = new Date().getTime();
-  const diff = endTimeDate - now;
-
-  const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-
-  if (diff <= 0) return "Ended";
-
-  const hours = Math.floor(diff / (1000 * 60 * 60));
-
-  if (days > 0) {
-    return `${days}d`;
-  } else if (hours > 0) {
-    return `${hours}h`;
-  } else {
-    const minutes = Math.floor(diff / (1000 * 60));
-    return `${minutes}m`;
-  }
-}
-
-function isTimeUrgent(endTime: string): boolean {
-  const endTimeDate = new Date(endTime).getTime();
-  const now = new Date().getTime();
-  const diff = endTimeDate - now;
-
-  if (diff <= 0) return true;
-
-  const hours = Math.floor(diff / (1000 * 60 * 60));
-  const days = Math.floor(hours / 24);
-
-  return days < 1;
-}
 
 function transformAuctionData(response: any): AuctionData[] {
   if (!response?.auctions) return [];
 
   const transformedAuctions = response.auctions.map((item: any) => {
+    // Keep existing timeLeft and isTimeUrgent for backward compatibility
+    // But client components will use endTime for real-time updates
     const timeLeft = formatTimeLeft(item.endTime);
     const timeIsUrgent = isTimeUrgent(item.endTime);
 
-    
     return {
       id: item.id,
       title: item.title,
@@ -79,7 +48,7 @@ function transformAuctionData(response: any): AuctionData[] {
       status: mapApiStatusToCardStatus(item.status),
       createdAt: item.createdAt || new Date().toISOString(),
       updatedAt: item.updatedAt || new Date().toISOString(),
-            price: `${item.currentPrice || 0} €`,
+      price: `${item.currentPrice || 0} €`,
       timeLeft,
       isTimeUrgent: timeIsUrgent
     };
@@ -97,7 +66,7 @@ export function useAuctionsQuery(
   const {
     enabled = true,
     staleTime = 5 * 60 * 1000,
-    refetchInterval = 30 * 1000
+    refetchInterval = 10 * 1000 // Reduced from 30s to 10s for faster price updates
   } = options;
 
   return useQuery({

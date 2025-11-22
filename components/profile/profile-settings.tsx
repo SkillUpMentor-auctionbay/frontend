@@ -70,7 +70,6 @@ const ProfileSettings = React.forwardRef<HTMLDivElement, ProfileSettingsProps>(
     const [showNewPasswordError, setShowNewPasswordError] = React.useState(false)
     const [showRepeatPasswordError, setShowRepeatPasswordError] = React.useState(false)
     const [isSubmitting, setIsSubmitting] = React.useState(false)
-    const [apiError, setApiError] = React.useState<string | null>(null)
 
     const [profilePictureFile, setProfilePictureFile] = React.useState<File | null>(null)
     const [profilePicturePreview, setProfilePicturePreview] = React.useState<string | null>(null)
@@ -112,8 +111,6 @@ const ProfileSettings = React.forwardRef<HTMLDivElement, ProfileSettingsProps>(
       if (field === "name") setShowNameError(false)
       if (field === "surname") setShowSurnameError(false)
       if (field === "email") setShowEmailError(false)
-
-      setApiError(null)
     }
 
     const handlePasswordChange = (field: keyof PasswordData) => (
@@ -127,8 +124,6 @@ const ProfileSettings = React.forwardRef<HTMLDivElement, ProfileSettingsProps>(
       if (field === "currentPassword") setShowCurrentPasswordError(false)
       if (field === "newPassword") setShowNewPasswordError(false)
       if (field === "repeatNewPassword") setShowRepeatPasswordError(false)
-
-      setApiError(null)
     }
 
     const handleViewChange = (view: ViewType) => {
@@ -141,7 +136,6 @@ const ProfileSettings = React.forwardRef<HTMLDivElement, ProfileSettingsProps>(
       setShowNewPasswordError(false)
       setShowRepeatPasswordError(false)
       setUploadError(null)
-      setApiError(null)
       onViewChange?.(view)
     }
 
@@ -238,8 +232,6 @@ const ProfileSettings = React.forwardRef<HTMLDivElement, ProfileSettingsProps>(
     const handleSubmit = async (e: React.FormEvent) => {
       e.preventDefault()
 
-      setApiError(null)
-
       try {
         if (currentView === 'profile') {
           const isDataUnchanged =
@@ -290,13 +282,7 @@ const ProfileSettings = React.forwardRef<HTMLDivElement, ProfileSettingsProps>(
         }
       } catch (error) {
         console.error("Failed to update profile:", error)
-
-        // Handle API errors gracefully
-        if (error && typeof error === 'object' && 'message' in error) {
-          setApiError(error.message as string)
-        } else {
-          setApiError("An unexpected error occurred. Please try again.")
-        }
+        // Error is handled by API service with toast notifications
       } finally {
         setIsSubmitting(false)
       }
@@ -328,9 +314,7 @@ const ProfileSettings = React.forwardRef<HTMLDivElement, ProfileSettingsProps>(
       setProfilePicturePreview(null)
       setUploadError(null)
 
-      // Clear API errors
-      setApiError(null)
-
+      
       onCancel?.()
     }
 
@@ -341,12 +325,6 @@ const ProfileSettings = React.forwardRef<HTMLDivElement, ProfileSettingsProps>(
         {...props}
       >
         <form onSubmit={handleSubmit} className="flex flex-col gap-8">
-
-          {apiError && (
-            <div className="bg-coral-10 border border-coral-30 text-coral-90 px-4 py-3 rounded-md">
-              <p className="text-sm font-medium">{apiError}</p>
-            </div>
-          )}
 
           <div className="flex flex-col gap-6">
             {currentView === 'profile' && (

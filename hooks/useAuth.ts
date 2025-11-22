@@ -63,10 +63,12 @@ export function useAuthMutation() {
     },
   });
 
+  
   const logout = useCallback(async () => {
     await logoutMutation.mutateAsync();
   }, [logoutMutation]);
 
+  
   const clearErrors = useRef(() => {
     loginMutation.reset();
     registerMutation.reset();

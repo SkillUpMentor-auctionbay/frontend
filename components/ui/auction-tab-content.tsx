@@ -12,6 +12,7 @@ export interface AuctionData extends Omit<CoreAuctionData, 'status'> {
   timeLeft: string;
   isTimeUrgent: boolean;
   status: "in-progress" | "outbid" | "winning" | "done";
+  endTime: string; // Added for client-side timer
 }
 
 interface AuctionTabContentProps {
@@ -104,6 +105,7 @@ export function AuctionTabContent({
               status={auction.status}
               timeLeft={auction.timeLeft}
               isTimeUrgent={auction.isTimeUrgent}
+              endTime={auction.endTime}
               imageUrl={auction.imageUrl}
               onClick={() => handleAuctionClick(auction.id)}
               onDelete={isEditable ? () => onDelete?.(auction.id) : undefined}

@@ -4,6 +4,7 @@ import { cn } from "@/lib/utils"
 import { getImageUrl } from "@/lib/image-url"
 import { Badge } from "./badge"
 import { Button } from "./button"
+import { useAuctionTimer } from "@/hooks/useAuctionTimer"
 
 const auctionCardVariants = cva(
   "bg-background-2 flex flex-col overflow-clip rounded-2xl",
@@ -28,6 +29,7 @@ export interface AuctionCardProps
   status?: "in-progress" | "outbid" | "winning" | "done"
   timeLeft?: string
   isTimeUrgent?: boolean
+  endTime?: string
   imageUrl?: string
   onDelete?: () => void
   onEdit?: () => void
@@ -42,6 +44,7 @@ const AuctionCard = React.forwardRef<HTMLDivElement, AuctionCardProps>(({
   status = "in-progress",
   timeLeft = "24h",
   isTimeUrgent = false,
+  endTime,
   imageUrl,
   onDelete,
   onEdit,
@@ -51,12 +54,18 @@ const AuctionCard = React.forwardRef<HTMLDivElement, AuctionCardProps>(({
   const isEditable = variant === "editable"
   const [imageError, setImageError] = React.useState(false)
 
+  const { timeLeft: dynamicTimeLeft, isTimeUrgent: dynamicIsTimeUrgent } = useAuctionTimer(
+    endTime || ""
+  )
+
+  const displayTimeLeft = endTime ? dynamicTimeLeft : timeLeft
+  const displayIsTimeUrgent = endTime ? dynamicIsTimeUrgent : isTimeUrgent
+
   const handleImageError = React.useCallback(() => {
     setImageError(true)
   }, [])
 
   const handleCardClick = React.useCallback((e: React.MouseEvent) => {
-    // Prevent navigation if clicking on buttons
     if ((e.target as HTMLElement).closest('button')) {
       return
     }
@@ -89,11 +98,11 @@ const AuctionCard = React.forwardRef<HTMLDivElement, AuctionCardProps>(({
             {status === "in-progress" ? "In progress" : status === "outbid" ? "Outbid" : status === "winning" ? "Winning" : "Done"}
           </Badge>
           <Badge
-            variant={isTimeUrgent ? "time-urgent" : "time"}
+            variant={displayIsTimeUrgent ? "time-urgent" : "time"}
             size="small"
             showTimeIcon={true}
           >
-            {timeLeft}
+          {status != "in-progress"  && status != "winning" && status != "outbid" ? "Ended" : displayTimeLeft}
           </Badge>
         </div>
 

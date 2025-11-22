@@ -1,8 +1,9 @@
 import axios, { AxiosResponse, AxiosError } from "axios";
 import { User, LoginRequest, LoginResponse, RegisterRequest, RegisterResponse, UpdateUserProfileRequest, UpdateUserProfileResponse, UpdatePasswordRequest, UpdatePasswordResponse, AuthError } from "../types/auth";
 import { CreateAuctionRequest, CreateAuctionResponse, ImageUploadResponse, AuctionError, UpdateAuctionRequest, UpdateAuctionResponse, DetailedAuctionResponse, PlaceBidRequest, PlaceBidResponse } from "../types/auction";
+import { NotificationsResponse } from "../types/notification";
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -83,6 +84,24 @@ const handleApiError = (error: AxiosError): AuthError | AuctionError => {
   }
 };
 
+// Enhanced error handler with optional toast notifications
+const handleApiErrorWithToast = async (error: AxiosError, operation: string = 'operation'): Promise<AuthError | AuctionError> => {
+  const errorData = handleApiError(error);
+
+  // Only show toast for non-GET operations and non-auth operations
+  // Auth operations are handled separately without toasts
+  if (error.config?.method?.toLowerCase() !== 'get') {
+    const { toast } = await import('sonner');
+
+    toast.error(`${operation} failed`, {
+      description: errorData.message,
+      duration: 5000,
+    });
+  }
+
+  return errorData;
+};
+
 // Auth API functions
 export const authAPI = {
   login: async (data: LoginRequest): Promise<LoginResponse> => {
@@ -120,7 +139,8 @@ export const authAPI = {
       throw handleApiError(error as AxiosError);
     }
   },
-};
+
+  };
 
 // Auctions API functions
 export const auctionsAPI = {
@@ -151,7 +171,7 @@ export const auctionsAPI = {
 
        return response.data;
      } catch (error) {
-       throw handleApiError(error as AxiosError);
+       throw await handleApiErrorWithToast(error as AxiosError, 'Auction creation');
      }
   },
 
@@ -172,7 +192,7 @@ export const auctionsAPI = {
 
        return response.data;
      } catch (error) {
-       throw handleApiError(error as AxiosError);
+       throw await handleApiErrorWithToast(error as AxiosError, 'Image upload');
      }
   },
 
@@ -184,7 +204,7 @@ export const auctionsAPI = {
       const response: AxiosResponse<UpdateAuctionResponse> = await api.patch(requestUrl, requestData);
       return response.data;
     } catch (error) {
-      throw handleApiError(error as AxiosError);
+      throw await handleApiErrorWithToast(error as AxiosError, 'Auction update');
     }
   },
 
@@ -194,7 +214,7 @@ export const auctionsAPI = {
 
       await api.delete(requestUrl);
     } catch (error) {
-      throw handleApiError(error as AxiosError);
+      throw await handleApiErrorWithToast(error as AxiosError, 'Auction deletion');
     }
   }
 };
@@ -210,7 +230,7 @@ export const userAPI = {
 
       return response.data;
     } catch (error) {
-      throw handleApiError(error as AxiosError);
+      throw await handleApiErrorWithToast(error as AxiosError, 'Profile update');
     }
   },
 
@@ -223,7 +243,7 @@ export const userAPI = {
 
       return response.data;
     } catch (error) {
-      throw handleApiError(error as AxiosError);
+      throw await handleApiErrorWithToast(error as AxiosError, 'Password change');
     }
   },
 
@@ -244,7 +264,7 @@ export const userAPI = {
 
       return response.data;
     } catch (error) {
-      throw handleApiError(error as AxiosError);
+      throw await handleApiErrorWithToast(error as AxiosError, 'Profile picture upload');
     }
   },
 
@@ -252,7 +272,7 @@ export const userAPI = {
     try {
       await api.delete('/api/v1/users/me/remove-profile-picture');
     } catch (error) {
-      throw handleApiError(error as AxiosError);
+      throw await handleApiErrorWithToast(error as AxiosError, 'Profile picture removal');
     }
   }
 };
@@ -264,9 +284,29 @@ export const biddingAPI = {
       const response: AxiosResponse<PlaceBidResponse> = await api.post(`/api/v1/auctions/${auctionId}/bid`, data);
       return response.data;
     } catch (error) {
-      throw handleApiError(error as AxiosError);
+      throw await handleApiErrorWithToast(error as AxiosError, 'Bid placement');
     }
   }
+};
+
+// Notifications API functions
+export const notificationsAPI = {
+  getNotifications: async (): Promise<NotificationsResponse> => {
+    try {
+      const response: AxiosResponse<NotificationsResponse> = await api.get('/api/v1/notifications');
+      return response.data;
+    } catch (error) {
+      throw handleApiError(error as AxiosError);
+    }
+  },
+
+  clearAllNotifications: async (): Promise<void> => {
+    try {
+      await api.patch('/api/v1/notifications/clear-all');
+    } catch (error) {
+      throw await handleApiErrorWithToast(error as AxiosError, 'Notifications clear');
+    }
+  },
 };
 
 export default api;

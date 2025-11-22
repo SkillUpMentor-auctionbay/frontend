@@ -53,8 +53,23 @@ const convertFormDataToRequest = (formData: BidFormData): PlaceBidRequest => {
   };
 };
 
-export function usePlaceBid(auctionId: string, initialCurrentPrice: number) {
+export function usePlaceBid(auctionId: string, initialCurrentPrice: number, auction?: DetailedAuctionResponse) {
   const queryClient = useQueryClient();
+
+  // Pre-validation function that runs before any mutations
+  const validateBidBeforeMutation = (formData: BidFormData, originalCurrentPrice: number): FormValidationErrors => {
+    console.log(`🔍 [usePlaceBid] Pre-validating bid: amount=${formData.amount}, currentPrice=${originalCurrentPrice}`);
+
+    const validationErrors = validateBidForm(formData, originalCurrentPrice);
+
+    if (Object.keys(validationErrors).length > 0) {
+      console.log(`❌ [usePlaceBid] Pre-validation failed:`, validationErrors);
+    } else {
+      console.log(`✅ [usePlaceBid] Pre-validation passed`);
+    }
+
+    return validationErrors;
+  };
 
   const placeBidMutation = useMutation<
     PlaceBidResponse | { validationErrors: FormValidationErrors },
@@ -62,25 +77,11 @@ export function usePlaceBid(auctionId: string, initialCurrentPrice: number) {
     { formData: BidFormData }
   >({
     mutationFn: async ({ formData }) => {
-      // Get the latest auction data to ensure we have the current price
-      const auctionData = queryClient.getQueryData(["auction", auctionId]) as DetailedAuctionResponse;
-      const latestCurrentPrice = auctionData?.currentPrice || initialCurrentPrice;
-
-      console.log(`🔍 [usePlaceBid] Using current price: ${latestCurrentPrice} (initial: ${initialCurrentPrice})`);
-
-      // Validate form data first
-      const validationErrors = validateBidForm(formData, latestCurrentPrice);
-      if (Object.keys(validationErrors).length > 0) {
-        // Return validation errors instead of throwing
-        return { validationErrors };
-      }
-
       // Convert form data to API request format
       const requestData = convertFormDataToRequest(formData);
 
       console.log(`🚀 [usePlaceBid] Placing bid for auction ${auctionId}:`, {
         amount: requestData.amount,
-        currentPrice: latestCurrentPrice,
         timestamp: new Date().toISOString()
       });
 
@@ -123,6 +124,46 @@ export function usePlaceBid(auctionId: string, initialCurrentPrice: number) {
         }
       }
     },
+    onMutate: async ({ formData }) => {
+      // Cancel any outgoing refetches so they don't overwrite our optimistic update
+      await queryClient.cancelQueries({ queryKey: ["auction", auctionId] });
+      await queryClient.cancelQueries({ queryKey: ["auctions"] });
+
+      // Snapshot the previous value for rollback
+      const previousAuction = queryClient.getQueryData(["auction", auctionId]);
+      const previousAuctions = queryClient.getQueryData(["auctions"]);
+
+      // Optimistically update auction details with new bid amount
+      if (previousAuction && typeof previousAuction === 'object' && 'currentPrice' in previousAuction) {
+        console.log(`🔄 [usePlaceBid] Optimistically updating auction price from ${previousAuction.currentPrice} to ${formData.amount}`);
+        queryClient.setQueryData(["auction", auctionId], (old: any) => ({
+          ...old,
+          currentPrice: parseFloat(formData.amount),
+          // Assume user is winning after placing bid
+          status: old.status === 'IN_PROGRESS' ? 'WINNING' : old.status
+        }));
+      }
+
+      // Optimistically update auction in list
+      if (previousAuctions && typeof previousAuctions === 'object' && 'auctions' in previousAuctions) {
+        queryClient.setQueryData(["auctions"], (old: any) => ({
+          ...old,
+          auctions: old.auctions.map((auction: any) =>
+            auction.id === auctionId
+              ? {
+                  ...auction,
+                  currentPrice: parseFloat(formData.amount),
+                  price: `${parseFloat(formData.amount).toFixed(2)} €`,
+                  status: auction.status === 'IN_PROGRESS' ? 'WINNING' : auction.status
+                }
+              : auction
+          )
+        }));
+      }
+
+      // Return a context with our snapshotted values
+      return { previousAuction, previousAuctions };
+    },
     onSuccess: (data) => {
       // Check if this is a validation error response
       if ('validationErrors' in data) {
@@ -141,7 +182,7 @@ export function usePlaceBid(auctionId: string, initialCurrentPrice: number) {
         timestamp: new Date().toISOString()
       });
 
-      // Invalidate relevant queries to refresh data
+      // Invalidate relevant queries to refresh data and confirm optimistic updates
       queryClient.invalidateQueries({
         queryKey: ["auction", auctionId],
         refetchType: "active"
@@ -159,7 +200,7 @@ export function usePlaceBid(auctionId: string, initialCurrentPrice: number) {
         refetchType: "active"
       });
     },
-    onError: (error) => {
+    onError: (error, variables, context: any) => {
       console.error(`💥 [usePlaceBid] Error placing bid:`, {
         auctionId,
         message: error.message,
@@ -167,15 +208,42 @@ export function usePlaceBid(auctionId: string, initialCurrentPrice: number) {
         details: error.details,
         timestamp: new Date().toISOString()
       });
+
+      // If the mutation fails, use the context returned from onMutate to roll back
+      if (context?.previousAuction) {
+        queryClient.setQueryData(["auction", auctionId], context.previousAuction);
+      }
+      if (context?.previousAuctions) {
+        queryClient.setQueryData(["auctions"], context.previousAuctions);
+      }
     },
   });
 
   const placeBid = async (formData: BidFormData): Promise<PlaceBidResponse> => {
+    // Step 1: Pre-validate the bid using the original auction data
+    const originalCurrentPrice = auction?.currentPrice || initialCurrentPrice;
+    console.log(`🔄 [usePlaceBid] Starting bid placement with original price: ${originalCurrentPrice}`);
+
+    const validationErrors = validateBidBeforeMutation(formData, originalCurrentPrice);
+
+    if (Object.keys(validationErrors).length > 0) {
+      console.log(`❌ [usePlaceBid] Pre-validation failed, returning errors:`, validationErrors);
+      // Return a mock error response that will be handled by the UI
+      const error: AuctionError = {
+        message: "Validation failed",
+        code: "VALIDATION_ERROR",
+        details: validationErrors
+      };
+      throw error;
+    }
+
+    // Step 2: If validation passes, call the mutation
+    console.log(`✅ [usePlaceBid] Pre-validation passed, calling mutation`);
     const result = await placeBidMutation.mutateAsync({ formData });
 
-    // Check if this is a validation error response
+    // Step 3: Check if the mutation returned validation errors (edge case)
     if ('validationErrors' in result) {
-      // Return a mock error response that will be handled by the UI
+      console.log(`⚠️ [usePlaceBid] Mutation returned validation errors:`, result.validationErrors);
       const error: AuctionError = {
         message: "Validation failed",
         code: "VALIDATION_ERROR",

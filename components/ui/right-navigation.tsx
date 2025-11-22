@@ -10,6 +10,8 @@ import { useProfilePicture } from "@/hooks/useProfilePicture"
 import { generateInitials } from "@/utils/imageUtils"
 import { CreateAuctionDialog } from "@/components/auctions/create-auction-dialog"
 import { ProfilePopover } from "@/components/profile/profile-popover"
+import { NotificationsPopover } from "@/components/ui/notifications-popover"
+import type { Notification } from "@/types/notification"
 
 export interface RightNavigationProps {
   className?: string
@@ -25,6 +27,16 @@ const RightNavigation = React.forwardRef<HTMLDivElement, RightNavigationProps>(
     const initials = generateInitials(user?.name, user?.surname);
     const showProfilePicture = profilePictureUrl && !error && !isLoading;
 
+    const handleNotificationClick = (notification: Notification) => {
+      // Handle notification click - navigate to auction
+      console.log("Notification clicked:", notification);
+
+      // Navigate to auction page
+      if (typeof window !== 'undefined') {
+        window.location.href = `/auctions/${notification.auctionId}`;
+      }
+    };
+
     return (
       <div
         ref={ref}
@@ -34,13 +46,21 @@ const RightNavigation = React.forwardRef<HTMLDivElement, RightNavigationProps>(
         )}
         {...props}
       >
-        <Button
-          variant="alternative"
-          buttonStyle="cta"
-          icon="Notifications none"
-          onClick={onNotificationsClick}
-          className="shrink-0"
-        />
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button
+              variant="alternative"
+              buttonStyle="cta"
+              icon="Notifications none"
+              className="shrink-0"
+            />
+          </PopoverTrigger>
+          <PopoverContent align="end" alignOffset={-130} sideOffset={8} className="p-0">
+            <NotificationsPopover
+              onNotificationClick={handleNotificationClick}
+            />
+          </PopoverContent>
+        </Popover>
 
         <CreateAuctionDialog>
           <Button

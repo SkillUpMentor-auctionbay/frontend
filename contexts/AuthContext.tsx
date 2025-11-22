@@ -50,6 +50,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     await registerMutation({ name, surname, email, password });
   };
 
+  
   const value = {
     user,
     isLoading,
