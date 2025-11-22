@@ -23,7 +23,7 @@ export default function ResetPasswordPage() {
         <div className="text-center">
           <div className="mb-6 flex justify-center">
             <div className="h-16 w-16 bg-red-100 rounded-full flex items-center justify-center">
-              <Icon name="X" size={32} className="text-red-600" />
+              <Icon name="Delete" size={32} className="text-red-600" />
             </div>
           </div>
           <h1 className="text-3xl font-bold mb-2">
