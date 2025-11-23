@@ -1,12 +1,10 @@
 "use client"
 
 import * as React from "react"
-import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Icon } from "@/components/ui/icon"
 import { useAuth } from "@/contexts/AuthContext"
 import { ProfileSettingsDialog } from "./profile-settings-dialog"
-import { type ProfileSettingsData, type PasswordData } from "./profile-settings"
 
 export interface ProfilePopoverProps {
   className?: string
@@ -16,26 +14,18 @@ export interface ProfilePopoverProps {
 
 const ProfilePopover = React.forwardRef<HTMLDivElement, ProfilePopoverProps>(
   ({ className, onSettingsClick, onLogoutClick, ...props }, ref) => {
-    const router = useRouter()
-    const { logout, isLoggingOut, user } = useAuth()
+    const { logout, isLoggingOut } = useAuth()
     const [isSettingsDialogOpen, setIsSettingsDialogOpen] = React.useState(false)
 
     const handleSettingsClick = () => {
       if (onSettingsClick) {
         onSettingsClick()
       } else {
-        // Open profile settings dialog instead of navigation
         setIsSettingsDialogOpen(true)
       }
     }
 
-    const handleProfileSettingsSubmit = async (data: ProfileSettingsData | PasswordData) => {
-      console.log("Profile settings submitted:", data)
-      // TODO: Implement profile update API call
-      // For now, just log the data and show success
-    }
-
-    const handleProfileSettingsDialogChange = (open: boolean) => {
+  const handleProfileSettingsDialogChange = (open: boolean) => {
       setIsSettingsDialogOpen(open)
     }
 
@@ -43,7 +33,6 @@ const ProfilePopover = React.forwardRef<HTMLDivElement, ProfilePopoverProps>(
       if (onLogoutClick) {
         onLogoutClick()
       } else {
-        // Default logout functionality - let the AuthContext handle navigation
         try {
           await logout()
         } catch (error) {
@@ -94,7 +83,6 @@ const ProfilePopover = React.forwardRef<HTMLDivElement, ProfilePopoverProps>(
         <ProfileSettingsDialog
           open={isSettingsDialogOpen}
           onOpenChange={handleProfileSettingsDialogChange}
-          onSubmit={handleProfileSettingsSubmit}
         />
       </>
     )

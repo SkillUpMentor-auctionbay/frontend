@@ -5,7 +5,6 @@ import {
   Dialog,
   DialogContent,
   DialogTitle,
-  DialogDescription,
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { AddAuctionCard } from "./add-auction-card";
@@ -22,13 +21,10 @@ export function CreateAuctionDialog({ children, onSubmit }: CreateAuctionDialogP
   const handleSubmit = async (data: AuctionFormData) => {
     try {
       if (onSubmit) {
-        await onSubmit(data);
+        onSubmit(data);
       }
-      // Only close dialog if auction creation succeeds
       setOpen(false);
     } catch (error) {
-      // Keep dialog open if there's an error (validation or API error)
-      console.log("Auction creation failed, keeping dialog open:", error);
     }
   };
 

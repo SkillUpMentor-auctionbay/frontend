@@ -20,7 +20,6 @@ const AppLayout: React.FC<AppLayoutProps> = ({
   const router = useRouter();
   const pathname = usePathname();
 
-  // Global SSE connection for real-time notifications and toasts
   useNotificationsStream();
 
   const getActiveTab = (): ActiveTab => {

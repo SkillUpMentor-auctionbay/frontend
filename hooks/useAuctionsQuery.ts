@@ -31,8 +31,6 @@ function transformAuctionData(response: any): AuctionData[] {
   if (!response?.auctions) return [];
 
   const transformedAuctions = response.auctions.map((item: any) => {
-    // Keep existing timeLeft and isTimeUrgent for backward compatibility
-    // But client components will use endTime for real-time updates
     const timeLeft = formatTimeLeft(item.endTime);
     const timeIsUrgent = isTimeUrgent(item.endTime);
 
@@ -66,7 +64,7 @@ export function useAuctionsQuery(
   const {
     enabled = true,
     staleTime = 5 * 60 * 1000,
-    refetchInterval = 10 * 1000 // Reduced from 30s to 10s for faster price updates
+    refetchInterval = 10 * 1000
   } = options;
 
   return useQuery({

@@ -1,7 +1,7 @@
 "use client";
 
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import api from "../services/api";
+import { userAPI } from "../services/api";
 
 export interface UserStatistics {
   totalEarnings: number;
@@ -15,69 +15,95 @@ interface UseUserStatisticsOptions {
   staleTime?: number;
 }
 
-export function useUserStatistics(options: UseUserStatisticsOptions = {}, isAuthenticated?: boolean, isLoggingOut?: boolean) {
-  const { enabled = true, staleTime = 5 * 60 * 1000 } = options;
+const DEFAULT_STATISTICS: UserStatistics = {
+  totalEarnings: 0,
+  totalPostedAuctions: 0,
+  currentlyBidding: 0,
+  currentlyWinning: 0,
+};
 
-  // Disable the query if user is not authenticated or is logging out
+const QUERY_CONFIG = {
+  STALE_TIME: 5 * 60 * 1000,
+  GC_TIME: 10 * 60 * 1000,
+  RETRY_COUNT: 1,
+  RETRY_DELAY: 2000,
+} as const;
+
+const validateStatisticsData = (data: any): UserStatistics => {
+  const safeData = data || {};
+  return {
+    totalEarnings: typeof safeData.totalEarnings === 'number' ? safeData.totalEarnings : 0,
+    totalPostedAuctions: typeof safeData.totalPostedAuctions === 'number' ? safeData.totalPostedAuctions : 0,
+    currentlyBidding: typeof safeData.currentlyBidding === 'number' ? safeData.currentlyBidding : 0,
+    currentlyWinning: typeof safeData.currentlyWinning === 'number' ? safeData.currentlyWinning : 0,
+  };
+};
+
+const shouldRetry = (failureCount: number, error: any): boolean => {
+  if (failureCount >= QUERY_CONFIG.RETRY_COUNT) {
+    return false;
+  }
+
+  if (error?.response?.status === 401 ||
+      error?.response?.status === 403 ||
+      error?.response?.status >= 500) {
+    return false;
+  }
+
+  return true;
+};
+
+const logError = (error: unknown): void => {
+  const message = error instanceof Error ? error.message : 'Unknown error';
+  console.warn('Statistics API failed, using default values:', message);
+};
+
+const statisticsAPI = {
+  async fetch(): Promise<UserStatistics> {
+    const data = await userAPI.getStatistics();
+    return validateStatisticsData(data);
+  },
+
+  async fetchWithFallback(): Promise<UserStatistics> {
+    try {
+      return await statisticsAPI.fetch();
+    } catch (error) {
+      logError(error);
+      return DEFAULT_STATISTICS;
+    }
+  },
+};
+
+export const useUserStatistics = (
+  options: UseUserStatisticsOptions = {},
+  isAuthenticated?: boolean,
+  isLoggingOut?: boolean
+) => {
+  const { enabled = true, staleTime = QUERY_CONFIG.STALE_TIME } = options;
   const queryEnabled = enabled && !!isAuthenticated && !isLoggingOut;
-
-  console.log(`📊 [useUserStatistics] Initializing statistics query - enabled: ${enabled}, isAuthenticated: ${isAuthenticated}, isLoggingOut: ${isLoggingOut}, queryEnabled: ${queryEnabled}`);
 
   return useQuery<UserStatistics, Error>({
     queryKey: ["user-statistics"],
-    queryFn: async () => {
-      console.log(`📡 [useUserStatistics] Fetching user statistics`);
-
-      try {
-        const response = await api.get("/api/v1/users/me/statistics");
-
-        console.log(`📥 [useUserStatistics] Statistics API Response:`, {
-          totalEarnings: response.data.totalEarnings,
-          totalPostedAuctions: response.data.totalPostedAuctions,
-          currentlyBidding: response.data.currentlyBidding,
-          currentlyWinning: response.data.currentlyWinning,
-          responseTime: new Date().toISOString()
-        });
-
-        return response.data;
-      } catch (error) {
-        console.error(`❌ [useUserStatistics] API Error:`, error);
-        throw error;
-      }
-    },
+    queryFn: statisticsAPI.fetchWithFallback,
     enabled: queryEnabled,
     staleTime,
-    retry: (failureCount, error) => {
-      console.log(`🔄 [useUserStatistics] Retry attempt ${failureCount}`, error);
-
-      // Don't retry on 401 or 403 errors
-      if (error && typeof error === 'object' && 'response' in error) {
-        const axiosError = error as any;
-        if (axiosError.response?.status === 401 || axiosError.response?.status === 403) {
-          console.log(`🚫 [useUserStatistics] Not retrying - status ${axiosError.response?.status}`);
-          return false;
-        }
-      }
-      return failureCount < 2;
-    },
-    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 5000),
+    retry: shouldRetry,
+    retryDelay: QUERY_CONFIG.RETRY_DELAY,
+    gcTime: QUERY_CONFIG.GC_TIME,
   });
-}
+};
 
-// Hook for prefetching statistics (used for background loading)
-export function usePrefetchUserStatistics() {
+export const usePrefetchUserStatistics = () => {
   const queryClient = useQueryClient();
 
   const prefetchStatistics = () => {
     queryClient.prefetchQuery({
       queryKey: ["user-statistics"],
-      queryFn: async () => {
-        const response = await api.get("/api/v1/users/me/statistics");
-        return response.data;
-      },
-      staleTime: 5 * 60 * 1000, // 5 minutes
+      queryFn: statisticsAPI.fetchWithFallback,
+      staleTime: QUERY_CONFIG.STALE_TIME,
+      retry: false,
     });
   };
 
   return { prefetchStatistics };
-}
+};

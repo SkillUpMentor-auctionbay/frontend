@@ -1,43 +1,29 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { notificationsAPI } from "@/services/api";
 import { useAuth } from "@/contexts/AuthContext";
-import { toast } from "sonner";
+import { showNotificationsClearedToast, showNotificationsErrorToast, createEmptyNotificationsCache } from "@/utils/notificationUtils";
+import { createNotificationQueryKey } from "@/constants/notifications";
 
 export const useClearAllNotificationsMutation = () => {
   const queryClient = useQueryClient();
   const { user } = useAuth();
 
   const mutation = useMutation({
-    mutationFn: async () => {
-      console.log('🗑️ Clearing all notifications for user:', user?.id);
-      const result = await notificationsAPI.clearAllNotifications();
-      console.log('✅ Clear notifications API response:', result);
-      return result;
-    },
+    mutationFn: () => notificationsAPI.clearAllNotifications(),
     onSuccess: () => {
-      console.log('🎉 Clear notifications successful, updating cache for user:', user?.id);
+      queryClient.setQueryData(
+        createNotificationQueryKey(user?.id || ''),
+        createEmptyNotificationsCache()
+      );
 
-      // Clear the cache immediately
-      queryClient.setQueryData(['notifications', user?.id], {
-        notifications: [],
-        total: 0
-      });
-
-      // Invalidate all notification queries for this user
       queryClient.invalidateQueries({
-        queryKey: ['notifications', user?.id]
+        queryKey: createNotificationQueryKey(user?.id || '')
       });
 
-      // Show success toast
-      toast.success('Notifications cleared', {
-        description: 'All notifications have been cleared successfully'
-      });
+      showNotificationsClearedToast();
     },
-    onError: (error) => {
-      console.error("❌ Failed to clear notifications:", error);
-      toast.error('Failed to clear notifications', {
-        description: 'Please try again later'
-      });
+    onError: () => {
+      showNotificationsErrorToast();
     },
   });
 

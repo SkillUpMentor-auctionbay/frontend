@@ -1,6 +1,6 @@
 "use client";
 
-import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { auctionsAPI } from "../services/api";
 import { AuctionFilter } from "../components/ui/auction-tab-content";
 import { UpdateAuctionRequest } from "../types/auction";

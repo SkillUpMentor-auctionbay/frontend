@@ -28,11 +28,7 @@ const RightNavigation = React.forwardRef<HTMLDivElement, RightNavigationProps>(
     const showProfilePicture = profilePictureUrl && !error && !isLoading;
 
     const handleNotificationClick = (notification: Notification) => {
-      // Handle notification click - navigate to auction
-      console.log("Notification clicked:", notification);
-
-      // Navigate to auction page
-      if (typeof window !== 'undefined') {
+      if (notification.auctionId && typeof window !== 'undefined') {
         window.location.href = `/auctions/${notification.auctionId}`;
       }
     };
@@ -80,7 +76,6 @@ const RightNavigation = React.forwardRef<HTMLDivElement, RightNavigationProps>(
                     src={profilePictureUrl}
                     alt="User avatar"
                     onError={(e) => {
-                      console.error('Avatar image failed to load:', e);
                     }}
                   />
                 )}

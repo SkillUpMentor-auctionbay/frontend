@@ -21,12 +21,9 @@ const ProfileSettingsDialog = React.forwardRef<HTMLDivElement, ProfileSettingsDi
     const handleSubmit = async (data: ProfileSettingsData | PasswordData) => {
       try {
         await onSubmit?.(data)
-        // Only close dialog if submission succeeds
         onOpenChange(false)
       } catch (error) {
-        // Keep dialog open if there's an error (validation or API error)
-        console.log("Profile update failed, keeping dialog open:", error)
-        throw error // Re-throw to let ProfileSettings component handle the error
+        throw error
       }
     }
 

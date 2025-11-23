@@ -67,9 +67,8 @@ export interface ButtonProps
   asChild?: boolean
   leftIcon?: IconProps["name"]
   rightIcon?: IconProps["name"]
-  icon?: IconProps["name"] // For CTA style buttons
+  icon?: IconProps["name"]
   iconSize?: number | string
-  // Override size to accept both regular and CTA size types
   size?:
     | VariantProps<typeof buttonVariants>['size']
     | VariantProps<typeof ctaButtonVariants>['size']
@@ -90,7 +89,6 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(({
 }, ref) => {
   const Comp = asChild ? Slot : "button"
 
-  // Unified color mapping for both regular and CTA buttons
   const getIconColor = () => {
     switch (variant) {
       case 'primary':
@@ -112,7 +110,6 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(({
     return <Icon name={iconName} size={iconSize} color={getIconColor()} />
   }
 
-  // Choose the right variant classes based on buttonStyle
   const buttonClasses = buttonStyle === 'cta'
     ? cn(ctaButtonVariants({
         variant: (['tertiary', 'ghost', 'outline', 'destructive'].includes(variant || '') ? 'primary' : variant) as 'primary' | 'secondary' | 'alternative', // Fallback for unsupported variants

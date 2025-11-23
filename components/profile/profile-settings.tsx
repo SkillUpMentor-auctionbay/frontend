@@ -166,12 +166,6 @@ const ProfileSettings = React.forwardRef<HTMLDivElement, ProfileSettingsProps>(
       setUploadError(null);
     }
 
-    const handleRemoveProfilePicture = () => {
-      setProfilePictureFile(null);
-      setProfilePicturePreview(null);
-      setUploadError(null);
-    }
-
     const validateForm = (): boolean => {
       let isValid = true
 
@@ -282,14 +276,12 @@ const ProfileSettings = React.forwardRef<HTMLDivElement, ProfileSettingsProps>(
         }
       } catch (error) {
         console.error("Failed to update profile:", error)
-        // Error is handled by API service with toast notifications
       } finally {
         setIsSubmitting(false)
       }
     }
 
     const handleCancel = () => {
-      // Reset forms to original data
       setFormData({
         name: user?.name || "",
         surname: user?.surname || "",
@@ -309,7 +301,6 @@ const ProfileSettings = React.forwardRef<HTMLDivElement, ProfileSettingsProps>(
       setShowNewPasswordError(false)
       setShowRepeatPasswordError(false)
 
-      // Clear profile picture upload state
       setProfilePictureFile(null)
       setProfilePicturePreview(null)
       setUploadError(null)

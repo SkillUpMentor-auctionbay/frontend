@@ -3,6 +3,8 @@
 import { DetailedAuctionResponse } from "../../types/auction";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { getProfilePictureUrl } from "@/lib/image-url";
+import { ScrollArea } from "../ui/scroll-area";
+import { formatBidDate } from "../../utils/dateUtils";
 
 interface BiddingHistoryProps {
   bids: DetailedAuctionResponse['bids'];
@@ -14,12 +16,6 @@ interface BidHistoryItemProps {
 }
 
 function BidHistoryItem({ bid }: BidHistoryItemProps) {
-  const formatBidDate = (dateString: string) => {
-    const date = new Date(dateString);
-    const time = date.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
-    const dateStr = date.toLocaleDateString('en-GB', { day: 'numeric', month: 'numeric', year: 'numeric' }).replace(/\//g, '.');
-    return `${time} ${dateStr}`;
-  };
 
   const bidderInitials = `${bid.bidder.name?.[0] || ''}${bid.bidder.surname?.[0] || ''}`.toUpperCase();
   const profilePictureUrl = getProfilePictureUrl(bid.bidder.profilePictureUrl);
@@ -77,17 +73,19 @@ export function BiddingHistory({ bids, className }: BiddingHistoryProps) {
   }
 
   return (
-    <div className={`${className} bg-background-2 p-4 text-black flex flex-col gap-4 items-start rounded-2xl h-full overflow-y-auto`}>
+    <div className={`${className} bg-background-2 p-4 text-black flex flex-col gap-4 items-start rounded-2xl h-full`}>
       <div className="flex flex-col gap-4 items-start w-full">
         <h4 className="font-bold text-[23px] leading-[1.2] text-black">
           Bidding history({bids.length || 0})
         </h4>
       </div>
-      <div className="flex flex-col items-start w-full font-semibold text-[16px] h-8">
-        {bids.map((bid) => (
-          <BidHistoryItem key={bid.id} bid={bid} />
-        ))}
-      </div>
+      <ScrollArea className="flex-1 w-full">
+        <div className="flex flex-col items-start w-full font-semibold text-[16px]">
+          {bids.map((bid) => (
+            <BidHistoryItem key={bid.id} bid={bid} />
+          ))}
+        </div>
+      </ScrollArea>
     </div>
   );
 }

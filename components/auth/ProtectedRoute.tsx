@@ -1,9 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, ReactNode } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { useAuth } from "../../contexts/AuthContext";
-import { ReactNode } from "react";
 
 interface ProtectedRouteProps {
   children: ReactNode;
@@ -39,7 +38,6 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
 
   if (!isAuthenticated) {
     if (pathname !== "/login") {
-      // Don't navigate here - let the useEffect handle it
       return null;
     }
   }

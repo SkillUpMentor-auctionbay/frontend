@@ -5,10 +5,9 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { InputField } from "@/components/ui/input";
 import { TextAreaField } from "@/components/ui/textarea-field";
-import { CalendarIcon } from "lucide-react";
-import { Icon } from "../ui/icon";
 import { useCreateAuction } from "@/hooks/useCreateAuction";
 import { AuctionFormData, FormValidationErrors } from "@/types/auction";
+import { createMidnightUTCDate } from "@/utils/dateUtils";
 
 export interface AddAuctionCardProps {
   className?: string;
@@ -16,11 +15,10 @@ export interface AddAuctionCardProps {
   onCancel?: () => void;
 }
 
-// AuctionFormData is now imported from types/auction.ts
 
 const AddAuctionCard = React.forwardRef<HTMLDivElement, AddAuctionCardProps>(
   ({ className, onSubmit, onCancel, ...props }, ref) => {
-    const { createAuction, isLoading, error, validationErrors, hasValidationErrors, reset, clearValidationErrors } = useCreateAuction();
+    const { createAuction, isLoading, error, validationErrors, hasValidationErrors, reset } = useCreateAuction();
 
     const [formData, setFormData] = React.useState<AuctionFormData>({
       title: "",
@@ -34,9 +32,7 @@ const AddAuctionCard = React.forwardRef<HTMLDivElement, AddAuctionCardProps>(
     const handleInputChange = (field: keyof AuctionFormData, value: string) => {
       setFormData(prev => ({ ...prev, [field]: value }));
 
-      // Hide validation error for this specific field when user starts typing valid data
       if (hasValidationErrors) {
-        // Check if the current field would pass validation
         const newValue = value.trim();
         let shouldClearForThisField = false;
 
@@ -57,12 +53,11 @@ const AddAuctionCard = React.forwardRef<HTMLDivElement, AddAuctionCardProps>(
                                    price <= 999999.99;
             break;
           case 'endDate':
-            const endDate = new Date(value);
-            shouldClearForThisField = !isNaN(endDate.getTime()) && endDate > new Date();
+            const endDate = createMidnightUTCDate(value);
+            shouldClearForThisField = !!endDate && endDate > new Date();
             break;
         }
 
-        // If this field is now valid, hide this field's validation error
         if (shouldClearForThisField) {
           setHiddenValidationErrors(prev => new Set([...prev, field]));
         }
@@ -85,7 +80,6 @@ const AddAuctionCard = React.forwardRef<HTMLDivElement, AddAuctionCardProps>(
       try {
         await createAuction(formData);
 
-        // Reset form on successful submission
         setFormData({
           title: "",
           description: "",
@@ -94,19 +88,13 @@ const AddAuctionCard = React.forwardRef<HTMLDivElement, AddAuctionCardProps>(
         });
         setImagePreview(null);
 
-        // Call parent onSubmit if provided to notify dialog to close
         if (onSubmit) {
           onSubmit(formData);
         }
       } catch (error) {
-        // Error is handled by the hook and displayed in the UI
-        // Validation errors will be shown, API errors will be displayed
-        // Dialog stays open so user can fix the issues
-        console.log("Auction creation handled with validation:", error);
       }
     };
 
-    // Compute visible validation errors (excluding hidden ones)
     const visibleValidationErrors = React.useMemo(() => {
       const errors: FormValidationErrors = {};
       Object.keys(validationErrors).forEach(key => {
@@ -117,15 +105,12 @@ const AddAuctionCard = React.forwardRef<HTMLDivElement, AddAuctionCardProps>(
       return errors;
     }, [validationErrors, hiddenValidationErrors]);
 
-    // Clear hidden errors when form is submitted again or when there are general API errors
     React.useEffect(() => {
       if (hasValidationErrors) {
-        // Only clear field-specific errors, keep general errors visible
         setHiddenValidationErrors(new Set());
       }
     }, [hasValidationErrors]);
 
-    // Clear errors when form data changes (but only if there are no validation errors)
     React.useEffect(() => {
       if (error && !hasValidationErrors) {
         reset();

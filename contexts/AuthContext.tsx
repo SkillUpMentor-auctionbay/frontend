@@ -1,8 +1,7 @@
 "use client";
 
 import { createContext, useContext, ReactNode } from "react";
-import { useAuth as useAuthQuery } from "../hooks/useAuth";
-import { useAuthMutation } from "../hooks/useAuth";
+import { useAuth as useAuthQuery, useAuthMutation } from "../hooks/useAuth";
 import { AuthContextUser, AuthError } from "../types/auth";
 
 interface AuthContextType {

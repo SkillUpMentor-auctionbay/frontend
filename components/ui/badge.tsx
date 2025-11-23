@@ -3,7 +3,7 @@ import { Slot } from "@radix-ui/react-slot"
 import { cva, type VariantProps } from "class-variance-authority"
 
 import { cn } from "@/lib/utils"
-import { Icon, type IconProps } from "./icon"
+import { Icon } from "./icon"
 
 const badgeVariants = cva(
   "inline-flex items-center justify-center gap-2 font-light whitespace-nowrap shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50 transition-colors",

@@ -8,8 +8,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { EditAuctionCard } from "./edit-auction-card";
-import { EditAuctionFormData } from "@/types/auction";
-import { AuctionData } from "@/types/auction";
+import { EditAuctionFormData, AuctionData } from "@/types/auction";
 
 interface EditAuctionDialogProps {
   children?: React.ReactNode;
@@ -43,7 +42,6 @@ export function EditAuctionDialog({
       if ((error as any)?.code === 'VALIDATION_ERROR') {
         return;
       }
-      // Error is handled by API service with toast notifications
     }
   };
 

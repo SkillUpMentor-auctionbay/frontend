@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { getImageUrl } from "../../lib/image-url";
+import { ImageFallback } from "../ui/image-fallback";
 
 interface AuctionImageProps {
   imageUrl?: string;
@@ -28,9 +29,11 @@ export function AuctionImage({ imageUrl, title, className }: AuctionImageProps) 
           onError={handleImageError}
         />
       ) : (
-        <div className="w-full h-full bg-gray-20 rounded-xl flex items-center justify-center">
-          <span className="text-gray-60 text-lg">No Image</span>
-        </div>
+        <ImageFallback
+          text="No Image!"
+          className="rounded-2xl"
+          fallbackType="text"
+        />
       )}
     </div>
   );

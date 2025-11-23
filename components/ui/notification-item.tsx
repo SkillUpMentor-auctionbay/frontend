@@ -1,129 +1,92 @@
 "use client"
 
 import * as React from "react"
-import { cn } from "@/lib/utils"
+import Link from "next/link"
 import { Badge } from "./badge"
 import { getImageUrl } from "@/lib/image-url"
+import { ImageFallback } from "./image-fallback"
 import type { Notification } from "@/types/notification"
+import { formatDateForDisplay } from "@/utils/dateUtils"
 
-interface NotificationItemProps extends React.HTMLAttributes<HTMLAnchorElement> {
+interface NotificationItemProps {
   notification: Notification
   onClick?: () => void
+  className?: string
 }
 
-const NotificationItem = React.forwardRef<HTMLAnchorElement, NotificationItemProps>(
-  ({ className, notification, onClick, ...props }, ref) => {
-    const { id, auctionTitle, imageUrl, price, createdAt } = notification
+const formatPrice = (price: number) => {
+  return '€' + price.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ".")
+}
 
-    // Debug logging to see what data we're getting
-    console.log('🔔 NotificationItem debug:', {
-      id,
-      auctionTitle,
-      imageUrl,
-      price,
-      createdAt,
-      priceType: typeof price,
-      isNull: price === null,
-      isUndefined: price === undefined,
-    });
 
-    // Determine status based on price
-    const status = price !== null && price !== undefined ? 'won' : 'outbid'
+const NotificationItem = ({ className, notification, onClick }: NotificationItemProps) => {
+  const { auctionId, auctionTitle, imageUrl, price, createdAt } = notification
+  const title = auctionTitle || 'Unknown Auction'
+  const status = price !== null && price !== undefined ? 'won' : 'outbid'
+  const [imageError, setImageError] = React.useState(false)
 
-    console.log('🔔 Status determination:', { price, status });
+  const handleImageError = React.useCallback(() => {
+    setImageError(true)
+  }, [])
 
-    // Format the date from createdAt to match Figma format (DD.MM.YYYY)
-    const formattedDate = new Date(createdAt).toLocaleDateString('de-DE', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric'
-    }).replace(/\./g, '.')
+  const renderBadges = () => {
+    const badges = []
 
-    // Handle image loading with fallback
-    const handleImageError = (e: React.SyntheticEvent<HTMLImageElement>) => {
-      // Hide the image and show fallback
-      e.currentTarget.style.display = "none"
-      const parent = e.currentTarget.parentElement
-      if (parent) {
-        const fallback = parent.querySelector('.image-fallback') as HTMLElement
-        if (fallback) {
-          fallback.style.display = "flex"
-        }
-      }
+    if (status === 'won') {
+      badges.push(<Badge key="won" variant="winning">Won</Badge>)
+    } else {
+      badges.push(<Badge key="outbid" variant="outbid">Outbid</Badge>)
     }
 
-    return (
-      <a
-        ref={ref}
-        className={cn(
-          "flex items-center w-full p-0 hover:bg-gray-5 rounded-lg transition-colors cursor-pointer overflow-hidden",
-          className
-        )}
-        onClick={onClick}
-        {...props}
-      >
-        {/* Image Container - Fixed 40px */}
-        <div className="relative rounded-lg shrink-0 size-10 overflow-hidden mr-2">
-          {imageUrl ? (
-            <>
-              <img
-                src={getImageUrl(imageUrl)}
-                alt={auctionTitle}
-                onError={handleImageError}
-                className="absolute inset-0 w-full h-full object-cover"
-              />
-              {/* Fallback for image load error */}
-              <div className="absolute inset-0 w-full h-full bg-gray-20 flex items-center justify-center image-fallback" style={{ display: "none" }}>
-                <span className="text-gray-50 text-xs">No Image</span>
-              </div>
-            </>
-          ) : (
-            <div className="absolute inset-0 w-full h-full bg-gray-20 flex items-center justify-center">
-              <span className="text-gray-50 text-xs">No Image</span>
-            </div>
-          )}
-        </div>
+    if (status === 'won' && price) {
+      badges.push(<Badge key="price" variant="done">{formatPrice(price)}eur</Badge>)
+    } else {
+      badges.push(<Badge key="done" variant="done">Done</Badge>)
+    }
 
-        {/* Title and Date Container - Takes remaining space */}
-        <div className="flex flex-col flex-1 font-light items-start justify-center min-w-0 mr-3 overflow-hidden">
-          <p className="leading-6 truncate text-base text-text-primary">
-            {auctionTitle}
-          </p>
-          <p className="leading-3 truncate text-[10px] text-gray-40">
-            {formattedDate}
-          </p>
-        </div>
-
-        {/* Status Badges - Fixed width, doesn't shrink */}
-        <div className="flex gap-1 flex-shrink-0">
-          {status === 'won' && (
-            <Badge variant="winning" size="default">
-              Won
-            </Badge>
-          )}
-          {status === 'won' && price && (
-            <Badge variant="done" size="default">
-              ${price.toFixed(2)}
-            </Badge>
-          )}
-          {status === 'outbid' && (
-            <Badge variant="outbid" size="default">
-              Outbid
-            </Badge>
-          )}
-        </div>
-
-        {/* Debug: Always show status for testing */}
-        <div className="flex gap-1 flex-shrink-0">
-          <span className="text-xs text-gray-40 bg-gray-80 px-1 rounded">
-            {status}
-          </span>
-        </div>
-      </a>
-    )
+    return badges
   }
-)
 
-NotificationItem.displayName = "NotificationItem"
+  return (
+    <Link
+      href={auctionId ? '/auctions/' + auctionId : '#'}
+      className={'grid grid-cols-[40px_1fr_auto] gap-2 items-center w-full p-2 hover:bg-gray-5 rounded-lg transition-colors cursor-pointer ' + (className || '')}
+      onClick={onClick}
+    >
+      <div className="relative rounded shrink-0 w-10 h-10 overflow-hidden">
+        {imageUrl && !imageError ? (
+          <img
+            src={getImageUrl(imageUrl)}
+            alt={title}
+            className="w-full h-full object-cover"
+            onError={handleImageError}
+          />
+        ) : (
+          <ImageFallback
+            text="No Image!"
+            className="w-full h-full"
+            fallbackType="text"
+          />
+        )}
+      </div>
+
+      <div className="flex flex-col font-light items-start justify-center min-w-0 overflow-hidden">
+        <p 
+          className="leading-6 truncate text-base text-text-primary" 
+          title={title.length > 30 ? title : undefined}
+        >
+          {title.length > 30 ? title.substring(0, 30) + '...' : title}
+        </p>
+        <p className="leading-3 text-xs text-gray-40">
+          {formatDateForDisplay(createdAt)}
+        </p>
+      </div>
+
+      <div className="flex gap-2 items-center">
+        {renderBadges()}
+      </div>
+    </Link>
+  )
+}
 
 export { NotificationItem }

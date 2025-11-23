@@ -1,5 +1,3 @@
-// Shared authentication types
-
 export interface User {
   id: string;
   email: string;
@@ -59,7 +57,6 @@ export interface UpdatePasswordResponse {
   message: string;
 }
 
-// Error types for better type safety
 export interface AuthError {
   message: string;
   status?: number;

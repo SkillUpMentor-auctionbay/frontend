@@ -121,3 +121,35 @@ export function getErrorMessage(error: any): string {
 
   return error.message || "An error occurred";
 }
+
+// Auction-specific error handling
+import { AuctionError } from '@/types/auction';
+import { AUCTION_VALIDATION } from '@/constants/validation';
+
+/**
+ * Normalizes various error types into a standard AuctionError format
+ */
+export function normalizeAuctionError(error: unknown): AuctionError {
+  if (error && typeof error === 'object' && 'message' in error) {
+    return error as AuctionError;
+  }
+
+  if (error instanceof Error) {
+    return {
+      message: error.message,
+      code: 'UNKNOWN_ERROR',
+    };
+  }
+
+  return {
+    message: AUCTION_VALIDATION.MESSAGES.GENERAL_ERROR,
+    code: 'UNKNOWN_ERROR',
+  };
+}
+
+/**
+ * Checks if an error represents validation errors
+ */
+export function isValidationError(error: unknown): error is { validationErrors: Record<string, string> } {
+  return error && typeof error === 'object' && 'validationErrors' in error;
+}

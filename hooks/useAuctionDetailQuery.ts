@@ -2,7 +2,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { auctionsAPI } from "../services/api";
-import { DetailedAuctionResponse } from "../types/auction";
+import { QUERY_CONSTANTS } from "../constants/query";
 
 interface UseAuctionDetailQueryOptions {
   enabled?: boolean;
@@ -16,36 +16,27 @@ export function useAuctionDetailQuery(
 ) {
   const {
     enabled = true,
-    staleTime = 5 * 60 * 1000, // 5 minutes for auction details (since we have client-side timer)
-    refetchInterval = 10 * 1000 // Refetch every 10 seconds for price/bid updates (matches auction cards)
+    staleTime = QUERY_CONSTANTS.CACHE_TIMES.MEDIUM,
+    refetchInterval = QUERY_CONSTANTS.REFRESH_INTERVALS.NORMAL
   } = options;
 
   return useQuery({
     queryKey: ["auction", auctionId],
-    queryFn: async (): Promise<DetailedAuctionResponse> => {
-      try {
-        const response = await auctionsAPI.getAuctionById(auctionId);
-        return response;
-      } catch (error) {
-        throw error;
-      }
-    },
+    queryFn: () => auctionsAPI.getAuctionById(auctionId),
     enabled: enabled && !!auctionId,
     staleTime,
     refetchInterval,
     refetchIntervalInBackground: true,
     retry: (failureCount, error) => {
       if (error && typeof error === 'object' && 'response' in error) {
-        const axiosError = error as any;
-        if (axiosError.response?.status === 404) {
-          return false; // Don't retry on not found
-        }
-        if (axiosError.response?.status === 401) {
-          return false; // Don't retry on unauthorized
+        const status = (error as any).response?.status;
+        if (status && status >= 400 && status < 500) {
+          return false;
         }
       }
-      return failureCount < 2;
+      return failureCount < QUERY_CONSTANTS.RETRY.MAX_ATTEMPTS;
     },
-    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 5000)
+    retryDelay: (attemptIndex) =>
+      Math.min(QUERY_CONSTANTS.RETRY.BASE_DELAY * 2 ** attemptIndex, QUERY_CONSTANTS.RETRY.MAX_DELAY)
   });
 }

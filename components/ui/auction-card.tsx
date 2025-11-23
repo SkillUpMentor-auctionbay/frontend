@@ -4,6 +4,7 @@ import { cn } from "@/lib/utils"
 import { getImageUrl } from "@/lib/image-url"
 import { Badge } from "./badge"
 import { Button } from "./button"
+import { ImageFallback } from "./image-fallback"
 import { useAuctionTimer } from "@/hooks/useAuctionTimer"
 
 const auctionCardVariants = cva(
@@ -129,8 +130,12 @@ const AuctionCard = React.forwardRef<HTMLDivElement, AuctionCardProps>(({
               onError={handleImageError}
             />
           ) : (
-            <div className="absolute inset-0 w-full h-full bg-gray-20 rounded-xl flex items-center justify-center">
-              <span className="text-gray-60 text-sm">No Image</span>
+            <div className="absolute inset-0 w-full h-full">
+              <ImageFallback
+                text="No Image!"
+                className="rounded-xl w-full h-full"
+                fallbackType="text"
+              />
             </div>
           )}
         </div>

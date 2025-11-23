@@ -1,5 +1,5 @@
 import axios, { AxiosResponse, AxiosError } from "axios";
-import { User, LoginRequest, LoginResponse, RegisterRequest, RegisterResponse, UpdateUserProfileRequest, UpdateUserProfileResponse, UpdatePasswordRequest, UpdatePasswordResponse, AuthError } from "../types/auth";
+import { LoginRequest, LoginResponse, RegisterRequest, RegisterResponse, UpdateUserProfileRequest, UpdateUserProfileResponse, UpdatePasswordRequest, UpdatePasswordResponse, AuthError } from "../types/auth";
 import { CreateAuctionRequest, CreateAuctionResponse, ImageUploadResponse, AuctionError, UpdateAuctionRequest, UpdateAuctionResponse, DetailedAuctionResponse, PlaceBidRequest, PlaceBidResponse } from "../types/auction";
 import { NotificationsResponse } from "../types/notification";
 
@@ -31,7 +31,6 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      // Only remove token and handle 401 if we're not in the middle of a logout request
       const isLogoutRequest = error.config?.url?.includes('/logout');
       if (!isLogoutRequest && typeof window !== "undefined") {
         localStorage.removeItem("token");
@@ -84,12 +83,9 @@ const handleApiError = (error: AxiosError): AuthError | AuctionError => {
   }
 };
 
-// Enhanced error handler with optional toast notifications
 const handleApiErrorWithToast = async (error: AxiosError, operation: string = 'operation'): Promise<AuthError | AuctionError> => {
   const errorData = handleApiError(error);
 
-  // Only show toast for non-GET operations and non-auth operations
-  // Auth operations are handled separately without toasts
   if (error.config?.method?.toLowerCase() !== 'get') {
     const { toast } = await import('sonner');
 
@@ -273,6 +269,15 @@ export const userAPI = {
       await api.delete('/api/v1/users/me/remove-profile-picture');
     } catch (error) {
       throw await handleApiErrorWithToast(error as AxiosError, 'Profile picture removal');
+    }
+  },
+
+  getStatistics: async () => {
+    try {
+      const response: AxiosResponse = await api.get('/api/v1/users/me/statistics');
+      return response.data;
+    } catch (error) {
+      throw handleApiError(error as AxiosError);
     }
   }
 };

@@ -216,7 +216,7 @@ export default function ProfilePage() {
             </TabsList>
           </div>
 
-          <TabsContent value="my-auctions" className="   overflow-y-auto">
+          <TabsContent value="my-auctions" className="flex-1 overflow-y-auto">
             <AuctionTabContent
               filter="OWN"
               auctions={myAuctions}

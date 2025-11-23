@@ -6,16 +6,14 @@ import { Button } from "@/components/ui/button";
 import { InputField } from "@/components/ui/input";
 import { TextAreaField } from "@/components/ui/textarea-field";
 import { useEditAuction } from "@/hooks/useEditAuction";
-import { EditAuctionFormData } from "@/types/auction";
-import { AuctionData } from "@/types/auction";
+import { EditAuctionFormData, AuctionData } from "@/types/auction";
 
-// Date formatting utility for European date format (DD.MM.YYYY)
 const formatEuropeanDate = (dateString: string): string => {
   if (!dateString) return '';
 
   try {
     const date = new Date(dateString);
-    if (isNaN(date.getTime())) return '';
+    if (Number.isNaN(date.getTime())) return '';
 
     const day = date.getUTCDate().toString().padStart(2, '0');
     const month = (date.getUTCMonth() + 1).toString().padStart(2, '0');
@@ -49,7 +47,7 @@ const EditAuctionCard = React.forwardRef<HTMLDivElement, EditAuctionCardProps>(
       );
     }
 
-    const { editAuction, isLoading, error, validationErrors, hasValidationErrors, reset } = useEditAuction();
+    const { editAuction, isLoading, validationErrors } = useEditAuction();
 
     const [formData, setFormData] = React.useState<EditAuctionFormData>(() => ({
       id: auction.id,

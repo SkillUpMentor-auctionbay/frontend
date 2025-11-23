@@ -13,7 +13,7 @@ export function QueryProvider({ children }: QueryProviderProps) {
       new QueryClient({
         defaultOptions: {
           queries: {
-            staleTime: 5 * 60 * 1000, // 5 minutes (consistent with auth data)
+            staleTime: 5 * 60 * 1000,
             refetchOnWindowFocus: false,
             retry: 2,
             retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 5000),
