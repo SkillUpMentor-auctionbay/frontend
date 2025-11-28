@@ -75,10 +75,6 @@ export default function ProfilePage() {
   const biddingCount = statistics?.currentlyBidding || 0;
   const winningCount = statistics?.currentlyWinning || 0;
 
-  const isCurrentlyFetching =
-    (activeTab === "my-auctions" && isFetchingMyAuctions) ||
-    (activeTab === "bidding" && isFetchingBidding) ||
-    (activeTab === "won" && isFetchingWon);
 
   useEffect(() => {
     const timer = setTimeout(() => {

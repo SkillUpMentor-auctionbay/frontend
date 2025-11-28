@@ -80,24 +80,22 @@ export function AuctionTabContent({
   if (!auctions || auctions.length === 0) {
     return (
       <div className="h-full">
-        <ScrollArea className="h-full">
-          <div className="px-8 pb-8 flex items-center justify-center h-full">
-            <div className="flex flex-col items-center justify-center gap-3 text-center">
-              <div className="text-text-primary text-[26px] font-bold w-full">
+          <div className="px-8 pb-8 flex items-center justify-center h-full ">
+            <div className="flex flex-col items-center justify-center gap-3 text-center ">
+              <div className="text-text-primary text-[26px] font-bold w-full ">
                 {filter === "ALL" && "No auctions available!"}
                 {filter === "OWN" && "Oh no, no auctions added!"}
                 {filter === "BID" && "No bidding in progress!"}
                 {filter === "WON" && "Nothing here yet?"}
               </div>
-              <div className="text-gray-40 text-base font-light w-full">
+              <div className="text-gray-40 text-base font-light w-full ">
                 {filter === "ALL" && <span>There are no auctions at the moment. <br/> Check back later for new items!</span>}
-                {filter === "OWN" && <span>To add new auction click \"+\" button in <br/> navigation bar and new auctions wil be <br/> added here!</span>}
-                {filter === "BID" && <span>Start bidding by finding new items you <br/> like on \"Auction\" page!</span>}
+                {filter === "OWN" && <span>To add new auction click "+" button in <br/> navigation bar and new auctions wil be <br/> added here!</span>}
+                {filter === "BID" && <span>Start bidding by finding new items you <br/> like on "Auction" page!</span>}
                 {filter === "WON" && <span>When you win auction items <br/> will be displayed here! Go on <br/> and bid on your favorite <br/> items!</span>}
               </div>
             </div>
           </div>
-        </ScrollArea>
       </div>
     );
   }
