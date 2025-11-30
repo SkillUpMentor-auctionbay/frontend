@@ -8,6 +8,7 @@ export const QUERY_CONSTANTS = {
   REFRESH_INTERVALS: {
     FAST: 5 * 1000,             // 5 seconds
     NORMAL: 10 * 1000,          // 10 seconds
+    MEDIUM: 20 * 1000,          // 20 seconds
     SLOW: 30 * 1000,            // 30 seconds
   },
 

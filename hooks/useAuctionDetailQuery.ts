@@ -17,7 +17,7 @@ export function useAuctionDetailQuery(
   const {
     enabled = true,
     staleTime = QUERY_CONSTANTS.CACHE_TIMES.MEDIUM,
-    refetchInterval = QUERY_CONSTANTS.REFRESH_INTERVALS.NORMAL
+    refetchInterval = QUERY_CONSTANTS.REFRESH_INTERVALS.MEDIUM
   } = options;
 
   return useQuery({

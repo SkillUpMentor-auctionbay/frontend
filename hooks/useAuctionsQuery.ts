@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { auctionsAPI } from "../services/api";
 import { AuctionData, AuctionFilter } from "../components/ui/auction-tab-content";
 import { formatTimeLeft, isTimeUrgent } from "../utils/timeUtils";
+import { QUERY_CONSTANTS } from "../constants/query";
 
 interface UseAuctionsQueryOptions {
   enabled?: boolean;
@@ -64,7 +65,7 @@ export function useAuctionsQuery(
   const {
     enabled = true,
     staleTime = 5 * 60 * 1000,
-    refetchInterval = 10 * 1000
+    refetchInterval = QUERY_CONSTANTS.REFRESH_INTERVALS.SLOW
   } = options;
 
   return useQuery({

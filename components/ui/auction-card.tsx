@@ -165,6 +165,23 @@ const AuctionCard = React.forwardRef<HTMLDivElement, AuctionCardProps>(({
   )
 })
 
-AuctionCard.displayName = "AuctionCard"
+const MemoizedAuctionCard = React.memo(AuctionCard, (prevProps, nextProps) => {
+  return (
+    prevProps.title === nextProps.title &&
+    prevProps.price === nextProps.price &&
+    prevProps.status === nextProps.status &&
+    prevProps.timeLeft === nextProps.timeLeft &&
+    prevProps.isTimeUrgent === nextProps.isTimeUrgent &&
+    prevProps.endTime === nextProps.endTime &&
+    prevProps.imageUrl === nextProps.imageUrl &&
+    prevProps.variant === nextProps.variant &&
+    prevProps.className === nextProps.className &&
+    prevProps.onDelete === nextProps.onDelete &&
+    prevProps.onEdit === nextProps.onEdit &&
+    prevProps.onClick === nextProps.onClick
+  );
+});
 
-export { AuctionCard, auctionCardVariants }
+MemoizedAuctionCard.displayName = "AuctionCard"
+
+export { MemoizedAuctionCard as AuctionCard, auctionCardVariants }

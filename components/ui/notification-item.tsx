@@ -89,4 +89,20 @@ const NotificationItem = ({ className, notification, onClick }: NotificationItem
   )
 }
 
-export { NotificationItem }
+const MemoizedNotificationItem = React.memo(NotificationItem, (prevProps, nextProps) => {
+  const prevNotification = prevProps.notification;
+  const nextNotification = nextProps.notification;
+
+  return (
+    prevProps.className === nextProps.className &&
+    prevProps.onClick === nextProps.onClick &&
+    prevNotification.id === nextNotification.id &&
+    prevNotification.auctionId === nextNotification.auctionId &&
+    prevNotification.auctionTitle === nextNotification.auctionTitle &&
+    prevNotification.imageUrl === nextNotification.imageUrl &&
+    prevNotification.price === nextNotification.price &&
+    prevNotification.createdAt === nextNotification.createdAt
+  );
+});
+
+export { MemoizedNotificationItem as NotificationItem }
