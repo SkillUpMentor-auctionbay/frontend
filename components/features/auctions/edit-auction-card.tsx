@@ -50,6 +50,7 @@ const EditAuctionCard = React.forwardRef<HTMLDivElement, EditAuctionCardProps>(
     }
 
     const { editAuction, isLoading, validationErrors } = useEditAuction();
+    const fileInputRef = React.useRef<HTMLInputElement>(null);
 
     const [formData, setFormData] = React.useState<EditAuctionFormData>(() => ({
       id: auction.id,
@@ -100,8 +101,7 @@ const EditAuctionCard = React.forwardRef<HTMLDivElement, EditAuctionCardProps>(
       setImageError(true);
     }, []);
 
-    const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-      const file = e.target.files?.[0];
+    const handleImageChange = (file?: File) => {
       if (file) {
         setFormData(prev => ({ ...prev, image: file }));
         setImageError(false); // Reset error state
@@ -110,6 +110,13 @@ const EditAuctionCard = React.forwardRef<HTMLDivElement, EditAuctionCardProps>(
           setImagePreview(reader.result as string);
         };
         reader.readAsDataURL(file);
+      }
+    };
+
+    const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0];
+      if (file) {
+        handleImageChange(file);
       }
     };
 
@@ -175,8 +182,8 @@ const EditAuctionCard = React.forwardRef<HTMLDivElement, EditAuctionCardProps>(
                 <Button
                   variant="secondary"
                   leftIcon="Delete"
-                  iconSize={32}
-                  className="absolute top-2 right-2 size-9"
+                  iconSize={16}
+                  className="absolute top-2 right-2"
                   onClick={handleImageDelete}
                 />
               </div>
@@ -189,20 +196,20 @@ const EditAuctionCard = React.forwardRef<HTMLDivElement, EditAuctionCardProps>(
                 />
               </div>
             ) : (
-              <label className="cursor-pointer">
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleImageChange}
-                  className="hidden"
-                />
-                <div className="border border-gray-50 rounded-2xl px-4 py-2 hover:bg-gray-10 transition-colors">
-                  <span className="font-medium text-base text-gray-90">
-                    Add image
-                  </span>
-                </div>
-              </label>
+              <Button
+                variant="tertiary"
+                onClick={() => fileInputRef.current?.click()}
+              >
+                Add image
+              </Button>
             )}
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              onChange={handleFileInputChange}
+              className="hidden"
+            />
           </div>
           {validationErrors?.image && (
             <p className="text-red-500 text-sm mt-1">{validationErrors.image}</p>

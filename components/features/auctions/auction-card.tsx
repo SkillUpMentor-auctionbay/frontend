@@ -158,6 +158,10 @@ const AuctionCard = React.forwardRef<HTMLDivElement, AuctionCardProps>(({
             >
               Edit
             </Button>
+            <Button
+              variant="tertiary"
+              onClick={(e) => handleButtonClick(e, onDelete)} 
+            >Hey</Button>
           </div>
         )}
       </div>
