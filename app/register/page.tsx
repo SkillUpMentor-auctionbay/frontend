@@ -2,13 +2,11 @@
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Button } from "../../components/ui/button";
-import { InputField } from "../../components/ui/input";
-import { Logo } from "../../components/ui/logo";
-import { AuthLayout } from "../../components/auth/AuthLayout";
-import { useAuth } from "../../contexts/AuthContext";
+import { Button, InputField, Logo } from "@/components/ui";
+import { AuthLayout } from "@/components/features/auth/auth-layout";
+import { useAuth } from "../../contexts/auth-context";
 import { formatRegisterError } from "../../utils/errorUtils";
-import ErrorBoundary from "../../components/ErrorBoundary";
+import ErrorBoundary from "@/components/infrastructure/error-boundary";
 
 export default function RegisterPage() {
   const [formData, setFormData] = useState({

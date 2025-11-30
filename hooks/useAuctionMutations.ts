@@ -2,8 +2,8 @@
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { auctionsAPI } from "../services/api";
-import { AuctionFilter } from "../components/ui/auction-tab-content";
-import { UpdateAuctionRequest } from "../types/auction";
+import { AuctionFilter } from "@/components/features/auctions/auction-tab-content";
+import { UpdateAuctionRequest } from "@/types/auction";
 
 export function useAuctionMutations() {
   const queryClient = useQueryClient();

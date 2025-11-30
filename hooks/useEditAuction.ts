@@ -1,7 +1,7 @@
 "use client";
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { auctionsAPI } from "../services/api";
+import { auctionsAPI } from "@/services/api";
 import {
   UpdateAuctionRequest,
   UpdateAuctionResponse,
@@ -9,10 +9,10 @@ import {
   EditAuctionFormData,
   FormValidationErrors,
 } from "../types/auction";
-import { validateEditAuctionForm } from "../utils/auctionValidation";
-import { normalizeAuctionError } from "../utils/errorUtils";
-import { createMidnightUTCDate } from "../utils/dateUtils";
-import { AUCTION_VALIDATION } from "../constants/validation";
+import { validateEditAuctionForm } from "@/utils/auctionValidation";
+import { normalizeAuctionError } from "@/utils/errorUtils";
+import { createMidnightUTCDate } from "@/utils/dateUtils";
+import { AUCTION_VALIDATION } from "@/constants/validation";
 
 function convertEditFormDataToRequest(formData: EditAuctionFormData, originalAuctionData?: any): UpdateAuctionRequest {
   const updateData: UpdateAuctionRequest = {};

@@ -1,8 +1,8 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { auctionsAPI } from "../services/api";
-import { QUERY_CONSTANTS } from "../constants/query";
+import { auctionsAPI } from "@/services/api";
+import { QUERY_CONSTANTS } from "@/constants/query";
 
 interface UseAuctionDetailQueryOptions {
   enabled?: boolean;

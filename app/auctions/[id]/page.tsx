@@ -1,11 +1,11 @@
 "use client";
 
 import { use } from "react";
-import { AppLayout } from "../../../components/layout/app-layout";
+import { AppLayout } from "@/components/features/layout/app-layout";
 import { useAuctionDetailQuery } from "../../../hooks/useAuctionDetailQuery";
-import { AuctionImage } from "../../../components/auctions/auction-image";
-import { AuctionDetails } from "../../../components/auctions/auction-details";
-import { BiddingHistory } from "../../../components/auctions/bidding-history";
+import { AuctionImage } from "@/components/features/auctions/auction-image";
+import { AuctionDetails } from "@/components/features/auctions/auction-details";
+import { BiddingHistory } from "@/components/features/auctions/bidding-history";
 
 interface AuctionPageProps {
   params: Promise<{

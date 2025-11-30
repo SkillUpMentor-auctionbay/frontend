@@ -2,10 +2,10 @@
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
-import { authAPI } from "../services/api";
-import { User, LoginRequest, RegisterRequest, LoginResponse, RegisterResponse, AuthError } from "../types/auth";
+import { authAPI } from "@/services/api";
+import { User, LoginRequest, RegisterRequest, LoginResponse, RegisterResponse, AuthError } from "@/types/auth";
 import { useCallback, useRef } from "react";
-import { storeToken, clearToken, getToken } from "../utils/tokenValidation";
+import { storeToken, clearToken, getToken } from "@/utils/tokenValidation";
 
 const handleAuthSuccess = (
   data: LoginResponse | RegisterResponse,

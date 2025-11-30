@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { notificationsAPI } from "@/services/api";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuth } from "@/contexts/auth-context";
 import { showNotificationsClearedToast, showNotificationsErrorToast, createEmptyNotificationsCache } from "@/utils/notificationUtils";
 import { createNotificationQueryKey } from "@/constants/notifications";
 

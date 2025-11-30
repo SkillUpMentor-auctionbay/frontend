@@ -1,10 +1,10 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { auctionsAPI } from "../services/api";
-import { AuctionData, AuctionFilter } from "../components/ui/auction-tab-content";
-import { formatTimeLeft, isTimeUrgent } from "../utils/timeUtils";
-import { QUERY_CONSTANTS } from "../constants/query";
+import { auctionsAPI } from "@/services/api";
+import { AuctionData, AuctionFilter } from "@/components/features/auctions/auction-tab-content";
+import { formatTimeLeft, isTimeUrgent } from "@/utils/timeUtils";
+import { QUERY_CONSTANTS } from "@/constants/query";
 
 interface UseAuctionsQueryOptions {
   enabled?: boolean;

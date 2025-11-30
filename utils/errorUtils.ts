@@ -146,10 +146,3 @@ export function normalizeAuctionError(error: unknown): AuctionError {
     code: 'UNKNOWN_ERROR',
   };
 }
-
-/**
- * Checks if an error represents validation errors
- */
-export function isValidationError(error: unknown): error is { validationErrors: Record<string, string> } {
-  return error && typeof error === 'object' && 'validationErrors' in error;
-}

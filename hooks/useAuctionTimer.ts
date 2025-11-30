@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { formatTimeLeft, isTimeUrgent, getTimeRemaining } from "../utils/timeUtils";
+import { formatTimeLeft, isTimeUrgent, getTimeRemaining } from "@/utils/timeUtils";
 
 
 export function useAuctionTimer(

@@ -1,11 +1,11 @@
 "use client";
 
-import { useAuth } from "../../contexts/AuthContext";
-import { AppLayout } from "../../components/layout/app-layout";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "../../components/ui/tabs";
-import { Card, CardContent } from "../../components/ui/card";
-import { AuctionTabContent, AuctionData } from "@/components/ui/auction-tab-content";
-import { EditAuctionDialog } from "@/components/auctions/edit-auction-dialog";
+import { useAuth } from "@/contexts/auth-context";
+import { AppLayout } from "@/components/features/layout/app-layout";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/navigation/tabs";
+import { Card, CardContent } from "@/components/ui/primitives/card";
+import { AuctionTabContent, AuctionData } from "@/components/features/auctions/auction-tab-content";
+import { EditAuctionDialog } from "@/components/features/auctions/edit-auction-dialog";
 import { useAuctionsQuery } from "@/hooks/useAuctionsQuery";
 import { useUserStatistics } from "@/hooks/useUserStatistics";
 import { useAuctionMutations, useAuctionPrefetcher } from "@/hooks/useAuctionMutations";

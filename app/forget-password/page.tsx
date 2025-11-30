@@ -2,12 +2,12 @@
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Button } from "../../components/ui/button";
-import { InputField } from "../../components/ui/input";
-import { Logo } from "../../components/ui/logo";
-import { AuthLayout } from "../../components/auth/AuthLayout";
-import { Icon } from "../../components/ui/icon";
-import { useAuth } from "../../contexts/AuthContext";
+import { Button } from "@/components/ui/primitives/button";
+import { InputField } from "@/components/ui/primitives/input";
+import { Logo } from "@/components/ui/primitives/logo";
+import { AuthLayout } from "@/components/features/auth/auth-layout";
+import { Icon } from "@/components/ui/primitives/icon";
+import { useAuth } from "@/contexts/auth-context";
 import { toast } from "sonner";
 
 export default function ForgetPasswordPage() {

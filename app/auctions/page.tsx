@@ -1,8 +1,8 @@
 "use client";
 
-import { AppLayout } from "../../components/layout/app-layout";
-import { AuctionTabContent, AuctionData } from "../../components/ui/auction-tab-content";
-import { EditAuctionDialog } from "../../components/auctions/edit-auction-dialog";
+import { AppLayout } from "@/components/features/layout/app-layout";
+import { AuctionTabContent, AuctionData } from "@/components/features/auctions/auction-tab-content";
+import { EditAuctionDialog } from "@/components/features/auctions/edit-auction-dialog";
 import { useAuctionsQuery } from "../../hooks/useAuctionsQuery";
 import { useAuctionMutations } from "../../hooks/useAuctionMutations";
 import { useState, useMemo } from "react";

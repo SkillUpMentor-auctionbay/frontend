@@ -1,9 +1,9 @@
 "use client";
 
 import { useMutation } from "@tanstack/react-query";
-import { userAPI } from "../services/api";
-import { validateProfilePicture } from "../utils/auctionValidation";
-import { normalizeAuctionError } from "../utils/errorUtils";
+import { userAPI } from "@/services/api";
+import { validateProfilePicture } from "@/utils/auctionValidation";
+import { normalizeAuctionError } from "@/utils/errorUtils";
 
 export interface ProfilePictureUploadError {
   message: string;

@@ -1,7 +1,7 @@
 import axios, { AxiosResponse, AxiosError } from "axios";
-import { LoginRequest, LoginResponse, RegisterRequest, RegisterResponse, UpdateUserProfileRequest, UpdateUserProfileResponse, UpdatePasswordRequest, UpdatePasswordResponse, AuthError } from "../types/auth";
-import { CreateAuctionRequest, CreateAuctionResponse, ImageUploadResponse, AuctionError, UpdateAuctionRequest, UpdateAuctionResponse, DetailedAuctionResponse, PlaceBidRequest, PlaceBidResponse } from "../types/auction";
-import { NotificationsResponse } from "../types/notification";
+import { LoginRequest, LoginResponse, RegisterRequest, RegisterResponse, UpdateUserProfileRequest, UpdateUserProfileResponse, UpdatePasswordRequest, UpdatePasswordResponse, AuthError } from "@/types/auth";
+import { CreateAuctionRequest, CreateAuctionResponse, ImageUploadResponse, AuctionError, UpdateAuctionRequest, UpdateAuctionResponse, DetailedAuctionResponse, PlaceBidRequest, PlaceBidResponse } from "@/types/auction";
+import { NotificationsResponse } from "@/types/notification";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
 

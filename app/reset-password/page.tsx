@@ -1,8 +1,8 @@
 "use client";
 import { useState, useEffect } from "react";
-import { Logo } from "../../components/ui/logo";
-import { AuthLayout } from "../../components/auth/AuthLayout";
-import { Icon } from "../../components/ui/icon";
+import { Logo } from "@/components/ui/primitives/logo";
+import { AuthLayout } from "@/components/features/auth/auth-layout";
+import { Icon } from "@/components/ui/primitives/icon";
 import Link from "next/link";
 
 export default function ResetPasswordPage() {

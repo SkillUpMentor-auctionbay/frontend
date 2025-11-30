@@ -1,7 +1,7 @@
 "use client";
 
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { userAPI } from "../services/api";
+import { userAPI } from "@/services/api";
 
 export interface UserStatistics {
   totalEarnings: number;

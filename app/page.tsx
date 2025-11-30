@@ -3,8 +3,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { useEffect } from "react";
 import { useRouter, usePathname } from "next/navigation";
-import { Button } from "../components/ui/button";
-import { useAuth } from "../contexts/AuthContext";
+import { Button } from "@/components/ui";
+import { useAuth } from "@/contexts/auth-context";
 
 export default function Home() {
   const { isAuthenticated, isLoading } = useAuth();
