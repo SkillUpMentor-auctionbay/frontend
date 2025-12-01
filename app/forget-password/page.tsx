@@ -15,7 +15,6 @@ export default function ForgetPasswordPage() {
   const router = useRouter();
   const [email, setEmail] = useState("");
   
-  // Redirect authenticated users to profile page
   useEffect(() => {
     if (!authLoading && isAuthenticated) {
       router.push("/profile");
@@ -30,19 +29,16 @@ export default function ForgetPasswordPage() {
       return;
     }
 
-    // Functionality disabled - button does nothing
-    toast.error("Email functionality is currently disabled");
+    toast.error("Sending email is not currently implemented");
   };
 
     return (
     <AuthLayout>
       <form onSubmit={handleSubmit}>
-        {/* Logo */}
         <div className="flex justify-center">
           <Logo size="md" />
         </div>
 
-        {/* Main content */}
         <div className="text-gray-90 flex-1 flex flex-col justify-center">
           <div className="text-center">
             <h1 className="text-3xl font-bold mb-2">

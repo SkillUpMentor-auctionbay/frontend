@@ -81,7 +81,6 @@ const EditAuctionCard = React.forwardRef<HTMLDivElement, EditAuctionCardProps>(
 
     const [imageError, setImageError] = React.useState(false);
 
-    // Sync image preview with auction data changes
     React.useEffect(() => {
       if (auction?.imageUrl) {
         const url = getImageUrl(auction.imageUrl);
@@ -104,7 +103,7 @@ const EditAuctionCard = React.forwardRef<HTMLDivElement, EditAuctionCardProps>(
     const handleImageChange = (file?: File) => {
       if (file) {
         setFormData(prev => ({ ...prev, image: file }));
-        setImageError(false); // Reset error state
+        setImageError(false);
         const reader = new FileReader();
         reader.onloadend = () => {
           setImagePreview(reader.result as string);
@@ -122,7 +121,7 @@ const EditAuctionCard = React.forwardRef<HTMLDivElement, EditAuctionCardProps>(
 
     const handleImageDelete = () => {
       setImagePreview(null);
-      setImageError(false); // Reset error state
+      setImageError(false);
       setFormData(prev => ({
         ...prev,
         image: undefined,
@@ -168,7 +167,6 @@ const EditAuctionCard = React.forwardRef<HTMLDivElement, EditAuctionCardProps>(
         {...props}
       >
   
-        {/* Image Upload Area */}
         <div>
           <div className="bg-background rounded-2xl h-[168px] flex flex-col items-center justify-center relative overflow-hidden">
             {imagePreview && !imageError ? (
@@ -216,9 +214,7 @@ const EditAuctionCard = React.forwardRef<HTMLDivElement, EditAuctionCardProps>(
           )}
         </div>
 
-        {/* Form Fields */}
         <div className="flex flex-col gap-4">
-          {/* Title Input */}
           <div>
             <InputField
               label="Title"
@@ -231,7 +227,6 @@ const EditAuctionCard = React.forwardRef<HTMLDivElement, EditAuctionCardProps>(
             )}
           </div>
 
-          {/* Description Textarea */}
           <div>
             <TextAreaField
               label="Description"
@@ -245,7 +240,6 @@ const EditAuctionCard = React.forwardRef<HTMLDivElement, EditAuctionCardProps>(
             )}
           </div>
 
-          {/* End Date Input */}
           <div className="w-full">
             <InputField
               label="End date"
@@ -263,7 +257,6 @@ const EditAuctionCard = React.forwardRef<HTMLDivElement, EditAuctionCardProps>(
           </div>
         </div>
 
-        {/* Action Buttons */}
         <div className="flex justify-end gap-4">
           <Button
             variant="alternative"

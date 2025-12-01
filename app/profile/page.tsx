@@ -33,14 +33,12 @@ export default function ProfilePage() {
   const {
     data: statistics,
     isLoading: isStatisticsLoading,
-    error: statisticsError
   } = useUserStatistics({}, !!user, isLoggingOut);
 
   const {
     data: myAuctionsData,
     isLoading: isLoadingMyAuctions,
     error: myAuctionsError,
-    isFetching: isFetchingMyAuctions,
   } = useAuctionsQuery("OWN", 1, 500, {
     enabled: activeTab === "my-auctions",
     refetchInterval: 30 * 1000
@@ -50,7 +48,6 @@ export default function ProfilePage() {
     data: biddingAuctionsData,
     isLoading: isLoadingBidding,
     error: biddingError,
-    isFetching: isFetchingBidding,
   } = useAuctionsQuery("BID", 1, 500, {
     enabled: activeTab === "bidding",
     refetchInterval: 30 * 1000
@@ -60,7 +57,6 @@ export default function ProfilePage() {
     data: wonAuctionsData,
     isLoading: isLoadingWon,
     error: wonError,
-    isFetching: isFetchingWon,
   } = useAuctionsQuery("WON", 1, 500, {
     enabled: activeTab === "won",
     refetchInterval: 30 * 1000
@@ -120,8 +116,8 @@ export default function ProfilePage() {
     id: auction.id,
     title: auction.title,
     description: auction.description || '',
-    startingPrice: auction.startingPrice || parseFloat(auction.price.replace(' €', '').replace(',', '')) || 0,
-    currentPrice: auction.currentPrice || parseFloat(auction.price.replace(' €', '').replace(',', '')) || 0,
+    startingPrice: auction.startingPrice || Number.parseFloat(auction.price.replace(' €', '').replace(',', '')) || 0,
+    currentPrice: auction.currentPrice || Number.parseFloat(auction.price.replace(' €', '').replace(',', '')) || 0,
     endTime: auction.endTime || new Date().toISOString(),
     imageUrl: auction.imageUrl,
     sellerId: auction.sellerId || '',

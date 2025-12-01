@@ -28,21 +28,16 @@ export default function LoginPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    try {
-      await login(email, password);
-    } catch (error) {
-    }
+    await login(email, password);
   };
 
   return (
     <ErrorBoundary>
       <AuthLayout>
-      {/* Logo */}
       <div className="flex justify-center">
         <Logo size="md" />
       </div>
 
-      {/* Main content */}
       <div className="text-gray-90 flex-1 flex flex-col justify-center">
         <div className="text-center">
           <h1 className="text-3xl font-bold mb-2">
@@ -97,7 +92,6 @@ export default function LoginPage() {
         </form>
       </div>
 
-      {/* Bottom navigation */}
       <div className="text-center text-base flex items-center justify-center gap-1 text-gray-90">
         <span className="font-light">Don't have an account?</span>
         <Link href="/register" className="font-bold hover:cursor-pointer hover:underline">

@@ -12,7 +12,7 @@ interface BiddingHistoryProps {
 }
 
 interface BidHistoryItemProps {
-  bid: DetailedAuctionResponse['bids'][0];
+  readonly bid: DetailedAuctionResponse['bids'][0];
 }
 
 function BidHistoryItem({ bid }: BidHistoryItemProps) {

@@ -19,12 +19,8 @@ const ProfileSettingsDialog = React.forwardRef<HTMLDivElement, ProfileSettingsDi
     const [currentView, setCurrentView] = React.useState<ViewType>('profile')
 
     const handleSubmit = async (data: ProfileSettingsData | PasswordData) => {
-      try {
-        await onSubmit?.(data)
-        onOpenChange(false)
-      } catch (error) {
-        throw error
-      }
+      await onSubmit?.(data)
+      onOpenChange(false)
     }
 
     const handleCancel = () => {

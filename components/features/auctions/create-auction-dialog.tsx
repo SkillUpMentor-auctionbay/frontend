@@ -19,13 +19,10 @@ export function CreateAuctionDialog({ children, onSubmit }: CreateAuctionDialogP
   const [open, setOpen] = React.useState(false);
 
   const handleSubmit = async (data: AuctionFormData) => {
-    try {
-      if (onSubmit) {
-        onSubmit(data);
-      }
-      setOpen(false);
-    } catch (error) {
+    if (onSubmit) {
+      onSubmit(data);
     }
+    setOpen(false);
   };
 
   const handleCancel = () => {

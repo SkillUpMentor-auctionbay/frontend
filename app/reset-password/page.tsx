@@ -9,7 +9,7 @@ export default function ResetPasswordPage() {
   const [error, setError] = useState("");
 
   useEffect(() => {
-    setError("Email functionality is currently disabled. Password reset is not available.");
+    setError("Resetting password via email is not currently implemented");
   }, []);
 
   

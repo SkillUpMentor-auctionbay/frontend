@@ -11,11 +11,11 @@ import { EditAuctionCard } from "./edit-auction-card";
 import { EditAuctionFormData, AuctionData } from "@/types/auction";
 
 interface EditAuctionDialogProps {
-  children?: React.ReactNode;
-  auction: AuctionData | null;
-  onSubmit?: (data: EditAuctionFormData) => void;
-  open?: boolean;
-  onOpenChange?: (open: boolean) => void;
+  readonly children?: React.ReactNode;
+  readonly auction: AuctionData | null;
+  readonly onSubmit?: (data: EditAuctionFormData) => void;
+  readonly open?: boolean;
+  readonly onOpenChange?: (open: boolean) => void;
 }
 
 export function EditAuctionDialog({
@@ -32,7 +32,7 @@ export function EditAuctionDialog({
   const handleSubmit = async (data: EditAuctionFormData) => {
     try {
       if (onSubmit) {
-        await onSubmit(data);
+        onSubmit(data);
       }
 
       if (data.success) {

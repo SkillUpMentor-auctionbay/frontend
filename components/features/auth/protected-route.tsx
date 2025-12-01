@@ -5,7 +5,7 @@ import { useRouter, usePathname } from "next/navigation";
 import { useAuth } from "@/contexts/auth-context";
 
 interface ProtectedRouteProps {
-  children: ReactNode;
+  readonly children: ReactNode;
 }
 
 export function ProtectedRoute({ children }: ProtectedRouteProps) {

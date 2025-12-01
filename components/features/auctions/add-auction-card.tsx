@@ -45,18 +45,22 @@ const AddAuctionCard = React.forwardRef<HTMLDivElement, AddAuctionCardProps>(
             shouldClearForThisField = newValue.length > 0 && newValue.length <= 2000;
             break;
           case 'startingPrice':
-            const priceStr = value.trim();
-            const price = parseFloat(priceStr);
-            shouldClearForThisField = priceStr.length > 0 &&
-                                   /^-?\d*\.?\d*$/.test(priceStr) &&
-                                   !isNaN(price) &&
-                                   price > 0 &&
-                                   price <= 999999.99;
-            break;
+            {
+              const priceStr = value.trim();
+              const price = Number.parseFloat(priceStr);
+              shouldClearForThisField = priceStr.length > 0 &&
+                                    /^-?\d*\.?\d*$/.test(priceStr) &&
+                                    !Number.isNaN(price) &&
+                                    price > 0 &&
+                                    price <= 999999.99;
+              break;
+            }
           case 'endDate':
-            const endDate = createMidnightUTCDate(value);
-            shouldClearForThisField = !!endDate && endDate > new Date();
-            break;
+            { 
+              const endDate = createMidnightUTCDate(value);
+              shouldClearForThisField = !!endDate && endDate > new Date();
+              break;
+            }
         }
 
         if (shouldClearForThisField) {
@@ -84,31 +88,29 @@ const AddAuctionCard = React.forwardRef<HTMLDivElement, AddAuctionCardProps>(
     };
 
     const handleSubmit = async () => {
-      try {
-        await createAuction(formData);
+      await createAuction(formData);
 
-        setFormData({
-          title: "",
-          description: "",
-          startingPrice: "",
-          endDate: "",
-        });
-        setImagePreview(null);
+      setFormData({
+        title: "",
+        description: "",
+        startingPrice: "",
+        endDate: "",
+      });
+      setImagePreview(null);
 
-        if (onSubmit) {
-          onSubmit(formData);
-        }
-      } catch (error) {
+      if (onSubmit) {
+        onSubmit(formData);
       }
     };
 
     const visibleValidationErrors = React.useMemo(() => {
       const errors: FormValidationErrors = {};
-      Object.keys(validationErrors).forEach(key => {
+      
+      for (const key of Object.keys(validationErrors)) {
         if (!hiddenValidationErrors.has(key)) {
           errors[key as keyof FormValidationErrors] = validationErrors[key as keyof FormValidationErrors];
         }
-      });
+      }
       return errors;
     }, [validationErrors, hiddenValidationErrors]);
 
@@ -133,7 +135,6 @@ const AddAuctionCard = React.forwardRef<HTMLDivElement, AddAuctionCardProps>(
         )}
         {...props}
       >
-        {/* Image Upload Area */}
         <div>
           <div className="bg-background rounded-2xl h-[168px] flex flex-col items-center justify-center relative overflow-hidden">
             {imagePreview ? (
@@ -176,9 +177,7 @@ const AddAuctionCard = React.forwardRef<HTMLDivElement, AddAuctionCardProps>(
           )}
         </div>
 
-        {/* Form Fields */}
         <div className="flex flex-col gap-4">
-          {/* Title Input */}
           <div>
             <InputField
               label="Title"
@@ -194,7 +193,6 @@ const AddAuctionCard = React.forwardRef<HTMLDivElement, AddAuctionCardProps>(
             )}
           </div>
 
-          {/* Description Textarea */}
           <div>
             <TextAreaField
               label="Description"
@@ -208,9 +206,7 @@ const AddAuctionCard = React.forwardRef<HTMLDivElement, AddAuctionCardProps>(
             )}
           </div>
 
-          {/* Price and Date Inputs */}
           <div className="flex gap-4">
-            {/* Starting Price */}
               <div>
                 <InputField
                   label="Starting price"
@@ -230,7 +226,6 @@ const AddAuctionCard = React.forwardRef<HTMLDivElement, AddAuctionCardProps>(
                 )}
               </div>
 
-            {/* End Date */}
               <div>
                 <InputField
                   label="End date"
@@ -251,19 +246,16 @@ const AddAuctionCard = React.forwardRef<HTMLDivElement, AddAuctionCardProps>(
               </div>
           </div>
 
-        {/* Error Display */}
         {visibleValidationErrors?.general && (
           <div className="bg-red-50 border border-red-200 rounded-lg p-3">
             <p className="text-red-600 text-sm font-medium">{visibleValidationErrors.general}</p>
           </div>
         )}
 
-        {/* Action Buttons */}
         <div className="flex justify-end gap-4">
           <Button
-            variant="secondary"
+            variant="alternative"
             onClick={onCancel}
-            className="bg-gray-10 text-gray-90 hover:bg-gray-20"
             disabled={isLoading}
           >
             Cancel
@@ -271,7 +263,6 @@ const AddAuctionCard = React.forwardRef<HTMLDivElement, AddAuctionCardProps>(
           <Button
             variant="primary"
             onClick={handleSubmit}
-            className="bg-primary-50 text-gray-90 hover:bg-primary-60"
             disabled={isLoading}
           >
             {isLoading ? "Creating..." : "Start auction"}

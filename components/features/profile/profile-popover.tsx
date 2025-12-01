@@ -49,7 +49,6 @@ const ProfilePopover = React.forwardRef<HTMLDivElement, ProfilePopoverProps>(
           {...props}
         >
           <div className="flex flex-col gap-[17px] items-start p-4">
-            {/* Settings Button */}
             <Button
               variant="ghost"
               onClick={handleSettingsClick}
@@ -64,8 +63,6 @@ const ProfilePopover = React.forwardRef<HTMLDivElement, ProfilePopoverProps>(
                 Profile settings
               </span>
             </Button>
-
-            {/* Log out Button */}
             <Button
               variant="outline"
               onClick={handleLogoutClick}
@@ -78,8 +75,6 @@ const ProfilePopover = React.forwardRef<HTMLDivElement, ProfilePopoverProps>(
             </Button>
           </div>
         </div>
-
-        {/* Profile Settings Dialog */}
         <ProfileSettingsDialog
           open={isSettingsDialogOpen}
           onOpenChange={handleProfileSettingsDialogChange}

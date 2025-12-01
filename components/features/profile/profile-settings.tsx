@@ -270,7 +270,7 @@ const ProfileSettings = React.forwardRef<HTMLDivElement, ProfileSettingsProps>(
 
         } else if (currentView === 'picture' && profilePictureFile) {
           setIsSubmitting(true)
-          await uploadProfilePicture(profilePictureFile)
+          uploadProfilePicture(profilePictureFile)
           setProfilePictureFile(null)
           setProfilePicturePreview(null)
         }
