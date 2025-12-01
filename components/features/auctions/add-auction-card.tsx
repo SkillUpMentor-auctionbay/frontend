@@ -8,6 +8,7 @@ import { TextAreaField } from "@/components/ui/primitives/textarea-field";
 import { useCreateAuction } from "@/hooks/useCreateAuction";
 import { AuctionFormData, FormValidationErrors } from "@/types/auction";
 import { createMidnightUTCDate } from "@/utils/dateUtils";
+import { AuctionImageUpload } from "./auction-image-upload";
 
 export interface AddAuctionCardProps {
   className?: string;
@@ -28,7 +29,6 @@ const AddAuctionCard = React.forwardRef<HTMLDivElement, AddAuctionCardProps>(
     });
     const [imagePreview, setImagePreview] = React.useState<string | null>(null);
     const [hiddenValidationErrors, setHiddenValidationErrors] = React.useState<Set<string>>(new Set());
-    const fileInputRef = React.useRef<HTMLInputElement>(null);
 
     const handleInputChange = (field: keyof AuctionFormData, value: string) => {
       setFormData(prev => ({ ...prev, [field]: value }));
@@ -69,22 +69,13 @@ const AddAuctionCard = React.forwardRef<HTMLDivElement, AddAuctionCardProps>(
       }
     };
 
-    const handleImageChange = (file?: File) => {
-      if (file) {
-        setFormData(prev => ({ ...prev, image: file }));
-        const reader = new FileReader();
-        reader.onloadend = () => {
-          setImagePreview(reader.result as string);
-        };
-        reader.readAsDataURL(file);
-      }
-    };
-
-    const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-      const file = e.target.files?.[0];
-      if (file) {
-        handleImageChange(file);
-      }
+    const handleImageChange = (file: File) => {
+      setFormData(prev => ({ ...prev, image: file }));
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
     };
 
     const handleSubmit = async () => {
@@ -105,10 +96,12 @@ const AddAuctionCard = React.forwardRef<HTMLDivElement, AddAuctionCardProps>(
 
     const visibleValidationErrors = React.useMemo(() => {
       const errors: FormValidationErrors = {};
-      
-      for (const key of Object.keys(validationErrors)) {
+
+      if (!validationErrors) return errors;
+
+      for (const key of Object.keys(validationErrors) as (keyof FormValidationErrors)[]) {
         if (!hiddenValidationErrors.has(key)) {
-          errors[key as keyof FormValidationErrors] = validationErrors[key as keyof FormValidationErrors];
+          errors[key] = validationErrors[key];
         }
       }
       return errors;
@@ -135,47 +128,15 @@ const AddAuctionCard = React.forwardRef<HTMLDivElement, AddAuctionCardProps>(
         )}
         {...props}
       >
-        <div>
-          <div className="bg-background rounded-2xl h-[168px] flex flex-col items-center justify-center relative overflow-hidden">
-            {imagePreview ? (
-              <div className="relative w-full h-full">
-                <img
-                  src={imagePreview}
-                  alt="Auction preview"
-                  className="w-full h-full object-cover rounded-2xl"
-                />
-                <Button
-                  variant="secondary"
-                  leftIcon="Delete"
-                  iconSize={16}
-                  className="absolute top-2 right-2"
-                  onClick={() => {
-                    setImagePreview(null);
-                    setFormData(prev => ({ ...prev, image: undefined }));
-                  }}
-                />
-
-              </div>
-            ) : (
-              <Button
-                variant="tertiary"
-                onClick={() => fileInputRef.current?.click()}
-              >
-                Add image
-              </Button>
-            )}
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/*"
-              onChange={handleFileInputChange}
-              className="hidden"
-            />
-          </div>
-          {visibleValidationErrors?.image && (
-            <p className="text-red-500 text-sm mt-1">{visibleValidationErrors.image}</p>
-          )}
-        </div>
+        <AuctionImageUpload
+          imagePreview={imagePreview}
+          onImageChange={handleImageChange}
+          onImageDelete={() => {
+            setImagePreview(null);
+            setFormData(prev => ({ ...prev, image: undefined }));
+          }}
+          validationError={visibleValidationErrors?.image}
+        />
 
         <div className="flex flex-col gap-4">
           <div>

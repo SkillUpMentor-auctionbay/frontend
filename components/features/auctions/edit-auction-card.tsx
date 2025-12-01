@@ -9,6 +9,7 @@ import { useEditAuction } from "@/hooks/useEditAuction";
 import { EditAuctionFormData, AuctionData } from "@/types/auction";
 import { getImageUrl } from "@/lib/image-url";
 import { ImageFallback } from "@/components/ui/primitives/image-fallback";
+import { AuctionImageUpload } from "./auction-image-upload";
 
 const formatEuropeanDate = (dateString: string): string => {
   if (!dateString) return '';
@@ -50,7 +51,6 @@ const EditAuctionCard = React.forwardRef<HTMLDivElement, EditAuctionCardProps>(
     }
 
     const { editAuction, isLoading, validationErrors } = useEditAuction();
-    const fileInputRef = React.useRef<HTMLInputElement>(null);
 
     const [formData, setFormData] = React.useState<EditAuctionFormData>(() => ({
       id: auction.id,
@@ -100,23 +100,14 @@ const EditAuctionCard = React.forwardRef<HTMLDivElement, EditAuctionCardProps>(
       setImageError(true);
     }, []);
 
-    const handleImageChange = (file?: File) => {
-      if (file) {
-        setFormData(prev => ({ ...prev, image: file }));
-        setImageError(false);
-        const reader = new FileReader();
-        reader.onloadend = () => {
-          setImagePreview(reader.result as string);
-        };
-        reader.readAsDataURL(file);
-      }
-    };
-
-    const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-      const file = e.target.files?.[0];
-      if (file) {
-        handleImageChange(file);
-      }
+    const handleImageChange = (file: File) => {
+      setFormData(prev => ({ ...prev, image: file }));
+      setImageError(false);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
     };
 
     const handleImageDelete = () => {
@@ -167,52 +158,14 @@ const EditAuctionCard = React.forwardRef<HTMLDivElement, EditAuctionCardProps>(
         {...props}
       >
   
-        <div>
-          <div className="bg-background rounded-2xl h-[168px] flex flex-col items-center justify-center relative overflow-hidden">
-            {imagePreview && !imageError ? (
-              <div className="relative w-full h-full">
-                <img
-                  src={imagePreview}
-                  alt="Auction preview"
-                  className="w-full h-full object-cover rounded-2xl"
-                  onError={handleImageError}
-                />
-                <Button
-                  variant="secondary"
-                  leftIcon="Delete"
-                  iconSize={16}
-                  className="absolute top-2 right-2"
-                  onClick={handleImageDelete}
-                />
-              </div>
-            ) : imageError ? (
-              <div className="w-full h-full flex items-center justify-center">
-                <ImageFallback
-                  text="Image failed to load"
-                  className="rounded-2xl"
-                  fallbackType="text"
-                />
-              </div>
-            ) : (
-              <Button
-                variant="tertiary"
-                onClick={() => fileInputRef.current?.click()}
-              >
-                Add image
-              </Button>
-            )}
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/*"
-              onChange={handleFileInputChange}
-              className="hidden"
-            />
-          </div>
-          {validationErrors?.image && (
-            <p className="text-red-500 text-sm mt-1">{validationErrors.image}</p>
-          )}
-        </div>
+        <AuctionImageUpload
+          imagePreview={imagePreview}
+          existingImageUrl={formData.existingImageUrl}
+          onImageChange={handleImageChange}
+          onImageDelete={handleImageDelete}
+          validationError={validationErrors?.image}
+          imageError={imageError}
+        />
 
         <div className="flex flex-col gap-4">
           <div>

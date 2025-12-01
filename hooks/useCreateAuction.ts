@@ -72,7 +72,10 @@ export function useCreateAuction() {
 
   const getValidationErrors = (): FormValidationErrors => {
     if (createAuctionMutation.error?.code === "VALIDATION_ERROR" && createAuctionMutation.error.details) {
-      return createAuctionMutation.error.details as FormValidationErrors;
+      const details = createAuctionMutation.error.details;
+      if (details && typeof details === 'object' && !Array.isArray(details)) {
+        return details as FormValidationErrors;
+      }
     }
 
     if (createAuctionMutation.error) {
