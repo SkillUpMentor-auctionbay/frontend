@@ -243,12 +243,12 @@ export const userAPI = {
     }
   },
 
-  changeProfilePicture: async (file: File): Promise<{ imageUrl: string }> => {
+  changeProfilePicture: async (file: File): Promise<{ profilePictureUrl: string }> => {
     try {
       const formData = new FormData();
       formData.append('file', file);
 
-      const response: AxiosResponse<{ imageUrl: string }> = await api.patch(
+      const response: AxiosResponse<{ profilePictureUrl: string }> = await api.patch(
         '/api/v1/users/me/change-profile-picture',
         formData,
         {

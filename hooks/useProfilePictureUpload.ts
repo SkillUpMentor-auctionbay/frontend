@@ -21,7 +21,7 @@ export function useProfilePictureUpload(options: UseProfilePictureUploadOptions 
   const { validateImage } = useAuctionValidation('create');
 
   const uploadMutation = useMutation<
-    { imageUrl: string },
+    { profilePictureUrl: string },
     ProfilePictureUploadError,
     File
   >({
@@ -43,7 +43,7 @@ export function useProfilePictureUpload(options: UseProfilePictureUploadOptions 
       }
     },
     onSuccess: (data) => {
-      onSuccess?.(data.imageUrl);
+      onSuccess?.(data.profilePictureUrl);
     },
     onError: (error) => {
       onError?.(error);

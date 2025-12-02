@@ -82,13 +82,11 @@ const ProfileSettings = React.forwardRef<HTMLDivElement, ProfileSettingsProps>(
       data: uploadResult,
       reset: resetUpload
     } = useProfilePictureUpload({
-      onSuccess: (imageUrl) => {
-        console.log("Profile picture uploaded successfully:", imageUrl);
-        onCancel?.();
-        setProfilePictureFile(null);
-        setProfilePicturePreview(null);
+      onSuccess: async (profilePictureUrl) => {
         setUploadError(null);
-        queryClient.invalidateQueries({ queryKey: ["user"] });
+        await queryClient.invalidateQueries({ queryKey: ["user"] });
+        await queryClient.refetchQueries({ queryKey: ["user"] });
+        onCancel?.();
       },
       onError: (error) => {
         setUploadError(error.message);
@@ -271,11 +269,7 @@ const ProfileSettings = React.forwardRef<HTMLDivElement, ProfileSettingsProps>(
         } else if (currentView === 'picture' && profilePictureFile) {
           setIsSubmitting(true)
           uploadProfilePicture(profilePictureFile)
-          setProfilePictureFile(null)
-          setProfilePicturePreview(null)
         }
-      } catch (error) {
-        console.error("Failed to update profile:", error)
       } finally {
         setIsSubmitting(false)
       }
