@@ -9,7 +9,7 @@ import { EditAuctionDialog } from "@/components/features/auctions/edit-auction-d
 import { useAuctionsQuery } from "@/hooks/useAuctionsQuery";
 import { useUserStatistics } from "@/hooks/useUserStatistics";
 import { useAuctionMutations, useAuctionPrefetcher } from "@/hooks/useAuctionMutations";
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 
 const VALID_TAB_VALUES = ['my-auctions', 'bidding', 'won'] as const;
@@ -26,7 +26,42 @@ interface AuctionsResponse {
   };
 }
 
-export default function ProfilePage() {
+function ProfilePageSkeleton() {
+  return (
+    <AppLayout>
+      <div className="w-full h-full flex flex-col gap-4">
+        <div className="text-3xl font-bold mt-4 px-8 h-12 w-64 bg-gray-200 rounded animate-pulse"></div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 px-8">
+          {[...Array(4)].map((_, i) => (
+            <div key={i} className="bg-gray-50 h-[202px] rounded-lg">
+              <div className="flex flex-col justify-between w-full h-full p-6">
+                <div className="space-y-2">
+                  <div className="h-6 bg-gray-200 rounded w-20 animate-pulse"></div>
+                  <div className="h-4 bg-gray-200 rounded w-16 animate-pulse"></div>
+                </div>
+                <div className="h-20 w-16 bg-gray-200 rounded animate-pulse"></div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <div className="flex-1">
+          <div className="flex justify-center mb-4">
+            <div className="flex space-x-1">
+              {[... Array(3)].map((_, i) => (
+                <div key={i} className="h-10 w-24 bg-gray-200 rounded animate-pulse"></div>
+              ))}
+            </div>
+          </div>
+          <div className="bg-gray-50 rounded-lg h-64 animate-pulse"></div>
+        </div>
+      </div>
+    </AppLayout>
+  );
+}
+
+function ProfileContent() {
   const { user, isLoggingOut } = useAuth();
   const { deleteAuction } = useAuctionMutations();
   const { prefetchAuctions } = useAuctionPrefetcher();
@@ -278,5 +313,13 @@ export default function ProfilePage() {
         onOpenChange={handleEditDialogChange}
       />
     </AppLayout>
+  );
+}
+
+export default function ProfilePage() {
+  return (
+    <Suspense fallback={<ProfilePageSkeleton />}>
+      <ProfileContent />
+    </Suspense>
   );
 }
