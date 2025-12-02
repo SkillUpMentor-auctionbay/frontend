@@ -15,7 +15,17 @@ export function getImageUrl(imageUrl?: string): string | undefined {
 }
 
 export function getProfilePictureUrl(profilePictureUrl?: string): string | undefined {
-  return getImageUrl(profilePictureUrl);
+  if (!profilePictureUrl) return undefined;
+
+  const url = getImageUrl(profilePictureUrl);
+
+  // Add cache-busting timestamp to profile pictures to ensure they update after changes
+  if (url && profilePictureUrl.includes('/profile-pictures/')) {
+    const separator = url.includes('?') ? '&' : '?';
+    return `${url}${separator}_t=${Date.now()}`;
+  }
+
+  return url;
 }
 
 
