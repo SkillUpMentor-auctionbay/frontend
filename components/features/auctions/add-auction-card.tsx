@@ -31,13 +31,10 @@ const AddAuctionCard = React.forwardRef<HTMLDivElement, AddAuctionCardProps>(
 
     const { clearFieldError, validateField } = useAuctionValidation('create');
 
-    // Use shared image hook (no existing image for create)
     const { imageState, handleImageSelect, handleImageDelete } = useAuctionImage();
 
     const handleInputChange = (field: keyof AuctionFormData, value: string) => {
       setFormData(prev => ({ ...prev, [field]: value }));
-
-      // Clear validation error for this field when user types
       clearFieldError(field);
     };
 
@@ -57,7 +54,6 @@ const AddAuctionCard = React.forwardRef<HTMLDivElement, AddAuctionCardProps>(
         if ((error as AuctionError)?.code === 'VALIDATION_ERROR') {
           return;
         }
-        // For other errors, let them bubble up or handle as needed
         throw error;
       }
     };

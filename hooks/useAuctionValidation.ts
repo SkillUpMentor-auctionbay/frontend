@@ -7,7 +7,6 @@ export function useAuctionValidation(mode: 'create' | 'edit') {
   const [hiddenValidationErrors, setHiddenValidationErrors] = useState<Set<string>>(new Set());
 
   const validateField = useCallback((field: string, value: string, allData: AuctionFormData | EditAuctionFormData): string | null => {
-    // Validate title field
     if (field === 'title') {
       if (!value || value.trim().length === 0) {
         return AUCTION_VALIDATION.MESSAGES.TITLE_REQUIRED;
@@ -16,7 +15,6 @@ export function useAuctionValidation(mode: 'create' | 'edit') {
       }
     }
 
-    // Validate description field
     if (field === 'description') {
       if (!value || value.trim().length === 0) {
         return AUCTION_VALIDATION.MESSAGES.DESCRIPTION_REQUIRED;
@@ -25,7 +23,6 @@ export function useAuctionValidation(mode: 'create' | 'edit') {
       }
     }
 
-    // Validate starting price field
     if (field === 'startingPrice') {
       if (!value || value.trim().length === 0) {
         return AUCTION_VALIDATION.MESSAGES.PRICE_REQUIRED;
@@ -37,7 +34,6 @@ export function useAuctionValidation(mode: 'create' | 'edit') {
       }
     }
 
-    // Validate end date field
     if (field === 'endDate') {
       if (!value || value.trim().length === 0) {
         return AUCTION_VALIDATION.MESSAGES.END_DATE_REQUIRED;
@@ -55,31 +51,26 @@ export function useAuctionValidation(mode: 'create' | 'edit') {
   const validateEntireForm = useCallback((formData: AuctionFormData | EditAuctionFormData): FormValidationErrors => {
     const errors: FormValidationErrors = {};
 
-    // Validate title
     const titleError = validateField('title', formData.title, formData);
     if (titleError && !hiddenValidationErrors.has('title')) {
       errors.title = titleError;
     }
 
-    // Validate description
     const descriptionError = validateField('description', formData.description, formData);
     if (descriptionError && !hiddenValidationErrors.has('description')) {
       errors.description = descriptionError;
     }
 
-    // Validate starting price
     const priceError = validateField('startingPrice', formData.startingPrice, formData);
     if (priceError && !hiddenValidationErrors.has('startingPrice')) {
       errors.startingPrice = priceError;
     }
 
-    // Validate end date
     const dateError = validateField('endDate', formData.endDate, formData);
     if (dateError && !hiddenValidationErrors.has('endDate')) {
       errors.endDate = dateError;
     }
 
-    // Validate image if present
     if (formData.image && !hiddenValidationErrors.has('image')) {
       const imageError = validateImage(formData.image);
       if (imageError) {

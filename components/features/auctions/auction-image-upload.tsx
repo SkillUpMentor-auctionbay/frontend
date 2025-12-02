@@ -7,7 +7,6 @@ import { ImageFallback } from "@/components/ui/primitives/image-fallback";
 import { getImageUrl } from "@/utils/imageUtils";
 
 interface AuctionImageUploadProps {
-  // Common props
   imagePreview: string | null;
   onImageChange: (file: File) => void;
   validationError?: string;
@@ -15,11 +14,9 @@ interface AuctionImageUploadProps {
   disabled?: boolean;
   className?: string;
 
-  // Props for edit scenario (existing image)
   existingImageUrl?: string;
   onImageDelete?: () => void;
 
-  // Props to control behavior
   showAddButton?: boolean;
 }
 
@@ -45,12 +42,10 @@ export const AuctionImageUpload = React.forwardRef<HTMLDivElement, AuctionImageU
       }
     };
 
-    // Display existing image, new preview, or add button
     const displayImage = imagePreview || (existingImageUrl ? getImageUrl(existingImageUrl) : null);
     const hasExistingOrNewImage = displayImage && !imageError;
 
     const handleImageClick = (e: React.MouseEvent) => {
-      // Don't trigger if clicking on buttons or other interactive elements
       if ((e.target as HTMLElement).tagName === 'BUTTON' ||
           (e.target as HTMLElement).closest('button')) {
         return;
@@ -62,7 +57,7 @@ export const AuctionImageUpload = React.forwardRef<HTMLDivElement, AuctionImageU
     };
 
     const handleAddButtonClick = (e: React.MouseEvent) => {
-      e.stopPropagation(); // Prevent event bubbling to parent
+      e.stopPropagation();
       fileInputRef.current?.click();
     };
 
@@ -83,11 +78,7 @@ export const AuctionImageUpload = React.forwardRef<HTMLDivElement, AuctionImageU
             <div className="relative w-full h-full">
               <img
                 src={displayImage}
-                alt="Auction image"
                 className="w-full h-full object-cover rounded-2xl"
-                onError={() => {
-                  // Parent handles image error state through imageError prop
-                }}
               />
               {onImageDelete && (
                 <Button

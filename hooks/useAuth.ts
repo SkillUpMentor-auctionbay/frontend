@@ -4,7 +4,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { authAPI } from "@/services/api";
 import { User, LoginRequest, RegisterRequest, LoginResponse, RegisterResponse, AuthError } from "@/types/auth";
-import { useCallback, useRef } from "react";
+import { useCallback, useRef, useEffect } from "react";
 import { storeToken, clearToken, getToken } from "@/utils/tokenValidation";
 
 const handleAuthSuccess = (
@@ -26,26 +26,49 @@ const handleAuthSuccess = (
 export function useAuthMutation() {
   const queryClient = useQueryClient();
   const router = useRouter();
+  const activeOperation = useRef<'login' | 'register' | 'logout' | null>(null);
 
   const loginMutation = useMutation({
-    mutationFn: (data: LoginRequest) => authAPI.login(data),
+    mutationFn: (data: LoginRequest) => {
+      if (activeOperation.current) {
+        return Promise.reject(new Error('Authentication operation already in progress'));
+      }
+      activeOperation.current = 'login';
+      return authAPI.login(data);
+    },
     onSuccess: (data) => {
       handleAuthSuccess(data, queryClient, router);
+      activeOperation.current = null;
     },
     onError: (error: AuthError) => {
       clearToken();
       queryClient.clear();
+      activeOperation.current = null;
+    },
+    onSettled: () => {
+      activeOperation.current = null;
     },
   });
 
   const registerMutation = useMutation({
-    mutationFn: (data: RegisterRequest) => authAPI.register(data),
+    mutationFn: (data: RegisterRequest) => {
+      if (activeOperation.current) {
+        return Promise.reject(new Error('Authentication operation already in progress'));
+      }
+      activeOperation.current = 'register';
+      return authAPI.register(data);
+    },
     onSuccess: (data) => {
       handleAuthSuccess(data, queryClient, router);
+      activeOperation.current = null;
     },
-    onError: () => {
+    onError: (error: AuthError) => {
       clearToken();
       queryClient.clear();
+      activeOperation.current = null;
+    },
+    onSettled: () => {
+      activeOperation.current = null;
     },
   });
 
@@ -55,24 +78,30 @@ export function useAuthMutation() {
       clearToken();
       queryClient.clear();
       router.push("/");
+      activeOperation.current = null;
     },
-    onError: () => {
+    onError: (error: AuthError) => {
       clearToken();
       queryClient.clear();
       router.push("/");
+      activeOperation.current = null;
+    },
+    onSettled: () => {
+      activeOperation.current = null;
     },
   });
 
-  
+
   const logout = useCallback(async () => {
     await logoutMutation.mutateAsync();
   }, [logoutMutation]);
 
-  
+
   const clearErrors = useRef(() => {
     loginMutation.reset();
     registerMutation.reset();
     logoutMutation.reset();
+    activeOperation.current = null;
   }).current;
 
   return {
@@ -91,6 +120,13 @@ export function useAuthMutation() {
 
 export function useAuthQuery() {
   const hasToken = getToken();
+  const queryClient = useQueryClient();
+
+  useEffect(() => {
+    if (hasToken) {
+      queryClient.cancelQueries({ queryKey: ["user"] });
+    }
+  }, [hasToken, queryClient]);
 
   const { data: user, isLoading, error } = useQuery<User | undefined, Error>({
     queryKey: ["user"],
@@ -98,6 +134,7 @@ export function useAuthQuery() {
     enabled: !!hasToken,
     retry: false,
     staleTime: 5 * 60 * 1000,
+    networkMode: 'online',
   });
 
   const isAuthenticated = !!user && !error && hasToken;

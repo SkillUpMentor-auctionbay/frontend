@@ -8,7 +8,7 @@ import { AuctionDetails } from "@/components/features/auctions/auction-details";
 import { BiddingHistory } from "@/components/features/auctions/bidding-history";
 
 interface AuctionPageProps {
-  params: Promise<{
+  readonly params: Promise<{
     id: string;
   }>;
 }
@@ -43,7 +43,7 @@ export default function AuctionPage({ params }: AuctionPageProps) {
             <div className="text-red-800 text-center">
               <h2 className="text-xl font-bold mb-2">Error Loading Auction</h2>
               <p>
-                {error && typeof error === 'object' && 'message' in error
+                {typeof error === 'object' && 'message' in error
                   ? (error as any).message
                   : "Failed to load auction details. Please try again later."}
               </p>
@@ -95,30 +95,6 @@ export default function AuctionPage({ params }: AuctionPageProps) {
             </div>
           </div>
         </div>
-
-
-
-        
-        
-        {/* <div className="flex-1 px-8 pb-8 overflow-hidden">
-          <div className="flex h-full gap-8 max-w-6xl mx-auto">
-            <div className="w-1/2">
-              <AuctionImage
-                imageUrl={auction.imageUrl}
-                title={auction.title}
-              />
-            </div>
-
-            <div className="w-1/2 flex flex-col overflow-hidden">
-              <div className="bg-white rounded-2xl p-8 flex-1 overflow-y-auto">
-                <div className="space-y-6">
-                  <AuctionDetails auction={auction} />
-                  <BiddingHistory bids={auction.bids} />
-                </div>
-              </div>
-            </div>
-          </div>
-        </div> */}
       </div>
     </AppLayout>
   );

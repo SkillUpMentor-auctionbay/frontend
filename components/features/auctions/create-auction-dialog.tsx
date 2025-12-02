@@ -11,8 +11,8 @@ import { AddAuctionCard } from "./add-auction-card";
 import { type AuctionFormData } from "@/types/auction";
 
 interface CreateAuctionDialogProps {
-  children: React.ReactNode;
-  onSubmit?: (data: AuctionFormData) => void;
+  readonly children: React.ReactNode;
+  readonly onSubmit?: (data: AuctionFormData) => void;
 }
 
 export function CreateAuctionDialog({ children, onSubmit }: CreateAuctionDialogProps) {

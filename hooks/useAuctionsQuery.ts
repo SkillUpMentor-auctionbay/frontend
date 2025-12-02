@@ -71,7 +71,6 @@ export function useAuctionsQuery(
   return useQuery({
     queryKey: ["auctions", filter, page, limit],
     queryFn: async () => {
-      try {
         const response = await auctionsAPI.getAuctions(filter, page, limit);
 
         const transformedData = {
@@ -85,9 +84,7 @@ export function useAuctionsQuery(
         };
 
         return transformedData;
-       } catch (error) {
-         throw error;
-       }
+       
     },
     enabled,
     staleTime,

@@ -40,19 +40,13 @@ export default function AuctionsPage() {
 
   const handleEditSubmit = async (formData: any) => {
     if (formData.success) {
-      console.log("Auction edited successfully");
       setEditingAuction(null);
       setIsEditDialogOpen(false);
     }
   };
 
   const handleDeleteAuction = async (auctionId: string) => {
-    try {
-      await deleteAuction(auctionId);
-      console.log("Auction deleted successfully");
-    } catch (error) {
-      console.error("Failed to delete auction:", error);
-    }
+    await deleteAuction(auctionId);
   };
 
   const handleEditDialogChange = (open: boolean) => {

@@ -5,9 +5,9 @@ import { getImageUrl } from "@/utils/imageUtils";
 import { ImageFallback } from "@/components/ui/primitives/image-fallback";
 
 interface AuctionImageProps {
-  imageUrl?: string;
-  title: string;
-  className?: string;
+  readonly imageUrl?: string;
+  readonly title: string;
+  readonly className?: string;
 }
 
 export function AuctionImage({ imageUrl, title, className }: AuctionImageProps) {

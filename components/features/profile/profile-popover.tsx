@@ -33,11 +33,7 @@ const ProfilePopover = React.forwardRef<HTMLDivElement, ProfilePopoverProps>(
       if (onLogoutClick) {
         onLogoutClick()
       } else {
-        try {
-          await logout()
-        } catch (error) {
-          console.error('Logout failed:', error)
-        }
+        await logout()
       }
     }
 

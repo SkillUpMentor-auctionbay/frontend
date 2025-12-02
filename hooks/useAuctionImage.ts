@@ -21,7 +21,6 @@ export function useAuctionImage(existingImageUrl?: string, mode: 'create' | 'edi
   const { validateField } = useAuctionValidation(mode);
 
   const handleImageSelect = useCallback((file: File) => {
-    // Validate the file first
     const validationError = validateField('image', '', {
       title: '',
       description: '',
@@ -40,7 +39,6 @@ export function useAuctionImage(existingImageUrl?: string, mode: 'create' | 'edi
       return;
     }
 
-    // Create preview
     const reader = new FileReader();
     reader.onload = () => {
       setImageState(prev => ({

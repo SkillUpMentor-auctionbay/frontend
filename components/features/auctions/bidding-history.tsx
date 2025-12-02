@@ -7,8 +7,8 @@ import { ScrollArea } from "@/components/ui/layout/scroll-area";
 import { formatBidDate } from "@/utils/dateUtils";
 
 interface BiddingHistoryProps {
-  bids: DetailedAuctionResponse['bids'];
-  className?: string;
+  readonly bids: DetailedAuctionResponse['bids'];
+  readonly className?: string;
 }
 
 interface BidHistoryItemProps {
@@ -28,9 +28,6 @@ function BidHistoryItem({ bid }: BidHistoryItemProps) {
             <AvatarImage
               src={profilePictureUrl}
               alt={`${bid.bidder.name} ${bid.bidder.surname}`}
-              onError={(e) => {
-                console.error('Avatar image failed to load:', e);
-              }}
             />
           ) : (
             <AvatarFallback className="bg-gray-20 text-gray-70 font-light text-sm">

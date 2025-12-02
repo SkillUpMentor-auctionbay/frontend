@@ -124,7 +124,6 @@ export function usePlaceBid(auctionId: string, initialCurrentPrice: number, auct
         status: old.status === 'IN_PROGRESS' ? 'WINNING' : old.status,
       }));
 
-      // Optimistically update auctions list if it exists
       const oldAuctions = queryClient.getQueryData(["auctions"]);
       if (oldAuctions && typeof oldAuctions === 'object' && 'auctions' in oldAuctions && Array.isArray(oldAuctions.auctions)) {
         queryClient.setQueryData(["auctions"], (old: any) => ({
@@ -155,9 +154,7 @@ export function usePlaceBid(auctionId: string, initialCurrentPrice: number, auct
       queryClient.invalidateQueries({ queryKey: ["user-statistics"], refetchType: "active" });
     },
     onError: (error, variables, context: any) => {
-      console.error('💥 [usePlaceBid] Error placing bid:', error);
 
-      // Rollback optimistic updates on error
       if (context?.previousAuction) {
         queryClient.setQueryData(["auction", auctionId], context.previousAuction);
       }
@@ -196,8 +193,7 @@ export function usePlaceBid(auctionId: string, initialCurrentPrice: number, auct
     return result;
   };
 
-  
-  
+
   return {
     placeBid,
     isLoading: placeBidMutation.isPending,

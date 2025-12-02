@@ -18,7 +18,7 @@ const CONNECTION_CONFIG: ConnectionConfig = {
 };
 
 const getNotificationType = (notification: NotificationDto): 'auction_won' | 'outbid' => {
-  return notification.price !== null ? 'auction_won' : 'outbid';
+  return notification.price == null ? 'outbid' : 'auction_won';
 };
 
 const getEventSource = () => {
@@ -224,14 +224,21 @@ export const useNotificationsStream = () => {
       return;
     }
 
-    connect();
+    const connectTimeout = setTimeout(() => {
+      connect();
+    }, 100);
 
-    return disconnect;
-  }, [connect, disconnect, authLoading, isAuthenticated, user?.id]);
+    return () => {
+      clearTimeout(connectTimeout);
+      disconnect();
+    };
+  }, [authLoading, isAuthenticated, user?.id]);
 
   useEffect(() => {
-    return disconnect;
-  }, [disconnect]);
+    if (!isAuthenticated && eventSourceRef.current) {
+      disconnect();
+    }
+  }, [isAuthenticated]);
 
   return {
     isConnected: typeof window !== 'undefined' && eventSourceRef.current?.readyState === 1,

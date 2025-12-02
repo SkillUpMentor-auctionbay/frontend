@@ -31,8 +31,8 @@ const Navbar = React.forwardRef<HTMLElement, NavbarProps>(
               />
             </div>
             <RightNavigation
-              onNotificationsClick={() => console.log('Notifications clicked')}
-              onAddClick={() => console.log('Add clicked')}
+              onNotificationsClick={() => {}}
+              onAddClick={() => {}}
             />
           </div>
       </nav>

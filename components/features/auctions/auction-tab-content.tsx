@@ -17,12 +17,12 @@ export interface AuctionData extends Omit<CoreAuctionData, 'status'> {
 }
 
 interface AuctionTabContentProps {
-  filter: AuctionFilter;
-  auctions?: AuctionData[];
-  isLoading?: boolean;
-  error?: string | null;
-  onEdit?: (auctionId: string) => void;
-  onDelete?: (auctionId: string) => void;
+  readonly filter: AuctionFilter;
+  readonly auctions?: AuctionData[];
+  readonly isLoading?: boolean;
+  readonly error?: string | null;
+  readonly onEdit?: (auctionId: string) => void;
+  readonly onDelete?: (auctionId: string) => void;
 }
 
 export function AuctionTabContent({

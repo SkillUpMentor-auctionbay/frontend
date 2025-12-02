@@ -41,16 +41,10 @@ export interface EditAuctionCardProps {
 
 const EditAuctionCard = React.forwardRef<HTMLDivElement, EditAuctionCardProps>(
   ({ className, auction, onSubmit, onCancel, isEditing = false, ...props }, ref) => {
-    // Always call hooks first, before any early returns
     const { editAuction, isLoading, validationErrors } = useEditAuction();
     const { clearFieldError } = useAuctionValidation('edit');
     const { imageState, handleImageSelect, handleImageDelete: deleteImage } = useAuctionImage(auction.imageUrl, 'edit');
 
-    
-
-
-    // Initialize form data using key-based re-initialization pattern
-    // Use safe defaults if auction is undefined
     const [formData, setFormData] = React.useState<EditAuctionFormData>(() => ({
       id: auction?.id || '',
       title: auction?.title || '',
@@ -60,7 +54,6 @@ const EditAuctionCard = React.forwardRef<HTMLDivElement, EditAuctionCardProps>(
       existingImageUrl: auction?.imageUrl,
     }));
 
-    // Early returns after all hooks are called
     if (!auction) {
       return <div className="p-4 text-red-500">Error: No auction data available for editing.</div>;
     }
@@ -75,8 +68,6 @@ const EditAuctionCard = React.forwardRef<HTMLDivElement, EditAuctionCardProps>(
 
     const handleInputChange = (field: keyof EditAuctionFormData, value: string) => {
       setFormData(prev => ({ ...prev, [field]: value }));
-
-      // Clear validation error for this field when user types
       clearFieldError(field);
     };
 
