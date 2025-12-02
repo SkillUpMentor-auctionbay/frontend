@@ -2,7 +2,7 @@
 
 import { useMemo } from "react";
 import { useAuth } from "@/hooks/useAuth";
-import { getProfilePictureUrl } from "@/lib/image-url";
+import { getProfilePictureUrl } from "@/utils/imageUtils";
 
 export function useProfilePicture() {
   const { user } = useAuth();

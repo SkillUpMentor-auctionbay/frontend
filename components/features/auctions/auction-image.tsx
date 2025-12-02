@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { getImageUrl } from "@/lib/image-url";
+import { getImageUrl } from "@/utils/imageUtils";
 import { ImageFallback } from "@/components/ui/primitives/image-fallback";
 
 interface AuctionImageProps {

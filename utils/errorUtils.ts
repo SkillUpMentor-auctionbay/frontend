@@ -1,11 +1,9 @@
+import { AuctionError } from '@/types/auction';
+import { AUCTION_VALIDATION } from '@/constants/validation';
+
 export interface ValidationError {
   field: string;
   message: string;
-}
-
-export interface ApiError {
-  message: string;
-  validationErrors?: ValidationError[];
 }
 
 export function formatLoginError(error: any): string {
@@ -106,24 +104,6 @@ function formatFieldName(field: string): string {
 
   return fieldNames[field] || field.charAt(0).toUpperCase() + field.slice(1);
 }
-
-export function getErrorMessage(error: any): string {
-  if (!error) return "An unexpected error occurred";
-
-  if (error.response?.data) {
-    const data = error.response.data;
-    return data.message || data.error || "An error occurred";
-  }
-
-  if (error.code === "NETWORK_ERROR" || error.message === "Network Error") {
-    return "Network error. Please check your connection.";
-  }
-
-  return error.message || "An error occurred";
-}
-
-import { AuctionError } from '@/types/auction';
-import { AUCTION_VALIDATION } from '@/constants/validation';
 
 
 export function normalizeAuctionError(error: unknown): AuctionError {

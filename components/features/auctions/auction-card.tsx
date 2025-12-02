@@ -1,7 +1,7 @@
 import * as React from "react"
 import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
-import { getImageUrl } from "@/lib/image-url"
+import { getImageUrl } from "@/utils/imageUtils"
 import { Badge } from "@/components/ui/primitives/badge"
 import { Button } from "@/components/ui/primitives/button"
 import { ImageFallback } from "@/components/ui/primitives/image-fallback"

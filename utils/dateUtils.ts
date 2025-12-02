@@ -5,16 +5,6 @@ export function formatDateForDisplay(date: Date | string): string {
   return new Date(date).toLocaleDateString(SLOVENIAN_LOCALE);
 }
 
-export function formatDateTimeForDisplay(date: Date | string): string {
-  return new Date(date).toLocaleString(SLOVENIAN_LOCALE);
-}
-
-export function formatTimeForDisplay(date: Date | string): string {
-  return new Date(date).toLocaleTimeString(SLOVENIAN_LOCALE, {
-    hour: '2-digit',
-    minute: '2-digit'
-  });
-}
 
 export function formatBidDate(dateString: string): string {
   const date = new Date(dateString);
@@ -48,11 +38,4 @@ export function createMidnightUTCDate(dateString: string): Date | null {
   }
 
   return date;
-}
-
-export function isMidnightUTC(date: Date): boolean {
-  return date.getUTCHours() === 0 &&
-         date.getUTCMinutes() === 0 &&
-         date.getUTCSeconds() === 0 &&
-         date.getUTCMilliseconds() === 0;
 }

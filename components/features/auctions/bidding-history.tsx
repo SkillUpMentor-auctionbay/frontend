@@ -2,7 +2,7 @@
 
 import { DetailedAuctionResponse } from "@/types/auction";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/primitives/avatar";
-import { getProfilePictureUrl } from "@/lib/image-url";
+import { getProfilePictureUrl } from "@/utils/imageUtils";
 import { ScrollArea } from "@/components/ui/layout/scroll-area";
 import { formatBidDate } from "@/utils/dateUtils";
 

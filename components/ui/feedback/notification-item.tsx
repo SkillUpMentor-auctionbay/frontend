@@ -3,7 +3,7 @@
 import * as React from "react"
 import Link from "next/link"
 import { Badge } from "@/components/ui/primitives/badge"
-import { getImageUrl } from "@/lib/image-url"
+import { getImageUrl } from "@/utils/imageUtils"
 import { ImageFallback } from "@/components/ui/primitives/image-fallback"
 import type { Notification } from "@/types/notification"
 import { formatDateForDisplay } from "@/utils/dateUtils"
