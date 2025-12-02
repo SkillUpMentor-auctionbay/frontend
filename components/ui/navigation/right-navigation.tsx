@@ -77,8 +77,6 @@ const RightNavigation = React.forwardRef<HTMLDivElement, RightNavigationProps>(
                   <AvatarImage
                     src={avatarUrl}
                     alt="User avatar"
-                    onError={(e) => {
-                    }}
                   />
                 )}
                 <AvatarFallback className="bg-primary-50 text-gray-90 font-medium">

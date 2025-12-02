@@ -18,18 +18,6 @@ export function getProfilePictureUrl(profilePictureUrl?: string): string | undef
   return getImageUrl(profilePictureUrl);
 }
 
-export function getProfilePictureUrlWithCacheBust(profilePictureUrl?: string): string | undefined {
-  if (!profilePictureUrl) return undefined;
-
-  const url = getImageUrl(profilePictureUrl);
-
-  if (url && profilePictureUrl.includes('/profile-pictures/')) {
-    const separator = url.includes('?') ? '&' : '?';
-    return `${url}${separator}_t=${Date.now()}`;
-  }
-
-  return url;
-}
 
 
 export function generateInitials(name?: string, surname?: string): string {
