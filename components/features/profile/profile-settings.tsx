@@ -84,7 +84,6 @@ const ProfileSettings = React.forwardRef<HTMLDivElement, ProfileSettingsProps>(
     } = useProfilePictureUpload({
       onSuccess: async (profilePictureUrl) => {
         setUploadError(null);
-        console.log('Profile picture upload successful, new URL:', profilePictureUrl);
         queryClient.setQueryData(["user"], (oldData: any) => {
           if (!oldData) return { profilePictureUrl };
           return {
