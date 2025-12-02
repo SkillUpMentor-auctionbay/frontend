@@ -39,7 +39,7 @@ const Logo = React.forwardRef<HTMLDivElement, LogoProps>(
         {...props}
       >
         <Image
-          src="/logo.svg"
+          src="/Logo.svg"
           width={config.image}
           height={config.image}
           alt="Auction Bay Logo"
