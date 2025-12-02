@@ -27,6 +27,8 @@ const RightNavigation = React.forwardRef<HTMLDivElement, RightNavigationProps>(
     const initials = generateInitials(user?.name, user?.surname);
     const showProfilePicture = profilePictureUrl && !error && !isLoading;
 
+    const avatarUrl = profilePictureUrl;
+
     const handleNotificationClick = (notification: Notification) => {
       if (notification.auctionId && typeof window !== 'undefined') {
         window.location.href = `/auctions/${notification.auctionId}`;
@@ -73,7 +75,7 @@ const RightNavigation = React.forwardRef<HTMLDivElement, RightNavigationProps>(
               <Avatar size="lg" className="size-full">
                 {showProfilePicture && (
                   <AvatarImage
-                    src={profilePictureUrl}
+                    src={avatarUrl}
                     alt="User avatar"
                     onError={(e) => {
                     }}

@@ -84,20 +84,7 @@ const ProfileSettings = React.forwardRef<HTMLDivElement, ProfileSettingsProps>(
     } = useProfilePictureUpload({
       onSuccess: async (profilePictureUrl) => {
         setUploadError(null);
-        // Force immediate refresh of all profile picture URLs by adding timestamp
-        await queryClient.invalidateQueries({
-          queryKey: ["user"],
-          refetchType: 'active'
-        });
-        await queryClient.refetchQueries({
-          queryKey: ["user"],
-          type: 'active'
-        });
-
-        // Force reload of the page to ensure new image is displayed
-        setTimeout(() => {
-          window.location.reload();
-        }, 500);
+        onCancel?.();
       },
       onError: (error) => {
         setUploadError(error.message);
