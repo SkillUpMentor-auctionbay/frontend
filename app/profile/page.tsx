@@ -10,6 +10,11 @@ import { useAuctionsQuery } from "@/hooks/useAuctionsQuery";
 import { useUserStatistics } from "@/hooks/useUserStatistics";
 import { useAuctionMutations, useAuctionPrefetcher } from "@/hooks/useAuctionMutations";
 import { useState, useEffect, useMemo } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
+
+const VALID_TAB_VALUES = ['my-auctions', 'bidding', 'won'] as const;
+
+type TabValue = typeof VALID_TAB_VALUES[number];
 
 interface AuctionsResponse {
   auctions: AuctionData[];
@@ -25,8 +30,15 @@ export default function ProfilePage() {
   const { user, isLoggingOut } = useAuth();
   const { deleteAuction } = useAuctionMutations();
   const { prefetchAuctions } = useAuctionPrefetcher();
+  const searchParams = useSearchParams();
+  const router = useRouter();
 
-  const [activeTab, setActiveTab] = useState<string>("my-auctions");
+  const urlFilter = searchParams.get('filter');
+  const [activeTab, setActiveTab] = useState<TabValue>(() => {
+    return VALID_TAB_VALUES.includes(urlFilter as TabValue)
+      ? urlFilter as TabValue
+      : 'my-auctions';
+  });
   const [editingAuction, setEditingAuction] = useState<AuctionData | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
 
@@ -89,6 +101,21 @@ export default function ProfilePage() {
     return () => clearTimeout(timer);
   }, [activeTab, prefetchAuctions]);
 
+  useEffect(() => {
+    const urlFilter = searchParams.get('filter');
+    const validTab = VALID_TAB_VALUES.includes(urlFilter as TabValue)
+      ? urlFilter as TabValue
+      : 'my-auctions';
+
+    if (!urlFilter) {
+      updateURL('my-auctions');
+    }
+
+    if (validTab !== activeTab) {
+      setActiveTab(validTab);
+    }
+  }, [searchParams, activeTab]);
+
   const handleEditAuction = (auctionId: string) => {
     const auction = myAuctions?.find(a => a.id === auctionId);
     if (auction) {
@@ -126,6 +153,12 @@ export default function ProfilePage() {
     updatedAt: auction.updatedAt || new Date().toISOString(),
   }), []);
 
+  const updateURL = (tabValue: string) => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.set('filter', tabValue);
+    router.replace(`/profile?${params.toString()}`);
+  };
+
   const handleDeleteAuction = async (auctionId: string) => {
     try {
       await deleteAuction(auctionId);
@@ -136,7 +169,12 @@ export default function ProfilePage() {
   };
 
   const handleTabChange = (value: string) => {
-    setActiveTab(value);
+    if (VALID_TAB_VALUES.includes(value as TabValue)) {
+      const tabValue = value as TabValue;
+      setActiveTab(tabValue);
+
+      updateURL(tabValue);
+    }
 
     if (isEditDialogOpen) {
       setIsEditDialogOpen(false);
@@ -199,7 +237,7 @@ export default function ProfilePage() {
           </Card>
         </div>
 
-        <Tabs defaultValue="my-auctions" onValueChange={handleTabChange} className="w-full h-[calc(100%-286px)]">
+        <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full h-[calc(100%-286px)]">
           <div className="flex justify-center">
             <TabsList className="mb-4">
               <TabsTrigger value="my-auctions">My auctions</TabsTrigger>
