@@ -1,9 +1,11 @@
+// Legacy validation functions - consider using useAuctionValidation hook instead
 import { AuctionFormData, FormValidationErrors, EditAuctionFormData } from '@/types/auction';
 import { createMidnightUTCDate } from './dateUtils';
 import { AUCTION_VALIDATION, VALIDATION_PATTERNS } from '@/constants/validation';
 
-
+// Keep these for backward compatibility but recommend using useAuctionValidation hook
 export function validateAuctionForm(formData: AuctionFormData): FormValidationErrors {
+  console.warn('validateAuctionForm is deprecated. Use useAuctionValidation hook instead.');
   const errors: FormValidationErrors = {};
 
   if (!formData.title || formData.title.trim().length === 0) {
@@ -105,6 +107,7 @@ function validateImage(image: File): string | null {
 
 
 export function validateEditAuctionForm(formData: EditAuctionFormData): FormValidationErrors {
+  console.warn('validateEditAuctionForm is deprecated. Use useAuctionValidation hook instead.');
   const errors: FormValidationErrors = {};
 
   if (!formData.title || formData.title.trim().length === 0) {
@@ -144,5 +147,5 @@ export function validateProfilePicture(image: File): string | null {
     return imageError;
   }
 
-  return null; 
+  return null;
 }
