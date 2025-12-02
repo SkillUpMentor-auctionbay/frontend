@@ -6,9 +6,10 @@ import { Button } from "@/components/ui/primitives/button";
 import { InputField } from "@/components/ui/primitives/input";
 import { TextAreaField } from "@/components/ui/primitives/textarea-field";
 import { useCreateAuction } from "@/hooks/useCreateAuction";
-import { AuctionFormData, FormValidationErrors } from "@/types/auction";
-import { createMidnightUTCDate } from "@/utils/dateUtils";
+import { AuctionFormData, AuctionError } from "@/types/auction";
 import { AuctionImageUpload } from "./auction-image-upload";
+import { useAuctionImage } from "@/hooks/useAuctionImage";
+import { useAuctionValidation } from "@/hooks/useAuctionValidation";
 
 export interface AddAuctionCardProps {
   className?: string;
@@ -16,10 +17,9 @@ export interface AddAuctionCardProps {
   onCancel?: () => void;
 }
 
-
 const AddAuctionCard = React.forwardRef<HTMLDivElement, AddAuctionCardProps>(
   ({ className, onSubmit, onCancel, ...props }, ref) => {
-    const { createAuction, isLoading, error, validationErrors, hasValidationErrors, reset } = useCreateAuction();
+    const { createAuction, isLoading, error, validationErrors, hasValidationErrors } = useCreateAuction();
 
     const [formData, setFormData] = React.useState<AuctionFormData>({
       title: "",
@@ -27,97 +27,39 @@ const AddAuctionCard = React.forwardRef<HTMLDivElement, AddAuctionCardProps>(
       startingPrice: "",
       endDate: "",
     });
-    const [imagePreview, setImagePreview] = React.useState<string | null>(null);
-    const [hiddenValidationErrors, setHiddenValidationErrors] = React.useState<Set<string>>(new Set());
+
+    const { clearFieldError, validateField } = useAuctionValidation('create');
+
+    // Use shared image hook (no existing image for create)
+    const { imageState, handleImageSelect, handleImageDelete } = useAuctionImage();
 
     const handleInputChange = (field: keyof AuctionFormData, value: string) => {
       setFormData(prev => ({ ...prev, [field]: value }));
 
-      if (hasValidationErrors) {
-        const newValue = value.trim();
-        let shouldClearForThisField = false;
-
-        switch (field) {
-          case 'title':
-            shouldClearForThisField = newValue.length > 0 && newValue.length <= 200;
-            break;
-          case 'description':
-            shouldClearForThisField = newValue.length > 0 && newValue.length <= 2000;
-            break;
-          case 'startingPrice':
-            {
-              const priceStr = value.trim();
-              const price = Number.parseFloat(priceStr);
-              shouldClearForThisField = priceStr.length > 0 &&
-                                    /^-?\d*\.?\d*$/.test(priceStr) &&
-                                    !Number.isNaN(price) &&
-                                    price > 0 &&
-                                    price <= 999999.99;
-              break;
-            }
-          case 'endDate':
-            { 
-              const endDate = createMidnightUTCDate(value);
-              shouldClearForThisField = !!endDate && endDate > new Date();
-              break;
-            }
-        }
-
-        if (shouldClearForThisField) {
-          setHiddenValidationErrors(prev => new Set([...prev, field]));
-        }
-      }
+      // Clear validation error for this field when user types
+      clearFieldError(field);
     };
 
     const handleImageChange = (file: File) => {
+      handleImageSelect(file);
       setFormData(prev => ({ ...prev, image: file }));
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setImagePreview(reader.result as string);
-      };
-      reader.readAsDataURL(file);
     };
 
     const handleSubmit = async () => {
-      await createAuction(formData);
+      try {
+        await createAuction(formData);
 
-      setFormData({
-        title: "",
-        description: "",
-        startingPrice: "",
-        endDate: "",
-      });
-      setImagePreview(null);
-
-      if (onSubmit) {
-        onSubmit(formData);
+        if (onSubmit) {
+          onSubmit(formData);
+        }
+      } catch (error) {
+        if ((error as AuctionError)?.code === 'VALIDATION_ERROR') {
+          return;
+        }
+        // For other errors, let them bubble up or handle as needed
+        throw error;
       }
     };
-
-    const visibleValidationErrors = React.useMemo(() => {
-      const errors: FormValidationErrors = {};
-
-      if (!validationErrors) return errors;
-
-      for (const key of Object.keys(validationErrors) as (keyof FormValidationErrors)[]) {
-        if (!hiddenValidationErrors.has(key)) {
-          errors[key] = validationErrors[key];
-        }
-      }
-      return errors;
-    }, [validationErrors, hiddenValidationErrors]);
-
-    React.useEffect(() => {
-      if (hasValidationErrors) {
-        setHiddenValidationErrors(new Set());
-      }
-    }, [hasValidationErrors]);
-
-    React.useEffect(() => {
-      if (error && !hasValidationErrors) {
-        reset();
-      }
-    }, [formData, error, hasValidationErrors, reset]);
 
     return (
       <div
@@ -128,14 +70,14 @@ const AddAuctionCard = React.forwardRef<HTMLDivElement, AddAuctionCardProps>(
         )}
         {...props}
       >
-        <AuctionImageUpload
-          imagePreview={imagePreview}
+              <AuctionImageUpload
+          imagePreview={imageState.preview}
+          existingImageUrl={imageState.existingUrl}
           onImageChange={handleImageChange}
-          onImageDelete={() => {
-            setImagePreview(null);
-            setFormData(prev => ({ ...prev, image: undefined }));
-          }}
-          validationError={visibleValidationErrors?.image}
+          onImageDelete={handleImageDelete}
+          validationError={undefined}
+          imageError={imageState.error}
+          showAddButton={true}
         />
 
         <div className="flex flex-col gap-4">
@@ -145,12 +87,9 @@ const AddAuctionCard = React.forwardRef<HTMLDivElement, AddAuctionCardProps>(
               placeholder="Write item name here"
               value={formData.title}
               onChange={(e) => handleInputChange("title", e.target.value)}
-              className={cn(
-                visibleValidationErrors?.title && "border-red-500 focus:border-red-500"
-              )}
             />
-            {visibleValidationErrors?.title && (
-              <p className="text-red-500 text-sm mt-1">{visibleValidationErrors.title}</p>
+            {validationErrors?.title && (
+              <p className="text-red-500 text-sm mt-1">{validationErrors.title}</p>
             )}
           </div>
 
@@ -162,54 +101,52 @@ const AddAuctionCard = React.forwardRef<HTMLDivElement, AddAuctionCardProps>(
               onChange={(e) => handleInputChange("description", e.target.value)}
               rows={5}
             />
-            {visibleValidationErrors?.description && (
-              <p className="text-red-500 text-sm mt-1">{visibleValidationErrors.description}</p>
+            {validationErrors?.description && (
+              <p className="text-red-500 text-sm mt-1">{validationErrors.description}</p>
             )}
           </div>
 
           <div className="flex gap-4">
-              <div>
-                <InputField
-                  label="Starting price"
-                  type="number"
-                  placeholder="Price"
-                  value={formData.startingPrice}
-                  onChange={(e) => handleInputChange("startingPrice", e.target.value)}
-                  rightIcon="Eur"
-                  rightIconClickable={false}
-                  className={cn(
-                    "w-42",
-                    visibleValidationErrors?.startingPrice && "border-red-500 focus:border-red-500"
-                  )}
-                />
-                {visibleValidationErrors?.startingPrice && (
-                  <p className="text-red-500 text-sm mt-1">{visibleValidationErrors.startingPrice}</p>
+            <div>
+              <InputField
+                label="Starting price"
+                type="number"
+                placeholder="Price"
+                value={formData.startingPrice}
+                onChange={(e) => handleInputChange("startingPrice", e.target.value)}
+                rightIcon="Eur"
+                rightIconClickable={false}
+                className={cn(
+                  "w-42",
+                  validateField('startingPrice', formData.startingPrice, formData)
                 )}
-              </div>
+              />
+              {validationErrors?.startingPrice && (
+                <p className="text-red-500 text-sm mt-1">{validationErrors.startingPrice}</p>
+              )}
+            </div>
 
-              <div>
-                <InputField
-                  label="End date"
-                  type="text"
-                  placeholder="dd.mm.yyyy"
-                  value={formData.endDate}
-                  onChange={(e) => handleInputChange("endDate", e.target.value)}
-                  rightIcon="Time"
-                  rightIconClickable={false}
-                  className={cn(
-                    "w-42",
-                    visibleValidationErrors?.endDate && "border-red-500 focus:border-red-500"
-                  )}
-                />
-                {visibleValidationErrors?.endDate && (
-                  <p className="text-red-500 text-sm mt-1">{visibleValidationErrors.endDate}</p>
-                )}
-              </div>
+            <div>
+              <InputField
+                label="End date"
+                type="text"
+                placeholder="dd.mm.yyyy"
+                value={formData.endDate}
+                onChange={(e) => handleInputChange("endDate", e.target.value)}
+                rightIcon="Time"
+                rightIconClickable={false}
+                className="w-42"
+              />
+              {validationErrors?.endDate && (
+                <p className="text-red-500 text-sm mt-1">{validationErrors.endDate}</p>
+              )}
+            </div>
           </div>
+        </div>
 
-        {visibleValidationErrors?.general && (
+        {error?.message && !hasValidationErrors && (
           <div className="bg-red-50 border border-red-200 rounded-lg p-3">
-            <p className="text-red-600 text-sm font-medium">{visibleValidationErrors.general}</p>
+            <p className="text-red-600 text-sm font-medium">{error.message}</p>
           </div>
         )}
 
@@ -225,10 +162,17 @@ const AddAuctionCard = React.forwardRef<HTMLDivElement, AddAuctionCardProps>(
             variant="primary"
             onClick={handleSubmit}
             disabled={isLoading}
+            className="relative"
           >
-            {isLoading ? "Creating..." : "Start auction"}
+            {isLoading ? (
+              <div className="flex items-center gap-2">
+                <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
+                Creating...
+              </div>
+            ) : (
+              "Start auction"
+            )}
           </Button>
-        </div>
         </div>
       </div>
     );

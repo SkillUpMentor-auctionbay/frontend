@@ -6,10 +6,10 @@ import { Button } from "@/components/ui/primitives/button";
 import { InputField } from "@/components/ui/primitives/input";
 import { TextAreaField } from "@/components/ui/primitives/textarea-field";
 import { useEditAuction } from "@/hooks/useEditAuction";
-import { EditAuctionFormData, AuctionData } from "@/types/auction";
-import { getImageUrl } from "@/lib/image-url";
-import { ImageFallback } from "@/components/ui/primitives/image-fallback";
+import { EditAuctionFormData, AuctionData, AuctionError } from "@/types/auction";
 import { AuctionImageUpload } from "./auction-image-upload";
+import { useAuctionImage } from "@/hooks/useAuctionImage";
+import { useAuctionValidation } from "@/hooks/useAuctionValidation";
 
 const formatEuropeanDate = (dateString: string): string => {
   if (!dateString) return '';
@@ -38,6 +38,23 @@ export interface EditAuctionCardProps {
 
 const EditAuctionCard = React.forwardRef<HTMLDivElement, EditAuctionCardProps>(
   ({ className, auction, onSubmit, onCancel, isEditing = false, ...props }, ref) => {
+    // Always call hooks first, before any early returns
+    const { editAuction, isLoading, validationErrors } = useEditAuction();
+    const { clearFieldError } = useAuctionValidation('edit');
+    const { imageState, handleImageSelect, handleImageDelete: deleteImage } = useAuctionImage(auction.imageUrl, 'edit');
+
+    // Initialize form data using key-based re-initialization pattern
+    // Use safe defaults if auction is undefined
+    const [formData, setFormData] = React.useState<EditAuctionFormData>(() => ({
+      id: auction?.id || '',
+      title: auction?.title || '',
+      description: auction?.description || '',
+      startingPrice: auction?.startingPrice?.toString() || '0',
+      endDate: auction?.endTime ? formatEuropeanDate(auction.endTime) : '',
+      existingImageUrl: auction?.imageUrl,
+    }));
+
+    // Early returns after all hooks are called
     if (!auction) {
       return <div className="p-4 text-red-500">Error: No auction data available for editing.</div>;
     }
@@ -50,69 +67,20 @@ const EditAuctionCard = React.forwardRef<HTMLDivElement, EditAuctionCardProps>(
       );
     }
 
-    const { editAuction, isLoading, validationErrors } = useEditAuction();
-
-    const [formData, setFormData] = React.useState<EditAuctionFormData>(() => ({
-      id: auction.id,
-      title: auction.title,
-      description: auction.description,
-      startingPrice: auction.startingPrice?.toString() || '0',
-      endDate: auction.endTime ? formatEuropeanDate(auction.endTime) : '',
-      existingImageUrl: auction.imageUrl,
-    }));
-
-    React.useEffect(() => {
-      if (auction && (auction.id !== formData.id || auction.description !== formData.description)) {
-        setFormData({
-          id: auction.id,
-          title: auction.title || '',
-          description: auction.description || '',
-          startingPrice: auction.startingPrice?.toString() || '0',
-          endDate: auction.endTime ? formatEuropeanDate(auction.endTime) : '',
-          existingImageUrl: auction.imageUrl || undefined,
-        });
-      }
-    }, [auction]);
-
-    const [imagePreview, setImagePreview] = React.useState<string | null>(() => {
-      const url = auction.imageUrl ? getImageUrl(auction.imageUrl) : null;
-      return url || null;
-    });
-
-    const [imageError, setImageError] = React.useState(false);
-
-    React.useEffect(() => {
-      if (auction?.imageUrl) {
-        const url = getImageUrl(auction.imageUrl);
-        setImagePreview(url || null);
-        setImageError(false);
-      } else {
-        setImagePreview(null);
-        setImageError(false);
-      }
-    }, [auction?.imageUrl]);
-
     const handleInputChange = (field: keyof EditAuctionFormData, value: string) => {
       setFormData(prev => ({ ...prev, [field]: value }));
+
+      // Clear validation error for this field when user types
+      clearFieldError(field);
     };
 
-    const handleImageError = React.useCallback(() => {
-      setImageError(true);
-    }, []);
-
     const handleImageChange = (file: File) => {
+      handleImageSelect(file);
       setFormData(prev => ({ ...prev, image: file }));
-      setImageError(false);
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setImagePreview(reader.result as string);
-      };
-      reader.readAsDataURL(file);
     };
 
     const handleImageDelete = () => {
-      setImagePreview(null);
-      setImageError(false);
+      deleteImage();
       setFormData(prev => ({
         ...prev,
         image: undefined,
@@ -141,7 +109,7 @@ const EditAuctionCard = React.forwardRef<HTMLDivElement, EditAuctionCardProps>(
           onSubmit({ ...formData, success: true });
         }
       } catch (error) {
-        if ((error as any)?.code === 'VALIDATION_ERROR') {
+        if ((error as AuctionError)?.code === 'VALIDATION_ERROR') {
           return;
         }
       }
@@ -159,12 +127,12 @@ const EditAuctionCard = React.forwardRef<HTMLDivElement, EditAuctionCardProps>(
       >
   
         <AuctionImageUpload
-          imagePreview={imagePreview}
-          existingImageUrl={formData.existingImageUrl}
+          imagePreview={imageState.preview}
+          existingImageUrl={imageState.existingUrl}
           onImageChange={handleImageChange}
           onImageDelete={handleImageDelete}
-          validationError={validationErrors?.image}
-          imageError={imageError}
+          validationError={imageState.validationError || validationErrors?.image}
+          imageError={imageState.error}
         />
 
         <div className="flex flex-col gap-4">
@@ -174,6 +142,7 @@ const EditAuctionCard = React.forwardRef<HTMLDivElement, EditAuctionCardProps>(
               placeholder="Write item name here"
               value={formData.title}
               onChange={(e) => handleInputChange("title", e.target.value)}
+              disabled={!isEditing}
             />
             {validationErrors?.title && (
               <p className="text-red-500 text-sm mt-1">{validationErrors.title}</p>
@@ -187,6 +156,7 @@ const EditAuctionCard = React.forwardRef<HTMLDivElement, EditAuctionCardProps>(
               value={formData.description}
               onChange={(e) => handleInputChange("description", e.target.value)}
               rows={5}
+              disabled={!isEditing}
             />
             {validationErrors?.description && (
               <p className="text-red-500 text-sm mt-1">{validationErrors.description}</p>
@@ -203,6 +173,7 @@ const EditAuctionCard = React.forwardRef<HTMLDivElement, EditAuctionCardProps>(
               rightIcon="Time"
               rightIconClickable={false}
               className="w-full"
+              disabled={!isEditing}
             />
             {validationErrors?.endDate && (
               <p className="text-red-500 text-sm mt-1">{validationErrors.endDate}</p>
@@ -219,9 +190,9 @@ const EditAuctionCard = React.forwardRef<HTMLDivElement, EditAuctionCardProps>(
             Discard changes
           </Button>
           <Button
-            variant="secondary"
+            variant={isEditing ? "secondary" : "primary"}
             onClick={handleSubmit}
-            disabled={isLoading}
+            disabled={isLoading || !isEditing}
             className="relative"
           >
             {isLoading ? (

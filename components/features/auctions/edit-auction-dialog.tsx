@@ -66,6 +66,7 @@ export function EditAuctionDialog({
               auction={auction}
               onSubmit={handleSubmit}
               onCancel={handleCancel}
+              isEditing={true}
               className="border-none bg-transparent p-0 shadow-none"
             />
           ) : (
