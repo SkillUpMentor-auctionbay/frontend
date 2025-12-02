@@ -10,6 +10,7 @@ import { AuctionFormData, AuctionError } from "@/types/auction";
 import { AuctionImageUpload } from "./auction-image-upload";
 import { useAuctionImage } from "@/hooks/useAuctionImage";
 import { useAuctionValidation } from "@/hooks/useAuctionValidation";
+import { DatePicker } from "@/components/ui/primitives/date-picker";
 
 export interface AddAuctionCardProps {
   className?: string;
@@ -126,21 +127,14 @@ const AddAuctionCard = React.forwardRef<HTMLDivElement, AddAuctionCardProps>(
               )}
             </div>
 
-            <div>
-              <InputField
-                label="End date"
-                type="text"
-                placeholder="dd.mm.yyyy"
-                value={formData.endDate}
-                onChange={(e) => handleInputChange("endDate", e.target.value)}
-                rightIcon="Time"
-                rightIconClickable={false}
-                className="w-42"
-              />
-              {validationErrors?.endDate && (
-                <p className="text-red-500 text-sm mt-1">{validationErrors.endDate}</p>
-              )}
-            </div>
+            <DatePicker
+              value={formData.endDate}
+              onChange={(value) => handleInputChange("endDate", value)}
+              label="End date"
+              isLoading={isLoading}
+              error={validationErrors?.endDate}
+              minDate={new Date(new Date().setHours(0, 0, 0, 0))}
+            />
           </div>
         </div>
 

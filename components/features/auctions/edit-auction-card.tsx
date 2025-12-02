@@ -11,13 +11,7 @@ import { AuctionImageUpload } from "./auction-image-upload";
 import { useAuctionImage } from "@/hooks/useAuctionImage";
 import { useAuctionValidation } from "@/hooks/useAuctionValidation";
 
-import { format, parse, isValid } from "date-fns";
-import { Calendar as CalendarComponent } from "@/components/ui/primitives/calendar";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/overlays/popover";
+import { DatePicker } from "@/components/ui/primitives/date-picker";
 
 
 const formatEuropeanDate = (dateString: string): string => {
@@ -52,22 +46,7 @@ const EditAuctionCard = React.forwardRef<HTMLDivElement, EditAuctionCardProps>(
     const { clearFieldError } = useAuctionValidation('edit');
     const { imageState, handleImageSelect, handleImageDelete: deleteImage } = useAuctionImage(auction.imageUrl, 'edit');
 
-    // related to date picker
-    const [endDateOpen, setEndDateOpen] = React.useState(false);
-
-    // Helper function to parse dd.MM.yyyy format
-    const parseDate = (dateString: string): Date | undefined => {
-      if (!dateString) return undefined;
-      const parsed = parse(dateString, "dd.MM.yyyy", new Date());
-      return isValid(parsed) ? parsed : undefined;
-    };
-
-    // Helper function to format Date to dd.mm.yyyy
-    const formatDate = (date: Date | undefined): string => {
-      if (!date) return "";
-      return format(date, "dd.MM.yyyy");
-    };
-
+    
 
 
     // Initialize form data using key-based re-initialization pattern
@@ -189,42 +168,15 @@ const EditAuctionCard = React.forwardRef<HTMLDivElement, EditAuctionCardProps>(
               <p className="text-red-500 text-sm mt-1">{validationErrors.description}</p>
             )}
           </div>
-          <Popover open={endDateOpen} onOpenChange={setEndDateOpen}>
-          <PopoverTrigger asChild>
-            <div className="w-full">
-              <InputField
-                label="End date"
-                type="text"
-                placeholder="dd.MM.yyyy"
-                value={formData.endDate}
-                onChange={(e) => handleInputChange("endDate", e.target.value)}
-                rightIcon="Time"
-                rightIconClickable={false}
-                className="w-full"
-                disabled={!isEditing || isLoading}
-              />
-              {validationErrors?.endDate && (
-                <p className="text-red-500 text-sm mt-1">{validationErrors.endDate}</p>
-              )}
-            </div>
-          </PopoverTrigger>
-          <PopoverContent className="p-0" align="start" side="top" sideOffset={-26}>
-      <CalendarComponent
-        mode="single"
-        selected={parseDate(formData.endDate)}
-        defaultMonth={parseDate(formData.endDate) || new Date()}
-        onSelect={(date) => {
-          handleInputChange("endDate", date ? formatDate(date) : "");
-          setEndDateOpen(false);
-        }}
-        disabled={isLoading || [
-          {
-            before: new Date(new Date().setHours(0, 0, 0, 0))
-          }
-        ]}
-      />
-    </PopoverContent>
-          </Popover>
+          <DatePicker
+            value={formData.endDate}
+            onChange={(value) => handleInputChange("endDate", value)}
+            label="End date"
+            disabled={!isEditing}
+            isLoading={isLoading}
+            error={validationErrors?.endDate}
+            minDate={new Date(new Date().setHours(0, 0, 0, 0))}
+          />
         </div>
 
         <div className="flex justify-end gap-4">
