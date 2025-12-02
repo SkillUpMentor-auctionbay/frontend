@@ -2,7 +2,7 @@
 
 import { useMutation } from "@tanstack/react-query";
 import { userAPI } from "@/services/api";
-import { validateProfilePicture } from "@/utils/auctionValidation";
+import { useAuctionValidation } from "@/hooks/useAuctionValidation";
 import { normalizeAuctionError } from "@/utils/errorUtils";
 
 export interface ProfilePictureUploadError {
@@ -18,6 +18,7 @@ export interface UseProfilePictureUploadOptions {
 
 export function useProfilePictureUpload(options: UseProfilePictureUploadOptions = {}) {
   const { onSuccess, onError } = options;
+  const { validateImage } = useAuctionValidation('create');
 
   const uploadMutation = useMutation<
     { imageUrl: string },
@@ -25,7 +26,7 @@ export function useProfilePictureUpload(options: UseProfilePictureUploadOptions 
     File
   >({
     mutationFn: async (file) => {
-      const validationError = validateProfilePicture(file);
+      const validationError = validateImage(file);
       if (validationError) {
         const error: ProfilePictureUploadError = {
           message: validationError,

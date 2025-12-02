@@ -9,7 +9,7 @@ import {
   AuctionFormData,
   FormValidationErrors,
 } from "../types/auction";
-import { validateAuctionForm } from "@/utils/auctionValidation";
+import { useAuctionValidation } from "@/hooks/useAuctionValidation";
 import { normalizeAuctionError } from "@/utils/errorUtils";
 import { createMidnightUTCDate } from "@/utils/dateUtils";
 import { AUCTION_VALIDATION } from "@/constants/validation";
@@ -32,10 +32,11 @@ function convertFormDataToRequest(formData: AuctionFormData): CreateAuctionReque
 
 export function useCreateAuction() {
   const queryClient = useQueryClient();
+  const { validateEntireForm } = useAuctionValidation('create');
 
   const createAuctionMutation = useMutation<CreateAuctionResponse, AuctionError, { formData: AuctionFormData }>({
     mutationFn: async ({ formData }) => {
-      const validationErrors = validateAuctionForm(formData);
+      const validationErrors = validateEntireForm(formData);
       if (Object.keys(validationErrors).length > 0) {
         const error: AuctionError = {
           message: AUCTION_VALIDATION.MESSAGES.VALIDATION_FAILED,

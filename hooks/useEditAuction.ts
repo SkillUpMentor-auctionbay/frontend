@@ -9,7 +9,7 @@ import {
   EditAuctionFormData,
   FormValidationErrors,
 } from "../types/auction";
-import { validateEditAuctionForm } from "@/utils/auctionValidation";
+import { useAuctionValidation } from "@/hooks/useAuctionValidation";
 import { normalizeAuctionError } from "@/utils/errorUtils";
 import { createMidnightUTCDate } from "@/utils/dateUtils";
 import { AUCTION_VALIDATION } from "@/constants/validation";
@@ -50,10 +50,11 @@ function convertEditFormDataToRequest(formData: EditAuctionFormData, originalAuc
 
 export function useEditAuction() {
   const queryClient = useQueryClient();
+  const { validateEntireForm } = useAuctionValidation('edit');
 
   const editAuctionMutation = useMutation<UpdateAuctionResponse, AuctionError, { auctionId: string; formData: EditAuctionFormData; originalAuctionData?: any }>({
     mutationFn: async ({ auctionId, formData, originalAuctionData }) => {
-      const validationErrors = validateEditAuctionForm(formData);
+      const validationErrors = validateEntireForm(formData);
       if (Object.keys(validationErrors).length > 0) {
         const error: AuctionError = {
           message: AUCTION_VALIDATION.MESSAGES.VALIDATION_FAILED,

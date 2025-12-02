@@ -110,6 +110,7 @@ export function useAuctionValidation(mode: 'create' | 'edit') {
     hasValidationErrors,
     hiddenValidationErrors,
     setHiddenValidationErrors,
+    validateImage,
   };
 }
 
