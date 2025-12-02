@@ -3,7 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useEffect } from "react";
 import { useRouter, usePathname } from "next/navigation";
-import { Button } from "@/components/ui";
+import { Button, Logo } from "@/components/ui";
 import { useAuth } from "@/contexts/auth-context";
 
 export default function Home() {
@@ -19,9 +19,7 @@ export default function Home() {
   return (
     <div className="flex flex-col w-screen h-screen justify-between items-center">
       <div className="w-full flex justify-between items-center py-5 px-8 ">
-        <div className="rounded-full bg-primary p-4">
-              <Image src="/logo.svg" width={32} height={32} alt="Auction Bay Logo" />
-        </div>
+        <Logo size="md" />
         <div className=" flex items-center justify-between w-[172px]">
             <Link href="/login" className="font-bold text-base leading-6 w-12 hover:underline">Log in</Link>
             <p className="font-light text-base leading-6 w-4 text-black">or</p>
