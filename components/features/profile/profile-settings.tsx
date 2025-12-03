@@ -1,16 +1,15 @@
 'use client';
 
 import { Button } from '@/components/ui/primitives/button';
-import { InputField } from '@/components/ui/primitives/input';
 import { useAuth } from '@/contexts/auth-context';
 import { usePasswordChange, type PasswordData } from '@/hooks/usePasswordChange';
+import { useProfileData, type ProfileData } from '@/hooks/useProfileData';
 import { useProfilePicture } from '@/hooks/useProfilePicture';
 import { useProfilePictureUpload } from '@/hooks/useProfilePictureUpload';
 import { PasswordChangeForm } from './password-change-form';
+import { ProfileForm } from './profile-form';
 import { ProfilePictureForm } from './profile-picture-form';
-import { userAPI } from '@/services/api';
 import { generateInitials } from '@/utils/imageUtils';
-import { useQueryClient } from '@tanstack/react-query';
 import * as React from 'react';
 
 export interface ProfileSettingsProps {
@@ -20,11 +19,7 @@ export interface ProfileSettingsProps {
   onViewChange?: (view: ViewType) => void;
 }
 
-export interface ProfileSettingsData {
-  name: string;
-  surname: string;
-  email: string;
-}
+export type ProfileSettingsData = ProfileData;
 
 export type ViewType = 'profile' | 'password' | 'picture';
 
@@ -43,20 +38,25 @@ const ProfileSettings = React.forwardRef<HTMLDivElement, ProfileSettingsProps>(
   ({ className, onSubmit, onCancel, onViewChange, ...props }, ref) => {
     const { user } = useAuth();
     const { data: profilePictureUrl, isLoading, error } = useProfilePicture();
-    const queryClient = useQueryClient();
 
     const [currentView, setCurrentView] = React.useState<ViewType>('profile');
-    const [formData, setFormData] = React.useState<ProfileSettingsData>({
-      name: user?.name || '',
-      surname: user?.surname || '',
-      email: user?.email || '',
-    });
 
-    const [errors, setErrors] = React.useState<Partial<ProfileSettingsData>>({});
-    const [showNameError, setShowNameError] = React.useState(false);
-    const [showSurnameError, setShowSurnameError] = React.useState(false);
-    const [showEmailError, setShowEmailError] = React.useState(false);
-    const [isSubmitting, setIsSubmitting] = React.useState(false);
+    const {
+      formData,
+      errors,
+      showNameError,
+      showSurnameError,
+      showEmailError,
+      isSubmitting,
+      handleInputChange,
+      submitProfileUpdate,
+      resetProfileForm,
+    } = useProfileData({
+      user,
+      onSuccess: () => {
+        onCancel?.();
+      },
+    });
 
     const {
       passwordData,
@@ -91,25 +91,13 @@ const ProfileSettings = React.forwardRef<HTMLDivElement, ProfileSettingsProps>(
 
     const fileInputRef = React.useRef<HTMLInputElement>(null);
 
-    const handleInputChange =
-      (field: keyof ProfileSettingsData) =>
-      (e: React.ChangeEvent<HTMLInputElement>) => {
-        setFormData((prev) => ({
-          ...prev,
-          [field]: e.target.value,
-        }));
-
-        if (field === 'name') setShowNameError(false);
-        if (field === 'surname') setShowSurnameError(false);
-        if (field === 'email') setShowEmailError(false);
-      };
-
+    
     const handleViewChange = (view: ViewType) => {
       setCurrentView(view);
-      setErrors({});
-      setShowNameError(false);
-      setShowSurnameError(false);
-      setShowEmailError(false);
+
+      if (view !== 'profile') {
+        resetProfileForm();
+      }
 
       if (view !== 'password') {
         resetPasswordForm();
@@ -133,86 +121,26 @@ const ProfileSettings = React.forwardRef<HTMLDivElement, ProfileSettingsProps>(
       fileInputRef.current?.click();
     };
 
-    const validateForm = (): boolean => {
-      let isValid = true;
-
-      if (!formData.name.trim()) {
-        setShowNameError(true);
-        isValid = false;
-      }
-
-      if (!formData.surname.trim()) {
-        setShowSurnameError(true);
-        isValid = false;
-      }
-
-      if (!formData.email.trim()) {
-        setShowEmailError(true);
-        isValid = false;
-      } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-        setShowEmailError(true);
-        isValid = false;
-      }
-
-      return isValid;
-    };
-
+    
     
     const handleSubmit = async (e: React.FormEvent) => {
       e.preventDefault();
 
-      try {
-        if (currentView === 'profile') {
-          const isDataUnchanged =
-            formData.name === user?.name &&
-            formData.surname === user?.surname &&
-            formData.email === user?.email;
-
-          if (isDataUnchanged) {
-            onCancel?.();
-            return;
-          }
-
-          if (!validateForm()) {
-            return;
-          }
-
-          setIsSubmitting(true);
-
-          await userAPI.updateUserProfile({
-            name: formData.name,
-            surname: formData.surname,
-            email: formData.email,
-          });
-
-          queryClient.invalidateQueries({ queryKey: ['user'] });
-
-          onCancel?.();
-        } else if (currentView === 'password') {
-          await submitPasswordChange();
-        } else if (currentView === 'picture' && selectedFile) {
-          setIsSubmitting(true);
-          uploadSelectedFile();
-        } else if (currentView === 'picture') {
-          onCancel?.();
-        }
-      } finally {
-        setIsSubmitting(false);
+      if (currentView === 'profile') {
+        await submitProfileUpdate();
+      } else if (currentView === 'password') {
+        await submitPasswordChange();
+      } else if (currentView === 'picture' && selectedFile) {
+        uploadSelectedFile();
+      } else if (currentView === 'picture') {
+        onCancel?.();
       }
     };
 
     const handleCancel = () => {
-      setFormData({
-        name: user?.name || '',
-        surname: user?.surname || '',
-        email: user?.email || '',
-      });
       setCurrentView('profile');
-      setErrors({});
-      setShowNameError(false);
-      setShowSurnameError(false);
-      setShowEmailError(false);
 
+      resetProfileForm();
       resetPasswordForm();
       clearPreview();
 
@@ -225,57 +153,16 @@ const ProfileSettings = React.forwardRef<HTMLDivElement, ProfileSettingsProps>(
           <div className="flex flex-col gap-6">
             {currentView === 'profile' && (
               <>
-                <div className="flex flex-col gap-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <InputField
-                        label="Name"
-                        value={formData.name}
-                        onChange={handleInputChange('name')}
-                        placeholder="Enter your name"
-                        disabled={isSubmitting || isPasswordSubmitting}
-                      />
-                      {showNameError && (
-                        <p className="text-sm text-coral-50">
-                          Name is required
-                        </p>
-                      )}
-                    </div>
-
-                    <div className="space-y-2">
-                      <InputField
-                        label="Surname"
-                        value={formData.surname}
-                        onChange={handleInputChange('surname')}
-                        placeholder="Enter your surname"
-                        disabled={isSubmitting || isPasswordSubmitting}
-                      />
-                      {showSurnameError && (
-                        <p className="text-sm text-coral-50">
-                          Surname is required
-                        </p>
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="space-y-2">
-                    <InputField
-                      label="Email"
-                      value={formData.email}
-                      onChange={handleInputChange('email')}
-                      placeholder="Enter your email"
-                      type="email"
-                      disabled={isSubmitting || isPasswordSubmitting}
-                    />
-                    {showEmailError && (
-                      <p className="text-sm text-coral-50">
-                        {!formData.email.trim()
-                          ? 'Email is required'
-                          : 'Invalid email format'}
-                      </p>
-                    )}
-                  </div>
-                </div>
+                <ProfileForm
+                  formData={formData}
+                  errors={errors}
+                  showNameError={showNameError}
+                  showSurnameError={showSurnameError}
+                  showEmailError={showEmailError}
+                  isSubmitting={isSubmitting}
+                  disabled={isPasswordSubmitting}
+                  onInputChange={handleInputChange}
+                />
 
                 <div className="flex flex-col gap-4">
                   <span
