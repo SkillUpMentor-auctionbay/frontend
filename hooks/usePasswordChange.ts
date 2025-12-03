@@ -24,12 +24,16 @@ export interface PasswordChangeResult {
   passwordData: PasswordData;
   errors: PasswordErrors;
   isSubmitting: boolean;
-  handlePasswordChange: (field: keyof PasswordData) => (e: ChangeEvent<HTMLInputElement>) => void;
+  handlePasswordChange: (
+    field: keyof PasswordData,
+  ) => (e: ChangeEvent<HTMLInputElement>) => void;
   submitPasswordChange: () => Promise<void>;
   resetPasswordForm: () => void;
 }
 
-export function usePasswordChange(options: PasswordChangeOptions = {}): PasswordChangeResult {
+export function usePasswordChange(
+  options: PasswordChangeOptions = {},
+): PasswordChangeResult {
   const { onSuccess } = options;
 
   const [passwordData, setPasswordData] = useState<PasswordData>({
@@ -62,7 +66,8 @@ export function usePasswordChange(options: PasswordChangeOptions = {}): Password
       passwordData.currentPassword &&
       passwordData.newPassword === passwordData.currentPassword
     ) {
-      newErrors.newPassword = 'New password must be different from current password';
+      newErrors.newPassword =
+        'New password must be different from current password';
       isValid = false;
     }
 
@@ -94,15 +99,14 @@ export function usePasswordChange(options: PasswordChangeOptions = {}): Password
       onSuccess?.();
     },
     onError: (error) => {
-      if (error.message === 'Validation failed') {        
+      if (error.message === 'Validation failed') {
         return;
       }
     },
   });
 
   const handlePasswordChange =
-    (field: keyof PasswordData) =>
-    (e: ChangeEvent<HTMLInputElement>) => {
+    (field: keyof PasswordData) => (e: ChangeEvent<HTMLInputElement>) => {
       const newValue = e.target.value;
       setPasswordData((prev) => ({
         ...prev,

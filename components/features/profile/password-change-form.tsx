@@ -1,14 +1,19 @@
 'use client';
 
 import { InputField } from '@/components/ui/primitives/input';
-import { type PasswordData, type PasswordErrors } from '@/hooks/usePasswordChange';
+import {
+  type PasswordData,
+  type PasswordErrors,
+} from '@/hooks/usePasswordChange';
 import * as React from 'react';
 
 export interface PasswordChangeFormProps {
   passwordData: PasswordData;
   passwordErrors: PasswordErrors;
   isSubmitting: boolean;
-  onPasswordChange: (field: keyof PasswordData) => (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onPasswordChange: (
+    field: keyof PasswordData,
+  ) => (e: React.ChangeEvent<HTMLInputElement>) => void;
   disabled?: boolean;
 }
 
@@ -24,7 +29,7 @@ const PasswordChangeForm = React.forwardRef<
       onPasswordChange,
       disabled = false,
     },
-    ref
+    ref,
   ) => {
     return (
       <div ref={ref}>
@@ -76,7 +81,7 @@ const PasswordChangeForm = React.forwardRef<
         </div>
       </div>
     );
-  }
+  },
 );
 
 PasswordChangeForm.displayName = 'PasswordChangeForm';

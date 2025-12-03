@@ -22,12 +22,16 @@ export interface ProfileDataResult {
   showSurnameError: boolean;
   showEmailError: boolean;
   isSubmitting: boolean;
-  handleInputChange: (field: keyof ProfileData) => (e: ChangeEvent<HTMLInputElement>) => void;
+  handleInputChange: (
+    field: keyof ProfileData,
+  ) => (e: ChangeEvent<HTMLInputElement>) => void;
   submitProfileUpdate: () => Promise<void>;
   resetProfileForm: () => void;
 }
 
-export function useProfileData(options: ProfileDataOptions = {}): ProfileDataResult {
+export function useProfileData(
+  options: ProfileDataOptions = {},
+): ProfileDataResult {
   const { user, onSuccess } = options;
   const queryClient = useQueryClient();
 
@@ -106,8 +110,7 @@ export function useProfileData(options: ProfileDataOptions = {}): ProfileDataRes
   });
 
   const handleInputChange =
-    (field: keyof ProfileData) =>
-    (e: ChangeEvent<HTMLInputElement>) => {
+    (field: keyof ProfileData) => (e: ChangeEvent<HTMLInputElement>) => {
       const newValue = e.target.value;
       setFormData((prev) => ({
         ...prev,

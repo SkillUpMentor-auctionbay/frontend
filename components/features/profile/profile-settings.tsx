@@ -2,15 +2,18 @@
 
 import { Button } from '@/components/ui/primitives/button';
 import { useAuth } from '@/contexts/auth-context';
-import { usePasswordChange, type PasswordData } from '@/hooks/usePasswordChange';
+import {
+  usePasswordChange,
+  type PasswordData,
+} from '@/hooks/usePasswordChange';
 import { useProfileData, type ProfileData } from '@/hooks/useProfileData';
 import { useProfilePicture } from '@/hooks/useProfilePicture';
 import { useProfilePictureUpload } from '@/hooks/useProfilePictureUpload';
+import { generateInitials } from '@/utils/imageUtils';
+import * as React from 'react';
 import { PasswordChangeForm } from './password-change-form';
 import { ProfileForm } from './profile-form';
 import { ProfilePictureForm } from './profile-picture-form';
-import { generateInitials } from '@/utils/imageUtils';
-import * as React from 'react';
 
 export interface ProfileSettingsProps {
   className?: string;
@@ -71,7 +74,6 @@ const ProfileSettings = React.forwardRef<HTMLDivElement, ProfileSettingsProps>(
       },
     });
 
-    
     const {
       previewUrl,
       selectedFile,
@@ -91,7 +93,6 @@ const ProfileSettings = React.forwardRef<HTMLDivElement, ProfileSettingsProps>(
 
     const fileInputRef = React.useRef<HTMLInputElement>(null);
 
-    
     const handleViewChange = (view: ViewType) => {
       setCurrentView(view);
 
@@ -121,8 +122,6 @@ const ProfileSettings = React.forwardRef<HTMLDivElement, ProfileSettingsProps>(
       fileInputRef.current?.click();
     };
 
-    
-    
     const handleSubmit = async (e: React.FormEvent) => {
       e.preventDefault();
 
@@ -216,8 +215,19 @@ const ProfileSettings = React.forwardRef<HTMLDivElement, ProfileSettingsProps>(
             >
               Cancel
             </Button>
-            <Button type="submit" variant="primary" disabled={isSubmitting || isPasswordSubmitting || isUploading || !!uploadError}>
-              {isSubmitting || isPasswordSubmitting || isUploading ? 'Saving...' : 'Save Changes'}
+            <Button
+              type="submit"
+              variant="primary"
+              disabled={
+                isSubmitting ||
+                isPasswordSubmitting ||
+                isUploading ||
+                !!uploadError
+              }
+            >
+              {isSubmitting || isPasswordSubmitting || isUploading
+                ? 'Saving...'
+                : 'Save Changes'}
             </Button>
           </div>
         </form>

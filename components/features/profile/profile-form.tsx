@@ -12,13 +12,12 @@ export interface ProfileFormProps {
   showEmailError: boolean;
   isSubmitting: boolean;
   disabled?: boolean;
-  onInputChange: (field: keyof ProfileData) => (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onInputChange: (
+    field: keyof ProfileData,
+  ) => (e: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
-const ProfileForm = React.forwardRef<
-  HTMLDivElement,
-  ProfileFormProps
->(
+const ProfileForm = React.forwardRef<HTMLDivElement, ProfileFormProps>(
   (
     {
       formData,
@@ -30,7 +29,7 @@ const ProfileForm = React.forwardRef<
       disabled = false,
       onInputChange,
     },
-    ref
+    ref,
   ) => {
     return (
       <div ref={ref}>
@@ -45,9 +44,7 @@ const ProfileForm = React.forwardRef<
                 disabled={isSubmitting || disabled}
               />
               {showNameError && (
-                <p className="text-sm text-coral-50">
-                  Name is required
-                </p>
+                <p className="text-sm text-coral-50">Name is required</p>
               )}
             </div>
 
@@ -60,9 +57,7 @@ const ProfileForm = React.forwardRef<
                 disabled={isSubmitting || disabled}
               />
               {showSurnameError && (
-                <p className="text-sm text-coral-50">
-                  Surname is required
-                </p>
+                <p className="text-sm text-coral-50">Surname is required</p>
               )}
             </div>
           </div>
@@ -87,7 +82,7 @@ const ProfileForm = React.forwardRef<
         </div>
       </div>
     );
-  }
+  },
 );
 
 ProfileForm.displayName = 'ProfileForm';

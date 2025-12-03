@@ -18,7 +18,9 @@ export interface ProfilePictureFormProps {
   initials: string;
   fileInputRef: React.RefObject<HTMLInputElement | null>;
   disabled?: boolean;
-  onProfilePictureChange: (e: React.ChangeEvent<HTMLInputElement>) => Promise<void>;
+  onProfilePictureChange: (
+    e: React.ChangeEvent<HTMLInputElement>,
+  ) => Promise<void>;
   onSelectPictureClick: (e: React.MouseEvent) => void;
 }
 
@@ -39,7 +41,7 @@ const ProfilePictureForm = React.forwardRef<
       onProfilePictureChange,
       onSelectPictureClick,
     },
-    ref
+    ref,
   ) => {
     const showProfilePicture = profilePictureUrl && !isLoading && !uploadError;
 
@@ -49,10 +51,7 @@ const ProfilePictureForm = React.forwardRef<
           <div className="relative">
             <Avatar size="lg" className="size-14">
               {previewUrl ? (
-                <AvatarImage
-                  src={previewUrl}
-                  alt="Profile picture preview"
-                />
+                <AvatarImage src={previewUrl} alt="Profile picture preview" />
               ) : showProfilePicture ? (
                 <AvatarImage src={profilePictureUrl} alt="User avatar" />
               ) : (
@@ -89,7 +88,7 @@ const ProfilePictureForm = React.forwardRef<
         </div>
       </div>
     );
-  }
+  },
 );
 
 ProfilePictureForm.displayName = 'ProfilePictureForm';

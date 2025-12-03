@@ -52,9 +52,14 @@ api.interceptors.response.use(
   (error) => {
     if (error.response?.status === 401) {
       const isLogoutRequest = error.config?.url?.includes('/logout');
-      const isPasswordChangeRequest = error.config?.url?.includes('/update-password');
+      const isPasswordChangeRequest =
+        error.config?.url?.includes('/update-password');
 
-      if (!isLogoutRequest && !isPasswordChangeRequest && typeof window !== 'undefined') {
+      if (
+        !isLogoutRequest &&
+        !isPasswordChangeRequest &&
+        typeof window !== 'undefined'
+      ) {
         localStorage.removeItem('token');
       }
     }

@@ -18,7 +18,9 @@ export interface ProfilePictureUploadResult {
   clearPreview: () => void;
 }
 
-export function useProfilePictureUpload(options: ProfilePictureUploadOptions = {}): ProfilePictureUploadResult {
+export function useProfilePictureUpload(
+  options: ProfilePictureUploadOptions = {},
+): ProfilePictureUploadResult {
   const { onSuccess } = options;
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -94,7 +96,9 @@ export function useProfilePictureUpload(options: ProfilePictureUploadOptions = {
       setPreviewUrl(preview);
       setSelectedFile(file);
     } catch (error) {
-      setError(error instanceof Error ? error.message : 'Failed to generate preview');
+      setError(
+        error instanceof Error ? error.message : 'Failed to generate preview',
+      );
       setPreviewUrl(null);
       setSelectedFile(null);
     }
