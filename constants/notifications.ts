@@ -15,4 +15,5 @@ export const NOTIFICATION_CONSTANTS = {
   },
 } as const;
 
-export const createNotificationQueryKey = (userId: string) => [NOTIFICATION_CONSTANTS.QUERY_KEYS.NOTIFICATIONS, userId] as const;
+export const createNotificationQueryKey = (userId: string) =>
+  [NOTIFICATION_CONSTANTS.QUERY_KEYS.NOTIFICATIONS, userId] as const;

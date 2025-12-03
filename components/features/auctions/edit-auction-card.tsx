@@ -1,18 +1,21 @@
-"use client";
+'use client';
 
-import * as React from "react";
-import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/primitives/button";
-import { InputField } from "@/components/ui/primitives/input";
-import { TextAreaField } from "@/components/ui/primitives/textarea-field";
-import { useEditAuction } from "@/hooks/useEditAuction";
-import { EditAuctionFormData, AuctionData, AuctionError } from "@/types/auction";
-import { AuctionImageUpload } from "./auction-image-upload";
-import { useAuctionImage } from "@/hooks/useAuctionImage";
-import { useAuctionValidation } from "@/hooks/useAuctionValidation";
+import { Button } from '@/components/ui/primitives/button';
+import { InputField } from '@/components/ui/primitives/input';
+import { TextAreaField } from '@/components/ui/primitives/textarea-field';
+import { useAuctionImage } from '@/hooks/useAuctionImage';
+import { useAuctionValidation } from '@/hooks/useAuctionValidation';
+import { useEditAuction } from '@/hooks/useEditAuction';
+import { cn } from '@/lib/utils';
+import {
+  AuctionData,
+  AuctionError,
+  EditAuctionFormData,
+} from '@/types/auction';
+import * as React from 'react';
+import { AuctionImageUpload } from './auction-image-upload';
 
-import { DatePicker } from "@/components/ui/primitives/date-picker";
-
+import { DatePicker } from '@/components/ui/primitives/date-picker';
 
 const formatEuropeanDate = (dateString: string): string => {
   if (!dateString) return '';
@@ -40,10 +43,17 @@ export interface EditAuctionCardProps {
 }
 
 const EditAuctionCard = React.forwardRef<HTMLDivElement, EditAuctionCardProps>(
-  ({ className, auction, onSubmit, onCancel, isEditing = false, ...props }, ref) => {
+  (
+    { className, auction, onSubmit, onCancel, isEditing = false, ...props },
+    ref,
+  ) => {
     const { editAuction, isLoading, validationErrors } = useEditAuction();
     const { clearFieldError } = useAuctionValidation('edit');
-    const { imageState, handleImageSelect, handleImageDelete: deleteImage } = useAuctionImage(auction.imageUrl, 'edit');
+    const {
+      imageState,
+      handleImageSelect,
+      handleImageDelete: deleteImage,
+    } = useAuctionImage(auction.imageUrl, 'edit');
 
     const [formData, setFormData] = React.useState<EditAuctionFormData>(() => ({
       id: auction?.id || '',
@@ -55,10 +65,14 @@ const EditAuctionCard = React.forwardRef<HTMLDivElement, EditAuctionCardProps>(
     }));
 
     if (!auction) {
-      return <div className="p-4 text-red-500">Error: No auction data available for editing.</div>;
+      return (
+        <div className="p-4 text-red-500">
+          Error: No auction data available for editing.
+        </div>
+      );
     }
 
-    if (auction.status === "done" || new Date(auction.endTime) <= new Date()) {
+    if (auction.status === 'done' || new Date(auction.endTime) <= new Date()) {
       return (
         <div className="p-4 text-red-500">
           This auction has ended and cannot be edited.
@@ -66,32 +80,37 @@ const EditAuctionCard = React.forwardRef<HTMLDivElement, EditAuctionCardProps>(
       );
     }
 
-    const handleInputChange = (field: keyof EditAuctionFormData, value: string) => {
-      setFormData(prev => ({ ...prev, [field]: value }));
+    const handleInputChange = (
+      field: keyof EditAuctionFormData,
+      value: string,
+    ) => {
+      setFormData((prev) => ({ ...prev, [field]: value }));
       clearFieldError(field);
     };
 
     const handleImageChange = (file: File) => {
       handleImageSelect(file);
-      setFormData(prev => ({ ...prev, image: file }));
+      setFormData((prev) => ({ ...prev, image: file }));
     };
 
     const handleImageDelete = () => {
       deleteImage();
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
         image: undefined,
-        existingImageUrl: undefined
+        existingImageUrl: undefined,
       }));
     };
 
     const handleSubmit = async () => {
       try {
-        const hasChanges = formData.title !== auction.title ||
-                          formData.description !== auction.description ||
-                          formData.endDate !== formatEuropeanDate(auction.endTime) ||
-                          (formData.image !== undefined) ||
-                          (formData.existingImageUrl === undefined && auction.imageUrl !== undefined);
+        const hasChanges =
+          formData.title !== auction.title ||
+          formData.description !== auction.description ||
+          formData.endDate !== formatEuropeanDate(auction.endTime) ||
+          formData.image !== undefined ||
+          (formData.existingImageUrl === undefined &&
+            auction.imageUrl !== undefined);
 
         if (!hasChanges) {
           if (onCancel) {
@@ -112,23 +131,23 @@ const EditAuctionCard = React.forwardRef<HTMLDivElement, EditAuctionCardProps>(
       }
     };
 
-    
     return (
       <div
         ref={ref}
         className={cn(
-          "bg-white rounded-2xl p-4 flex flex-col gap-4 w-full max-w-[533px]",
-          className
+          'bg-white rounded-2xl p-4 flex flex-col gap-4 w-full max-w-[533px]',
+          className,
         )}
         {...props}
       >
-  
         <AuctionImageUpload
           imagePreview={imageState.preview}
           existingImageUrl={imageState.existingUrl}
           onImageChange={handleImageChange}
           onImageDelete={handleImageDelete}
-          validationError={imageState.validationError || validationErrors?.image}
+          validationError={
+            imageState.validationError || validationErrors?.image
+          }
           imageError={imageState.error}
         />
 
@@ -138,11 +157,13 @@ const EditAuctionCard = React.forwardRef<HTMLDivElement, EditAuctionCardProps>(
               label="Title"
               placeholder="Write item name here"
               value={formData.title}
-              onChange={(e) => handleInputChange("title", e.target.value)}
+              onChange={(e) => handleInputChange('title', e.target.value)}
               disabled={!isEditing}
             />
             {validationErrors?.title && (
-              <p className="text-red-500 text-sm mt-1">{validationErrors.title}</p>
+              <p className="text-red-500 text-sm mt-1">
+                {validationErrors.title}
+              </p>
             )}
           </div>
 
@@ -151,17 +172,19 @@ const EditAuctionCard = React.forwardRef<HTMLDivElement, EditAuctionCardProps>(
               label="Description"
               placeholder="Write description here..."
               value={formData.description}
-              onChange={(e) => handleInputChange("description", e.target.value)}
+              onChange={(e) => handleInputChange('description', e.target.value)}
               rows={5}
               disabled={!isEditing}
             />
             {validationErrors?.description && (
-              <p className="text-red-500 text-sm mt-1">{validationErrors.description}</p>
+              <p className="text-red-500 text-sm mt-1">
+                {validationErrors.description}
+              </p>
             )}
           </div>
           <DatePicker
             value={formData.endDate}
-            onChange={(value) => handleInputChange("endDate", value)}
+            onChange={(value) => handleInputChange('endDate', value)}
             label="End date"
             disabled={!isEditing}
             isLoading={isLoading}
@@ -171,15 +194,11 @@ const EditAuctionCard = React.forwardRef<HTMLDivElement, EditAuctionCardProps>(
         </div>
 
         <div className="flex justify-end gap-4">
-          <Button
-            variant="alternative"
-            onClick={onCancel}
-            disabled={isLoading}
-          >
+          <Button variant="alternative" onClick={onCancel} disabled={isLoading}>
             Discard changes
           </Button>
           <Button
-            variant={isEditing ? "secondary" : "primary"}
+            variant={isEditing ? 'secondary' : 'primary'}
             onClick={handleSubmit}
             disabled={isLoading || !isEditing}
             className="relative"
@@ -190,15 +209,15 @@ const EditAuctionCard = React.forwardRef<HTMLDivElement, EditAuctionCardProps>(
                 Saving...
               </div>
             ) : (
-              "Edit auction"
+              'Edit auction'
             )}
           </Button>
         </div>
       </div>
     );
-  }
+  },
 );
 
-EditAuctionCard.displayName = "EditAuctionCard";
+EditAuctionCard.displayName = 'EditAuctionCard';
 
 export { EditAuctionCard };

@@ -1,9 +1,8 @@
-import { useEffect, useRef, useCallback } from "react";
-import { useQueryClient } from "@tanstack/react-query";
-import { NotificationDto, NotificationsResponse } from "@/types/notification";
-import { toast } from "sonner";
-import { useAuth } from "@/contexts/auth-context";
-
+import { useAuth } from '@/contexts/auth-context';
+import { NotificationDto, NotificationsResponse } from '@/types/notification';
+import { useQueryClient } from '@tanstack/react-query';
+import { useCallback, useEffect, useRef } from 'react';
+import { toast } from 'sonner';
 
 interface ConnectionConfig {
   maxReconnectAttempts: number;
@@ -17,7 +16,9 @@ const CONNECTION_CONFIG: ConnectionConfig = {
   maxReconnectDelay: 30000,
 };
 
-const getNotificationType = (notification: NotificationDto): 'auction_won' | 'outbid' => {
+const getNotificationType = (
+  notification: NotificationDto,
+): 'auction_won' | 'outbid' => {
   return notification.price == null ? 'outbid' : 'auction_won';
 };
 
@@ -69,67 +70,79 @@ export const useNotificationsStream = () => {
   const getReconnectDelay = useCallback((attempt: number): number => {
     return Math.min(
       CONNECTION_CONFIG.baseReconnectDelay * Math.pow(2, attempt - 1),
-      CONNECTION_CONFIG.maxReconnectDelay
+      CONNECTION_CONFIG.maxReconnectDelay,
     );
   }, []);
 
-  const addNotificationToCache = useCallback((notification: NotificationDto) => {
-    queryClient.setQueryData(['notifications', user?.id], (oldData: NotificationsResponse | undefined) => {
-      if (!oldData) {
-        return {
-          notifications: [notification],
-          total: 1
-        };
+  const addNotificationToCache = useCallback(
+    (notification: NotificationDto) => {
+      queryClient.setQueryData(
+        ['notifications', user?.id],
+        (oldData: NotificationsResponse | undefined) => {
+          if (!oldData) {
+            return {
+              notifications: [notification],
+              total: 1,
+            };
+          }
+
+          return {
+            ...oldData,
+            notifications: [notification, ...oldData.notifications],
+            total: oldData.total + 1,
+          };
+        },
+      );
+
+      const notificationType = getNotificationType(notification);
+      const notificationTitle =
+        notificationType === 'auction_won' ? 'Auction Won!' : 'Outbid';
+      const notificationMessage =
+        notificationType === 'auction_won'
+          ? `Congratulations! You won the auction for ${notification.auction?.title || 'an item'}`
+          : `You've been outbid on ${notification.auction?.title || 'an item'}`;
+
+      toast(notificationTitle, {
+        description: notificationMessage,
+        action: notification.auction?.id
+          ? {
+              label: 'View',
+              onClick: () => {
+                window.location.href = `/auctions/${notification.auction.id}`;
+              },
+            }
+          : undefined,
+      });
+    },
+    [queryClient, user],
+  );
+
+  const handleMessage = useCallback(
+    (event: MessageEvent) => {
+      const parsedData = JSON.parse(event.data);
+
+      let notification: NotificationDto;
+      let targetUserId: string | undefined;
+
+      if (parsedData.data?.userId && parsedData.data.notification) {
+        notification = parsedData.data.notification;
+        targetUserId = parsedData.data.userId;
+      } else if (parsedData.userId && parsedData.notification) {
+        notification = parsedData.notification;
+        targetUserId = parsedData.userId;
+      } else if (parsedData.auction) {
+        notification = parsedData;
+        targetUserId = user?.id;
+      } else {
+        return;
       }
 
-      return {
-        ...oldData,
-        notifications: [notification, ...oldData.notifications],
-        total: oldData.total + 1
-      };
-    });
-
-    const notificationType = getNotificationType(notification);
-    const notificationTitle = notificationType === 'auction_won' ? 'Auction Won!' : 'Outbid';
-    const notificationMessage = notificationType === 'auction_won'
-      ? `Congratulations! You won the auction for ${notification.auction?.title || 'an item'}`
-      : `You've been outbid on ${notification.auction?.title || 'an item'}`;
-
-    toast(notificationTitle, {
-      description: notificationMessage,
-      action: notification.auction?.id ? {
-        label: 'View',
-        onClick: () => {
-          window.location.href = `/auctions/${notification.auction.id}`;
-        }
-      } : undefined,
-    });
-  }, [queryClient, user]);
-
-  const handleMessage = useCallback((event: MessageEvent) => {
-    const parsedData = JSON.parse(event.data);
-
-    let notification: NotificationDto;
-    let targetUserId: string | undefined;
-
-    if (parsedData.data?.userId && parsedData.data.notification) {
-      notification = parsedData.data.notification;
-      targetUserId = parsedData.data.userId;
-    } else if (parsedData.userId && parsedData.notification) {
-      notification = parsedData.notification;
-      targetUserId = parsedData.userId;
-    } else if (parsedData.auction) {
-      notification = parsedData;
-      targetUserId = user?.id;
-    } else {
-      return;
-    }
-
-    if (targetUserId && targetUserId === user?.id) {
-      addNotificationToCache(notification);
-    }
-    
-  }, [addNotificationToCache, user]);
+      if (targetUserId && targetUserId === user?.id) {
+        addNotificationToCache(notification);
+      }
+    },
+    [addNotificationToCache, user],
+  );
 
   const handleOpen = useCallback(() => {
     connectionStatusRef.current = 'connected';
@@ -158,7 +171,7 @@ export const useNotificationsStream = () => {
       setTimeout(connect, delay);
     } else {
       showConnectionError(
-        'Unable to connect to notification service after multiple attempts. Real-time updates are disabled.'
+        'Unable to connect to notification service after multiple attempts. Real-time updates are disabled.',
       );
     }
   }, [getReconnectDelay, showConnectionError]);
@@ -170,7 +183,9 @@ export const useNotificationsStream = () => {
 
     const sseUrl = getSSEUrl();
     if (!sseUrl) {
-      showConnectionError('Notification service is unavailable. Real-time updates are disabled.');
+      showConnectionError(
+        'Notification service is unavailable. Real-time updates are disabled.',
+      );
       return;
     }
 
@@ -188,10 +203,11 @@ export const useNotificationsStream = () => {
       eventSource.onmessage = handleMessage;
       eventSource.onopen = handleOpen;
       eventSource.onerror = handleError;
-
     } catch (error) {
       connectionStatusRef.current = 'error';
-      showConnectionError('Failed to connect to notification service. Real-time updates are disabled.');
+      showConnectionError(
+        'Failed to connect to notification service. Real-time updates are disabled.',
+      );
     }
   }, [
     isAuthenticated,
@@ -241,7 +257,8 @@ export const useNotificationsStream = () => {
   }, [isAuthenticated]);
 
   return {
-    isConnected: typeof window !== 'undefined' && eventSourceRef.current?.readyState === 1,
+    isConnected:
+      typeof window !== 'undefined' && eventSourceRef.current?.readyState === 1,
     connectionStatus: connectionStatusRef.current,
     reconnect,
   };

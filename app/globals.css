@@ -1,5 +1,5 @@
-@import "tailwindcss";
-@import "tw-animate-css";
+@import 'tailwindcss';
+@import 'tw-animate-css';
 
 @custom-variant dark (&:is(.dark *));
 
@@ -35,68 +35,67 @@
   --color-popover: var(--popover);
   --color-card-foreground: var(--card-foreground);
   --color-card: var(--card);
-  
+
   --color-primary: var(--color-primary-50); /* PRIMARY */
   --color-text-primary: var(--color-gray-90);
 
   /* Custom Color Palettes */
-  --color-primary-10: #FDFFDA;
-  --color-primary-20: #FBFFB5;
-  --color-primary-30: #F9FF90;
-  --color-primary-40: #F7FF75;
-  --color-primary-50: #F4FF47;
-  --color-primary-60: #D0DB33;
-  --color-primary-70: #ACB723;
-  --color-primary-80: #8A9316;
-  --color-primary-90: #717A0D;
+  --color-primary-10: #fdffda;
+  --color-primary-20: #fbffb5;
+  --color-primary-30: #f9ff90;
+  --color-primary-40: #f7ff75;
+  --color-primary-50: #f4ff47;
+  --color-primary-60: #d0db33;
+  --color-primary-70: #acb723;
+  --color-primary-80: #8a9316;
+  --color-primary-90: #717a0d;
 
-  --color-gray-10: #EDF4F2;
-  --color-gray-20: #DDE9E6;
-  --color-gray-30: #B0BFBD;
-  --color-gray-40: #74817F;
-  --color-gray-50: #272D2D;
-  --color-gray-60: #1C2526;
-  --color-gray-70: #131E20;
-  --color-gray-80: #0C161A;
+  --color-gray-10: #edf4f2;
+  --color-gray-20: #dde9e6;
+  --color-gray-30: #b0bfbd;
+  --color-gray-40: #74817f;
+  --color-gray-50: #272d2d;
+  --color-gray-60: #1c2526;
+  --color-gray-70: #131e20;
+  --color-gray-80: #0c161a;
   --color-gray-90: #071015;
 
-  --color-coral-10: #FFE8DC;
-  --color-coral-20: #FFCCBA;
-  --color-coral-30: #FFAA98;
-  --color-coral-40: #FF897E;
-  --color-coral-50: #FF5454;
-  --color-coral-60: #DB3D4B;
-  --color-coral-70: #B72A42;
-  --color-coral-80: #931A3A;
-  --color-coral-90: #7A1034;
+  --color-coral-10: #ffe8dc;
+  --color-coral-20: #ffccba;
+  --color-coral-30: #ffaa98;
+  --color-coral-40: #ff897e;
+  --color-coral-50: #ff5454;
+  --color-coral-60: #db3d4b;
+  --color-coral-70: #b72a42;
+  --color-coral-80: #931a3a;
+  --color-coral-90: #7a1034;
 
-  --color-ocean-10: #CDF5FE;
-  --color-ocean-20: #9CE6FE;
-  --color-ocean-30: #6BD1FE;
-  --color-ocean-40: #46BBFD;
-  --color-ocean-50: #0A97FC;
-  --color-ocean-60: #0775D8;
-  --color-ocean-70: #0557B5;
-  --color-ocean-80: #033D92;
-  --color-ocean-90: #012B78;
+  --color-ocean-10: #cdf5fe;
+  --color-ocean-20: #9ce6fe;
+  --color-ocean-30: #6bd1fe;
+  --color-ocean-40: #46bbfd;
+  --color-ocean-50: #0a97fc;
+  --color-ocean-60: #0775d8;
+  --color-ocean-70: #0557b5;
+  --color-ocean-80: #033d92;
+  --color-ocean-90: #012b78;
 
-  --color-gold-10: #FFF9D1;
-  --color-gold-20: #FFF2A4;
-  --color-gold-30: #FFE976;
-  --color-gold-40: #FFE054;
-  --color-gold-50: #FFD11C; 
-  --color-gold-60: #DBAE14;
-  --color-gold-70: #B78E0E;
-  --color-gold-80: #936E08;
-  --color-gold-90: #7A5805;
+  --color-gold-10: #fff9d1;
+  --color-gold-20: #fff2a4;
+  --color-gold-30: #ffe976;
+  --color-gold-40: #ffe054;
+  --color-gold-50: #ffd11c;
+  --color-gold-60: #dbae14;
+  --color-gold-70: #b78e0e;
+  --color-gold-80: #936e08;
+  --color-gold-90: #7a5805;
 
-  --color-green-card-winning: #ADFF90;
+  --color-green-card-winning: #adff90;
 
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
-
 }
 
 :root {
@@ -175,14 +174,28 @@
   }
   body {
     @apply bg-background text-foreground;
-    font-family: var(--font-inter), system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    font-feature-settings: "calt" 1;
-    font-variation-settings: "slnt" 0;
+    font-family:
+      var(--font-inter),
+      system-ui,
+      -apple-system,
+      BlinkMacSystemFont,
+      'Segoe UI',
+      Roboto,
+      sans-serif;
+    font-feature-settings: 'calt' 1;
+    font-variation-settings: 'slnt' 0;
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
   html {
-    font-family: var(--font-inter), system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    font-family:
+      var(--font-inter),
+      system-ui,
+      -apple-system,
+      BlinkMacSystemFont,
+      'Segoe UI',
+      Roboto,
+      sans-serif;
   }
 }

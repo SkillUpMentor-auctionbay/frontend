@@ -1,11 +1,14 @@
-"use client";
+'use client';
 
-import { AppLayout } from "@/components/features/layout/app-layout";
-import { AuctionTabContent, AuctionData } from "@/components/features/auctions/auction-tab-content";
-import { EditAuctionDialog } from "@/components/features/auctions/edit-auction-dialog";
-import { useAuctionsQuery } from "../../hooks/useAuctionsQuery";
-import { useAuctionMutations } from "../../hooks/useAuctionMutations";
-import { useState, useMemo } from "react";
+import {
+  AuctionData,
+  AuctionTabContent,
+} from '@/components/features/auctions/auction-tab-content';
+import { EditAuctionDialog } from '@/components/features/auctions/edit-auction-dialog';
+import { AppLayout } from '@/components/features/layout/app-layout';
+import { useMemo, useState } from 'react';
+import { useAuctionMutations } from '../../hooks/useAuctionMutations';
+import { useAuctionsQuery } from '../../hooks/useAuctionsQuery';
 
 interface AuctionsResponse {
   auctions: AuctionData[];
@@ -19,19 +22,21 @@ interface AuctionsResponse {
 
 export default function AuctionsPage() {
   const { deleteAuction } = useAuctionMutations();
-  const [editingAuction, setEditingAuction] = useState<AuctionData | null>(null);
+  const [editingAuction, setEditingAuction] = useState<AuctionData | null>(
+    null,
+  );
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
 
   const {
     data: allAuctionsData,
     isLoading: isLoadingAllAuctions,
     error: allAuctionsError,
-  } = useAuctionsQuery("ALL", 1, 500);
+  } = useAuctionsQuery('ALL', 1, 500);
 
   const allAuctions = (allAuctionsData as AuctionsResponse)?.auctions || [];
 
   const handleEditAuction = (auctionId: string) => {
-    const auction = allAuctions?.find(a => a.id === auctionId);
+    const auction = allAuctions?.find((a) => a.id === auctionId);
     if (auction) {
       setEditingAuction(auction);
       setIsEditDialogOpen(true);
@@ -56,19 +61,22 @@ export default function AuctionsPage() {
     }
   };
 
-  const convertToEditAuctionData = useMemo(() => (auction: AuctionData) => ({
-    id: auction.id,
-    title: auction.title,
-    description: auction.description || '',
-    startingPrice: auction.startingPrice || 0,
-    currentPrice: auction.currentPrice || 0,
-    endTime: auction.endTime || new Date().toISOString(),
-    imageUrl: auction.imageUrl,
-    sellerId: auction.sellerId || '',
-    status: auction.status || 'in-progress',
-    createdAt: auction.createdAt || new Date().toISOString(),
-    updatedAt: auction.updatedAt || new Date().toISOString(),
-  }), []);
+  const convertToEditAuctionData = useMemo(
+    () => (auction: AuctionData) => ({
+      id: auction.id,
+      title: auction.title,
+      description: auction.description || '',
+      startingPrice: auction.startingPrice || 0,
+      currentPrice: auction.currentPrice || 0,
+      endTime: auction.endTime || new Date().toISOString(),
+      imageUrl: auction.imageUrl,
+      sellerId: auction.sellerId || '',
+      status: auction.status || 'in-progress',
+      createdAt: auction.createdAt || new Date().toISOString(),
+      updatedAt: auction.updatedAt || new Date().toISOString(),
+    }),
+    [],
+  );
 
   return (
     <AppLayout>
@@ -88,7 +96,9 @@ export default function AuctionsPage() {
       </div>
 
       <EditAuctionDialog
-        auction={editingAuction ? convertToEditAuctionData(editingAuction) : null}
+        auction={
+          editingAuction ? convertToEditAuctionData(editingAuction) : null
+        }
         onSubmit={handleEditSubmit}
         open={isEditDialogOpen}
         onOpenChange={handleEditDialogChange}

@@ -1,10 +1,11 @@
-"use client";
+'use client';
 
-import * as React from "react";
-import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/primitives/button";
-import { ImageFallback } from "@/components/ui/primitives/image-fallback";
-import { getImageUrl } from "@/utils/imageUtils";
+import { Button } from '@/components/ui/primitives/button';
+import { ImageFallback } from '@/components/ui/primitives/image-fallback';
+import { cn } from '@/lib/utils';
+import { getImageUrl } from '@/utils/imageUtils';
+import Image from 'next/image';
+import * as React from 'react';
 
 interface AuctionImageUploadProps {
   imagePreview: string | null;
@@ -20,19 +21,25 @@ interface AuctionImageUploadProps {
   showAddButton?: boolean;
 }
 
-export const AuctionImageUpload = React.forwardRef<HTMLDivElement, AuctionImageUploadProps>(
-  ({
-    imagePreview,
-    existingImageUrl,
-    onImageChange,
-    onImageDelete,
-    validationError,
-    imageError = false,
-    disabled = false,
-    showAddButton = true,
-    className,
-    ...props
-  }, ref) => {
+export const AuctionImageUpload = React.forwardRef<
+  HTMLDivElement,
+  AuctionImageUploadProps
+>(
+  (
+    {
+      imagePreview,
+      existingImageUrl,
+      onImageChange,
+      onImageDelete,
+      validationError,
+      imageError = false,
+      disabled = false,
+      showAddButton = true,
+      className,
+      ...props
+    },
+    ref,
+  ) => {
     const fileInputRef = React.useRef<HTMLInputElement>(null);
 
     const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -42,12 +49,15 @@ export const AuctionImageUpload = React.forwardRef<HTMLDivElement, AuctionImageU
       }
     };
 
-    const displayImage = imagePreview || (existingImageUrl ? getImageUrl(existingImageUrl) : null);
+    const displayImage =
+      imagePreview || (existingImageUrl ? getImageUrl(existingImageUrl) : null);
     const hasExistingOrNewImage = displayImage && !imageError;
 
     const handleImageClick = (e: React.MouseEvent) => {
-      if ((e.target as HTMLElement).tagName === 'BUTTON' ||
-          (e.target as HTMLElement).closest('button')) {
+      if (
+        (e.target as HTMLElement).tagName === 'BUTTON' ||
+        (e.target as HTMLElement).closest('button')
+      ) {
         return;
       }
 
@@ -69,16 +79,18 @@ export const AuctionImageUpload = React.forwardRef<HTMLDivElement, AuctionImageU
     };
 
     return (
-      <div ref={ref} className={cn("w-full", className)} {...props}>
+      <div ref={ref} className={cn('w-full', className)} {...props}>
         <div
           className="bg-background rounded-2xl h-[168px] flex flex-col items-center justify-center relative overflow-hidden cursor-pointer"
           onClick={handleImageClick}
         >
           {hasExistingOrNewImage ? (
             <div className="relative w-full h-full">
-              <img
+              <Image
                 src={displayImage}
-                className="w-full h-full object-cover rounded-2xl"
+                alt="Auction image preview"
+                className="absolute inset-0 w-full h-full object-cover rounded-xl"
+                fill
               />
               {onImageDelete && (
                 <Button
@@ -122,7 +134,7 @@ export const AuctionImageUpload = React.forwardRef<HTMLDivElement, AuctionImageU
         )}
       </div>
     );
-  }
+  },
 );
 
-AuctionImageUpload.displayName = "AuctionImageUpload";
+AuctionImageUpload.displayName = 'AuctionImageUpload';

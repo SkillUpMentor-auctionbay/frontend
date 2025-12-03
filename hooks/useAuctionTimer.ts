@@ -1,16 +1,25 @@
-"use client";
+'use client';
 
-import { useState, useEffect, useCallback } from "react";
-import { formatTimeLeft, isTimeUrgent, getTimeRemaining } from "@/utils/timeUtils";
-
+import {
+  formatTimeLeft,
+  getTimeRemaining,
+  isTimeUrgent,
+} from '@/utils/timeUtils';
+import { useCallback, useEffect, useState } from 'react';
 
 export function useAuctionTimer(
   endTime: string,
-  updateInterval: number = 60000
+  updateInterval: number = 60000,
 ) {
-  const [timeLeft, setTimeLeft] = useState<string>(() => formatTimeLeft(endTime));
-  const [isUrgent, setIsUrgent] = useState<boolean>(() => isTimeUrgent(endTime));
-  const [timeRemaining, setTimeRemaining] = useState<number>(() => getTimeRemaining(endTime));
+  const [timeLeft, setTimeLeft] = useState<string>(() =>
+    formatTimeLeft(endTime),
+  );
+  const [isUrgent, setIsUrgent] = useState<boolean>(() =>
+    isTimeUrgent(endTime),
+  );
+  const [timeRemaining, setTimeRemaining] = useState<number>(() =>
+    getTimeRemaining(endTime),
+  );
 
   const updateTimer = useCallback(() => {
     const newTimeRemaining = getTimeRemaining(endTime);

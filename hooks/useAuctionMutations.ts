@@ -1,9 +1,13 @@
-"use client";
+'use client';
 
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { auctionsAPI } from "../services/api";
-import { AuctionFilter } from "@/components/features/auctions/auction-tab-content";
-import { UpdateAuctionRequest } from "@/types/auction";
+import { AuctionFilter } from '@/components/features/auctions/auction-tab-content';
+import {
+  AuctionData,
+  AuctionsResponse,
+  UpdateAuctionRequest,
+} from '@/types/auction';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { auctionsAPI } from '../services/api';
 
 export function useAuctionMutations() {
   const queryClient = useQueryClient();
@@ -14,84 +18,109 @@ export function useAuctionMutations() {
       return auctionId;
     },
     onMutate: async (auctionId: string) => {
-      await queryClient.cancelQueries({ queryKey: ["auctions", "OWN"] });
-      await queryClient.cancelQueries({ queryKey: ["auctions", "ALL"] });
+      await queryClient.cancelQueries({ queryKey: ['auctions', 'OWN'] });
+      await queryClient.cancelQueries({ queryKey: ['auctions', 'ALL'] });
 
-      const previousOwnData = queryClient.getQueryData(["auctions", "OWN", 1, 20]);
-      const previousAllData = queryClient.getQueryData(["auctions", "ALL", 1, 20]);
+      const previousOwnData = queryClient.getQueryData([
+        'auctions',
+        'OWN',
+        1,
+        20,
+      ]);
+      const previousAllData = queryClient.getQueryData([
+        'auctions',
+        'ALL',
+        1,
+        20,
+      ]);
 
       queryClient.setQueriesData(
-        { queryKey: ["auctions", "OWN"] },
-        (old: any) => {
+        { queryKey: ['auctions', 'OWN'] },
+        (old: AuctionsResponse) => {
           if (!old?.auctions) return old;
 
           return {
             ...old,
-            auctions: old.auctions.filter((auction: any) => auction.id !== auctionId),
+            auctions: old.auctions.filter(
+              (auction: AuctionData) => auction.id !== auctionId,
+            ),
             pagination: {
               ...old.pagination,
-              total: old.pagination.total - 1
-            }
+              total: old.pagination.total - 1,
+            },
           };
-        }
+        },
       );
 
       queryClient.setQueriesData(
-        { queryKey: ["auctions", "ALL"] },
-        (old: any) => {
+        { queryKey: ['auctions', 'ALL'] },
+        (old: AuctionsResponse) => {
           if (!old?.auctions) return old;
 
           return {
             ...old,
-            auctions: old.auctions.filter((auction: any) => auction.id !== auctionId),
+            auctions: old.auctions.filter(
+              (auction: AuctionData) => auction.id !== auctionId,
+            ),
             pagination: {
               ...old.pagination,
-              total: old.pagination.total - 1
-            }
+              total: old.pagination.total - 1,
+            },
           };
-        }
+        },
       );
 
       return { previousOwnData, previousAllData };
     },
-     onError: (error, auctionId, context) => {
-       if (context?.previousOwnData) {
-         queryClient.setQueryData(["auctions", "OWN", 1, 20], context.previousOwnData);
-       }
-       if (context?.previousAllData) {
-         queryClient.setQueryData(["auctions", "ALL", 1, 20], context.previousAllData);
-       }
-     },
+    onError: (error, auctionId, context) => {
+      if (context?.previousOwnData) {
+        queryClient.setQueryData(
+          ['auctions', 'OWN', 1, 20],
+          context.previousOwnData,
+        );
+      }
+      if (context?.previousAllData) {
+        queryClient.setQueryData(
+          ['auctions', 'ALL', 1, 20],
+          context.previousAllData,
+        );
+      }
+    },
     onSettled: () => {
       queryClient.invalidateQueries({
-        queryKey: ["auctions", "OWN"],
-        refetchType: "active"
+        queryKey: ['auctions', 'OWN'],
+        refetchType: 'active',
       });
       queryClient.invalidateQueries({
-        queryKey: ["auctions", "ALL"],
-        refetchType: "active"
+        queryKey: ['auctions', 'ALL'],
+        refetchType: 'active',
       });
     },
   });
 
   const editAuctionMutation = useMutation({
-    mutationFn: async ({ auctionId, data }: { auctionId: string; data: UpdateAuctionRequest }) => {
+    mutationFn: async ({
+      auctionId,
+      data,
+    }: {
+      auctionId: string;
+      data: UpdateAuctionRequest;
+    }) => {
       const response = await auctionsAPI.updateAuction(auctionId, data);
       return response;
     },
-     onSuccess: (response) => {
-       queryClient.invalidateQueries({
-         queryKey: ["auctions", "OWN"],
-         refetchType: "active"
-       });
+    onSuccess: (response) => {
+      queryClient.invalidateQueries({
+        queryKey: ['auctions', 'OWN'],
+        refetchType: 'active',
+      });
 
-       queryClient.invalidateQueries({
-         queryKey: ["auctions", "ALL"],
-         refetchType: "active"
-       });
-     },
-     onError: (error) => {
-     }
+      queryClient.invalidateQueries({
+        queryKey: ['auctions', 'ALL'],
+        refetchType: 'active',
+      });
+    },
+    onError: (error) => {},
   });
 
   return {
@@ -109,22 +138,22 @@ export function useAuctionPrefetcher() {
 
   const prefetchAuctions = (filter: AuctionFilter, page = 1, limit = 20) => {
     queryClient.prefetchQuery({
-      queryKey: ["auctions", filter, page, limit],
+      queryKey: ['auctions', filter, page, limit],
       queryFn: async () => {
         const response = await auctionsAPI.getAuctions(filter, page, limit);
         return {
           auctions: response.auctions || [],
-          pagination: response.pagination
+          pagination: response.pagination,
         };
       },
-      staleTime: 5 * 60 * 1000
+      staleTime: 5 * 60 * 1000,
     });
   };
 
   const prefetchAllTabs = () => {
-    prefetchAuctions("OWN");
-    prefetchAuctions("BID");
-    prefetchAuctions("WON");
+    prefetchAuctions('OWN');
+    prefetchAuctions('BID');
+    prefetchAuctions('WON');
   };
 
   return {
@@ -139,13 +168,13 @@ export function useAuctionInvalidator() {
   const invalidateAuctions = (filter?: AuctionFilter) => {
     if (filter) {
       queryClient.invalidateQueries({
-        queryKey: ["auctions", filter],
-        refetchType: "active"
+        queryKey: ['auctions', filter],
+        refetchType: 'active',
       });
     } else {
       queryClient.invalidateQueries({
-        queryKey: ["auctions"],
-        refetchType: "active"
+        queryKey: ['auctions'],
+        refetchType: 'active',
       });
     }
   };

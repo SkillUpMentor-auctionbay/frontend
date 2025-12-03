@@ -1,29 +1,35 @@
-"use client";
+'use client';
 
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { auctionsAPI } from "@/services/api";
+import { AUCTION_VALIDATION } from '@/constants/validation';
+import { useAuctionValidation } from '@/hooks/useAuctionValidation';
+import { auctionsAPI } from '@/services/api';
+import { createMidnightUTCDate } from '@/utils/dateUtils';
+import { normalizeAuctionError } from '@/utils/errorUtils';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import {
-  UpdateAuctionRequest,
-  UpdateAuctionResponse,
   AuctionError,
   EditAuctionFormData,
   FormValidationErrors,
-} from "../types/auction";
-import { useAuctionValidation } from "@/hooks/useAuctionValidation";
-import { normalizeAuctionError } from "@/utils/errorUtils";
-import { createMidnightUTCDate } from "@/utils/dateUtils";
-import { AUCTION_VALIDATION } from "@/constants/validation";
+  UpdateAuctionRequest,
+  UpdateAuctionResponse,
+} from '../types/auction';
 
-function convertEditFormDataToRequest(formData: EditAuctionFormData, originalAuctionData?: any): UpdateAuctionRequest {
+function convertEditFormDataToRequest(
+  formData: EditAuctionFormData,
+  originalAuctionData?: any,
+): UpdateAuctionRequest {
   const updateData: UpdateAuctionRequest = {};
 
-  if (formData.title?.trim() && formData.title.trim() !== originalAuctionData?.title) {
+  if (
+    formData.title?.trim() &&
+    formData.title.trim() !== originalAuctionData?.title
+  ) {
     updateData.title = formData.title.trim();
   }
 
   if (formData.description !== undefined && formData.description !== null) {
     const trimmedDescription = formData.description.trim();
-    if (trimmedDescription !== (originalAuctionData?.description || "")) {
+    if (trimmedDescription !== (originalAuctionData?.description || '')) {
       updateData.description = trimmedDescription;
     }
   }
@@ -41,36 +47,52 @@ function convertEditFormDataToRequest(formData: EditAuctionFormData, originalAuc
   }
 
   if (formData.existingImageUrl === undefined) {
-    updateData.imageUrl = "";
+    updateData.imageUrl = '';
   }
 
   return updateData;
 }
 
-
 export function useEditAuction() {
   const queryClient = useQueryClient();
   const { validateEntireForm } = useAuctionValidation('edit');
 
-  const editAuctionMutation = useMutation<UpdateAuctionResponse, AuctionError, { auctionId: string; formData: EditAuctionFormData; originalAuctionData?: any }>({
+  const editAuctionMutation = useMutation<
+    UpdateAuctionResponse,
+    AuctionError,
+    {
+      auctionId: string;
+      formData: EditAuctionFormData;
+      originalAuctionData?: any;
+    }
+  >({
     mutationFn: async ({ auctionId, formData, originalAuctionData }) => {
       const validationErrors = validateEntireForm(formData);
       if (Object.keys(validationErrors).length > 0) {
         const error: AuctionError = {
           message: AUCTION_VALIDATION.MESSAGES.VALIDATION_FAILED,
           code: 'VALIDATION_ERROR',
-          details: validationErrors
+          details: validationErrors,
         };
         throw error;
       }
 
-      const requestData = convertEditFormDataToRequest(formData, originalAuctionData);
+      const requestData = convertEditFormDataToRequest(
+        formData,
+        originalAuctionData,
+      );
 
       try {
-        const updateResponse = await auctionsAPI.updateAuction(auctionId, requestData);
+        const updateResponse = await auctionsAPI.updateAuction(
+          auctionId,
+          requestData,
+        );
 
         if (formData.image) {
-          const imageResponse = await auctionsAPI.uploadAuctionImage(auctionId, formData.image);
+          const imageResponse = await auctionsAPI.uploadAuctionImage(
+            auctionId,
+            formData.image,
+          );
           updateResponse.auction.imageUrl = imageResponse.imageUrl;
         }
 
@@ -80,19 +102,42 @@ export function useEditAuction() {
       }
     },
     onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: ["auctions"], refetchType: "active" });
-      queryClient.invalidateQueries({ queryKey: ["auctions", "OWN"], refetchType: "active" });
-      queryClient.invalidateQueries({ queryKey: ["auctions", "ALL"], refetchType: "active" });
-      queryClient.invalidateQueries({ queryKey: ["user-statistics"], refetchType: "active" });
+      queryClient.invalidateQueries({
+        queryKey: ['auctions'],
+        refetchType: 'active',
+      });
+      queryClient.invalidateQueries({
+        queryKey: ['auctions', 'OWN'],
+        refetchType: 'active',
+      });
+      queryClient.invalidateQueries({
+        queryKey: ['auctions', 'ALL'],
+        refetchType: 'active',
+      });
+      queryClient.invalidateQueries({
+        queryKey: ['user-statistics'],
+        refetchType: 'active',
+      });
     },
   });
 
-  const editAuction = async (auctionId: string, formData: EditAuctionFormData, originalAuctionData?: any): Promise<UpdateAuctionResponse> => {
-    return await editAuctionMutation.mutateAsync({ auctionId, formData, originalAuctionData });
+  const editAuction = async (
+    auctionId: string,
+    formData: EditAuctionFormData,
+    originalAuctionData?: any,
+  ): Promise<UpdateAuctionResponse> => {
+    return await editAuctionMutation.mutateAsync({
+      auctionId,
+      formData,
+      originalAuctionData,
+    });
   };
 
   const getValidationErrors = (): FormValidationErrors => {
-    if (editAuctionMutation.error?.code === "VALIDATION_ERROR" && editAuctionMutation.error.details) {
+    if (
+      editAuctionMutation.error?.code === 'VALIDATION_ERROR' &&
+      editAuctionMutation.error.details
+    ) {
       return editAuctionMutation.error.details as FormValidationErrors;
     }
 

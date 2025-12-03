@@ -1,23 +1,23 @@
-"use client";
-import Link from "next/link";
-import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
-import { Button } from "@/components/ui/primitives/button";
-import { InputField } from "@/components/ui/primitives/input";
-import { Logo } from "@/components/ui/primitives/logo";
-import { AuthLayout } from "@/components/features/auth/auth-layout";
-import { Icon } from "@/components/ui/primitives/icon";
-import { useAuth } from "@/contexts/auth-context";
-import { toast } from "sonner";
+'use client';
+import { AuthLayout } from '@/components/features/auth/auth-layout';
+import { Button } from '@/components/ui/primitives/button';
+import { Icon } from '@/components/ui/primitives/icon';
+import { InputField } from '@/components/ui/primitives/input';
+import { Logo } from '@/components/ui/primitives/logo';
+import { useAuth } from '@/contexts/auth-context';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import { toast } from 'sonner';
 
 export default function ForgetPasswordPage() {
   const { isAuthenticated, isLoading: authLoading } = useAuth();
   const router = useRouter();
-  const [email, setEmail] = useState("");
-  
+  const [email, setEmail] = useState('');
+
   useEffect(() => {
     if (!authLoading && isAuthenticated) {
-      router.push("/profile");
+      router.push('/profile');
     }
   }, [isAuthenticated, authLoading, router]);
 
@@ -25,14 +25,14 @@ export default function ForgetPasswordPage() {
     e.preventDefault();
 
     if (!email.trim()) {
-      toast.error("Please enter your email address");
+      toast.error('Please enter your email address');
       return;
     }
 
-    toast.error("Sending email is not currently implemented");
+    toast.error('Sending email is not currently implemented');
   };
 
-    return (
+  return (
     <AuthLayout>
       <form onSubmit={handleSubmit}>
         <div className="flex justify-center">
@@ -41,9 +41,7 @@ export default function ForgetPasswordPage() {
 
         <div className="text-gray-90 flex-1 flex flex-col justify-center">
           <div className="text-center">
-            <h1 className="text-3xl font-bold mb-2">
-              Forgot password?
-            </h1>
+            <h1 className="text-3xl font-bold mb-2">Forgot password?</h1>
             <p className="font-light text-base mb-8">
               No worries, we will send you reset instructions
             </p>
@@ -68,11 +66,12 @@ export default function ForgetPasswordPage() {
               Reset Password
             </Button>
 
-            <Link href="/login" className="text-gray-40 flex items-center leading-4 gap-2 justify-center hover:cursor-pointer hover:underline">
-              <Icon name="Chevron right" size={16} className="rotate-180"/>
-              <span className="font-light text-xs">
-                Back to Login
-              </span>
+            <Link
+              href="/login"
+              className="text-gray-40 flex items-center leading-4 gap-2 justify-center hover:cursor-pointer hover:underline"
+            >
+              <Icon name="Chevron right" size={16} className="rotate-180" />
+              <span className="font-light text-xs">Back to Login</span>
             </Link>
           </div>
         </div>

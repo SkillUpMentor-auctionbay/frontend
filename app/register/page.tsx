@@ -1,32 +1,39 @@
-"use client";
-import Link from "next/link";
-import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
-import { Button, InputField, Logo } from "@/components/ui";
-import { AuthLayout } from "@/components/features/auth/auth-layout";
-import { useAuth } from "../../contexts/auth-context";
-import { formatRegisterError } from "../../utils/errorUtils";
-import ErrorBoundary from "@/components/infrastructure/error-boundary";
+'use client';
+import { AuthLayout } from '@/components/features/auth/auth-layout';
+import ErrorBoundary from '@/components/infrastructure/error-boundary';
+import { Button, InputField, Logo } from '@/components/ui';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import { useAuth } from '../../contexts/auth-context';
+import { formatRegisterError } from '../../utils/errorUtils';
 
 export default function RegisterPage() {
   const [formData, setFormData] = useState({
-    name: "",
-    surname: "",
-    email: "",
-    password: "",
-    confirmPassword: ""
+    name: '',
+    surname: '',
+    email: '',
+    password: '',
+    confirmPassword: '',
   });
   const [errors, setErrors] = useState({
-    confirmPassword: "",
-    general: ""
+    confirmPassword: '',
+    general: '',
   });
 
-  const { register, isRegistering, registerError, isAuthenticated, isLoading, clearErrors } = useAuth();
+  const {
+    register,
+    isRegistering,
+    registerError,
+    isAuthenticated,
+    isLoading,
+    clearErrors,
+  } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
     if (!isLoading && isAuthenticated) {
-      router.push("/profile");
+      router.push('/profile');
     }
   }, [isAuthenticated, isLoading, router]);
 
@@ -34,32 +41,32 @@ export default function RegisterPage() {
     return () => {
       clearErrors();
     };
-  }, []);
+  }, [clearErrors]);
 
   const handleInputChange = (field: string, value: string) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [field]: value
+      [field]: value,
     }));
 
-    if (field === "password" || field === "confirmPassword") {
-      setErrors(prev => ({ ...prev, confirmPassword: "" }));
+    if (field === 'password' || field === 'confirmPassword') {
+      setErrors((prev) => ({ ...prev, confirmPassword: '' }));
     }
   };
 
   const validateForm = () => {
-    const newErrors = { confirmPassword: "", general: "" };
+    const newErrors = { confirmPassword: '', general: '' };
 
     if (formData.password !== formData.confirmPassword) {
-      newErrors.confirmPassword = "Passwords do not match";
+      newErrors.confirmPassword = 'Passwords do not match';
     } else if (formData.password.length < 6) {
-      newErrors.confirmPassword = "Password must be at least 6 characters";
+      newErrors.confirmPassword = 'Password must be at least 6 characters';
     }
 
     if (formData.name.length < 2) {
-      newErrors.general = "First name must be at least 2 characters long";
+      newErrors.general = 'First name must be at least 2 characters long';
     } else if (formData.surname.length < 2) {
-      newErrors.general = "Last name must be at least 2 characters long";
+      newErrors.general = 'Last name must be at least 2 characters long';
     }
 
     setErrors(newErrors);
@@ -73,11 +80,20 @@ export default function RegisterPage() {
       return;
     }
 
-    await register(formData.name, formData.surname, formData.email, formData.password);
+    await register(
+      formData.name,
+      formData.surname,
+      formData.email,
+      formData.password,
+    );
   };
 
-  const isFormValid = formData.name && formData.surname && formData.email &&
-    formData.password && formData.confirmPassword &&
+  const isFormValid =
+    formData.name &&
+    formData.surname &&
+    formData.email &&
+    formData.password &&
+    formData.confirmPassword &&
     formData.password === formData.confirmPassword &&
     formData.password.length >= 6;
 
@@ -90,9 +106,7 @@ export default function RegisterPage() {
 
         <div className="text-gray-90 flex-1 flex flex-col justify-center">
           <div className="text-center">
-            <h1 className="text-3xl font-bold mb-2">
-              Hello!
-            </h1>
+            <h1 className="text-3xl font-bold mb-2">Hello!</h1>
             <p className="font-light text-base mb-8">
               Please enter your details
             </p>
@@ -106,7 +120,7 @@ export default function RegisterPage() {
                   type="text"
                   placeholder="Enter your name"
                   value={formData.name}
-                  onChange={(e) => handleInputChange("name", e.target.value)}
+                  onChange={(e) => handleInputChange('name', e.target.value)}
                   required
                 />
                 <InputField
@@ -114,7 +128,7 @@ export default function RegisterPage() {
                   type="text"
                   placeholder="Enter your surname"
                   value={formData.surname}
-                  onChange={(e) => handleInputChange("surname", e.target.value)}
+                  onChange={(e) => handleInputChange('surname', e.target.value)}
                   required
                 />
               </div>
@@ -124,7 +138,7 @@ export default function RegisterPage() {
                 type="email"
                 placeholder="Enter your email"
                 value={formData.email}
-                onChange={(e) => handleInputChange("email", e.target.value)}
+                onChange={(e) => handleInputChange('email', e.target.value)}
                 required
               />
 
@@ -134,7 +148,7 @@ export default function RegisterPage() {
                 placeholder="Enter your password"
                 rightIcon="Eye"
                 value={formData.password}
-                onChange={(e) => handleInputChange("password", e.target.value)}
+                onChange={(e) => handleInputChange('password', e.target.value)}
                 required
               />
 
@@ -144,7 +158,9 @@ export default function RegisterPage() {
                 placeholder="Confirm your password"
                 rightIcon="Eye"
                 value={formData.confirmPassword}
-                onChange={(e) => handleInputChange("confirmPassword", e.target.value)}
+                onChange={(e) =>
+                  handleInputChange('confirmPassword', e.target.value)
+                }
                 required
               />
 
@@ -155,9 +171,7 @@ export default function RegisterPage() {
               )}
 
               {errors.general && (
-                <div className="text-red-500 text-sm">
-                  {errors.general}
-                </div>
+                <div className="text-red-500 text-sm">{errors.general}</div>
               )}
 
               {registerError && (
@@ -172,14 +186,17 @@ export default function RegisterPage() {
               className="w-full bg-primary-50 text-gray-900 hover:bg-primary-60 rounded-2xl font-medium"
               disabled={!isFormValid || isRegistering}
             >
-              {isRegistering ? "Creating account..." : "Sign Up"}
+              {isRegistering ? 'Creating account...' : 'Sign Up'}
             </Button>
           </form>
         </div>
 
         <div className="text-center text-base flex items-center justify-center gap-1 text-gray-90">
           <span className="font-light">Already have an account?</span>
-          <Link href="/login" className="font-bold hover:cursor-pointer hover:underline">
+          <Link
+            href="/login"
+            className="font-bold hover:cursor-pointer hover:underline"
+          >
             Log in
           </Link>
         </div>

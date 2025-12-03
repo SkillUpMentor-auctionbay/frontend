@@ -1,65 +1,89 @@
-"use client"
+'use client';
 
-import * as React from "react"
-import Link from "next/link"
-import { Badge } from "@/components/ui/primitives/badge"
-import { getImageUrl } from "@/utils/imageUtils"
-import { ImageFallback } from "@/components/ui/primitives/image-fallback"
-import type { Notification } from "@/types/notification"
-import { formatDateForDisplay } from "@/utils/dateUtils"
+import { Badge } from '@/components/ui/primitives/badge';
+import { ImageFallback } from '@/components/ui/primitives/image-fallback';
+import type { Notification } from '@/types/notification';
+import { formatDateForDisplay } from '@/utils/dateUtils';
+import { getImageUrl } from '@/utils/imageUtils';
+import Image from 'next/image';
+import Link from 'next/link';
+import * as React from 'react';
 
 interface NotificationItemProps {
-  notification: Notification
-  onClick?: () => void
-  className?: string
+  notification: Notification;
+  onClick?: () => void;
+  className?: string;
 }
 
 const formatPrice = (price: number) => {
-  return '€' + price.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ".")
-}
+  return '€' + price.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+};
 
-
-const NotificationItem = ({ className, notification, onClick }: NotificationItemProps) => {
-  const { auctionId, auctionTitle, imageUrl, price, createdAt } = notification
-  const title = auctionTitle || 'Unknown Auction'
-  const status = price !== null && price !== undefined ? 'won' : 'outbid'
-  const [imageError, setImageError] = React.useState(false)
+const NotificationItem = ({
+  className,
+  notification,
+  onClick,
+}: NotificationItemProps) => {
+  const { auctionId, auctionTitle, imageUrl, price, createdAt } = notification;
+  const title = auctionTitle || 'Unknown Auction';
+  const status = price !== null && price !== undefined ? 'won' : 'outbid';
+  const [imageError, setImageError] = React.useState(false);
 
   const handleImageError = React.useCallback(() => {
-    setImageError(true)
-  }, [])
+    setImageError(true);
+  }, []);
 
   const renderBadges = () => {
-    const badges = []
+    const badges = [];
 
     if (status === 'won') {
-      badges.push(<Badge key="won" variant="winning">Won</Badge>)
+      badges.push(
+        <Badge key="won" variant="winning">
+          Won
+        </Badge>,
+      );
     } else {
-      badges.push(<Badge key="outbid" variant="outbid">Outbid</Badge>)
+      badges.push(
+        <Badge key="outbid" variant="outbid">
+          Outbid
+        </Badge>,
+      );
     }
 
     if (status === 'won' && price) {
-      badges.push(<Badge key="price" variant="done">{formatPrice(price)}eur</Badge>)
+      badges.push(
+        <Badge key="price" variant="done">
+          {formatPrice(price)}eur
+        </Badge>,
+      );
     } else {
-      badges.push(<Badge key="done" variant="done">Done</Badge>)
+      badges.push(
+        <Badge key="done" variant="done">
+          Done
+        </Badge>,
+      );
     }
 
-    return badges
-  }
+    return badges;
+  };
 
   return (
     <Link
       href={auctionId ? '/auctions/' + auctionId : '#'}
-      className={'grid grid-cols-[40px_1fr_auto] gap-2 items-center w-full p-2 hover:bg-gray-5 rounded-lg transition-colors cursor-pointer ' + (className || '')}
+      className={
+        'grid grid-cols-[40px_1fr_auto] gap-2 items-center w-full p-2 hover:bg-gray-5 rounded-lg transition-colors cursor-pointer ' +
+        (className || '')
+      }
       onClick={onClick}
     >
       <div className="relative rounded shrink-0 w-10 h-10 overflow-hidden">
         {imageUrl && !imageError ? (
-          <img
-            src={getImageUrl(imageUrl)}
+          <Image
+            src={getImageUrl(imageUrl)!}
             alt={title}
-            className="w-full h-full object-cover"
             onError={handleImageError}
+            fill
+            className="absolute inset-0 w-full h-full object-cover rounded-md"
           />
         ) : (
           <ImageFallback
@@ -71,8 +95,8 @@ const NotificationItem = ({ className, notification, onClick }: NotificationItem
       </div>
 
       <div className="flex flex-col font-light items-start justify-center min-w-0 overflow-hidden">
-        <p 
-          className="leading-6 truncate text-base text-text-primary" 
+        <p
+          className="leading-6 truncate text-base text-text-primary"
           title={title.length > 30 ? title : undefined}
         >
           {title.length > 30 ? title.substring(0, 30) + '...' : title}
@@ -82,27 +106,28 @@ const NotificationItem = ({ className, notification, onClick }: NotificationItem
         </p>
       </div>
 
-      <div className="flex gap-2 items-center">
-        {renderBadges()}
-      </div>
+      <div className="flex gap-2 items-center">{renderBadges()}</div>
     </Link>
-  )
-}
-
-const MemoizedNotificationItem = React.memo(NotificationItem, (prevProps, nextProps) => {
-  const prevNotification = prevProps.notification;
-  const nextNotification = nextProps.notification;
-
-  return (
-    prevProps.className === nextProps.className &&
-    prevProps.onClick === nextProps.onClick &&
-    prevNotification.id === nextNotification.id &&
-    prevNotification.auctionId === nextNotification.auctionId &&
-    prevNotification.auctionTitle === nextNotification.auctionTitle &&
-    prevNotification.imageUrl === nextNotification.imageUrl &&
-    prevNotification.price === nextNotification.price &&
-    prevNotification.createdAt === nextNotification.createdAt
   );
-});
+};
 
-export { MemoizedNotificationItem as NotificationItem }
+const MemoizedNotificationItem = React.memo(
+  NotificationItem,
+  (prevProps, nextProps) => {
+    const prevNotification = prevProps.notification;
+    const nextNotification = nextProps.notification;
+
+    return (
+      prevProps.className === nextProps.className &&
+      prevProps.onClick === nextProps.onClick &&
+      prevNotification.id === nextNotification.id &&
+      prevNotification.auctionId === nextNotification.auctionId &&
+      prevNotification.auctionTitle === nextNotification.auctionTitle &&
+      prevNotification.imageUrl === nextNotification.imageUrl &&
+      prevNotification.price === nextNotification.price &&
+      prevNotification.createdAt === nextNotification.createdAt
+    );
+  },
+);
+
+export { MemoizedNotificationItem as NotificationItem };

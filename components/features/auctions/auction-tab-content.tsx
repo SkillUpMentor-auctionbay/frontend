@@ -1,18 +1,18 @@
-"use client";
+'use client';
 
-import { useRouter } from "next/navigation";
-import { AuctionCard } from "./auction-card";
-import { useAuth } from "@/contexts/auth-context";
-import { AuctionData as CoreAuctionData } from "@/types/auction";
-import { ScrollArea } from "@/components/ui/layout/scroll-area";
+import { ScrollArea } from '@/components/ui/layout/scroll-area';
+import { useAuth } from '@/contexts/auth-context';
+import { AuctionData as CoreAuctionData } from '@/types/auction';
+import { useRouter } from 'next/navigation';
+import { AuctionCard } from './auction-card';
 
-export type AuctionFilter = "ALL" | "OWN" | "BID" | "WON";
+export type AuctionFilter = 'ALL' | 'OWN' | 'BID' | 'WON';
 
 export interface AuctionData extends Omit<CoreAuctionData, 'status'> {
   price: string;
   timeLeft: string;
   isTimeUrgent: boolean;
-  status: "in-progress" | "outbid" | "winning" | "done";
+  status: 'in-progress' | 'outbid' | 'winning' | 'done';
   endTime: string;
 }
 
@@ -37,14 +37,14 @@ export function AuctionTabContent({
   const router = useRouter();
 
   const checkIfEditable = (auction: AuctionData) => {
-    if (auction.status === "done" || new Date(auction.endTime) <= new Date()) {
+    if (auction.status === 'done' || new Date(auction.endTime) <= new Date()) {
       return false;
     }
 
-    if (filter === "ALL") {
+    if (filter === 'ALL') {
       return auction.sellerId === user?.id;
     }
-    return filter === "OWN";
+    return filter === 'OWN';
   };
 
   const handleAuctionClick = (auctionId: string) => {
@@ -80,22 +80,42 @@ export function AuctionTabContent({
   if (!auctions || auctions.length === 0) {
     return (
       <div className="h-full">
-          <div className="px-8 pb-8 flex items-center justify-center h-full ">
-            <div className="flex flex-col items-center justify-center gap-3 text-center ">
-              <div className="text-text-primary text-[26px] font-bold w-full ">
-                {filter === "ALL" && "No auctions available!"}
-                {filter === "OWN" && "Oh no, no auctions added!"}
-                {filter === "BID" && "No bidding in progress!"}
-                {filter === "WON" && "Nothing here yet?"}
-              </div>
-              <div className="text-gray-40 text-base font-light w-full ">
-                {filter === "ALL" && <span>There are no auctions at the moment. <br/> Check back later for new items!</span>}
-                {filter === "OWN" && <span>To add new auction click "+" button in <br/> navigation bar and new auctions wil be <br/> added here!</span>}
-                {filter === "BID" && <span>Start bidding by finding new items you <br/> like on "Auction" page!</span>}
-                {filter === "WON" && <span>When you win auction items <br/> will be displayed here! Go on <br/> and bid on your favorite <br/> items!</span>}
-              </div>
+        <div className="px-8 pb-8 flex items-center justify-center h-full ">
+          <div className="flex flex-col items-center justify-center gap-3 text-center ">
+            <div className="text-text-primary text-[26px] font-bold w-full ">
+              {filter === 'ALL' && 'No auctions available!'}
+              {filter === 'OWN' && 'Oh no, no auctions added!'}
+              {filter === 'BID' && 'No bidding in progress!'}
+              {filter === 'WON' && 'Nothing here yet?'}
+            </div>
+            <div className="text-gray-40 text-base font-light w-full ">
+              {filter === 'ALL' && (
+                <span>
+                  There are no auctions at the moment. <br /> Check back later
+                  for new items!
+                </span>
+              )}
+              {filter === 'OWN' && (
+                <span>
+                  To add new auction click "+" button in <br /> navigation bar
+                  and new auctions wil be <br /> added here!
+                </span>
+              )}
+              {filter === 'BID' && (
+                <span>
+                  Start bidding by finding new items you <br /> like on
+                  "Auction" page!
+                </span>
+              )}
+              {filter === 'WON' && (
+                <span>
+                  When you win auction items <br /> will be displayed here! Go
+                  on <br /> and bid on your favorite <br /> items!
+                </span>
+              )}
             </div>
           </div>
+        </div>
       </div>
     );
   }
@@ -110,7 +130,7 @@ export function AuctionTabContent({
               return (
                 <AuctionCard
                   key={auction.id}
-                  variant={isEditable ? "editable" : "default"}
+                  variant={isEditable ? 'editable' : 'default'}
                   title={auction.title}
                   price={auction.price}
                   status={auction.status}
@@ -119,7 +139,9 @@ export function AuctionTabContent({
                   endTime={auction.endTime}
                   imageUrl={auction.imageUrl}
                   onClick={() => handleAuctionClick(auction.id)}
-                  onDelete={isEditable ? () => onDelete?.(auction.id) : undefined}
+                  onDelete={
+                    isEditable ? () => onDelete?.(auction.id) : undefined
+                  }
                   onEdit={isEditable ? () => onEdit?.(auction.id) : undefined}
                 />
               );

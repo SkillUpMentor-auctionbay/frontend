@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
-import { useEffect, useState, ReactNode } from "react";
-import { useRouter, usePathname } from "next/navigation";
-import { useAuth } from "@/contexts/auth-context";
+import { useAuth } from '@/contexts/auth-context';
+import { usePathname, useRouter } from 'next/navigation';
+import { ReactNode, useEffect, useState } from 'react';
 
 interface ProtectedRouteProps {
   readonly children: ReactNode;
@@ -19,8 +19,14 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
   }, []);
 
   useEffect(() => {
-    if (isClient && !isLoading && !isLoggingOut && !isAuthenticated && pathname !== "/login") {
-      router.push("/login");
+    if (
+      isClient &&
+      !isLoading &&
+      !isLoggingOut &&
+      !isAuthenticated &&
+      pathname !== '/login'
+    ) {
+      router.push('/login');
     }
   }, [isAuthenticated, isLoading, isLoggingOut, router, pathname, isClient]);
 
@@ -37,7 +43,7 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
   }
 
   if (!isAuthenticated) {
-    if (pathname !== "/login") {
+    if (pathname !== '/login') {
       return null;
     }
   }

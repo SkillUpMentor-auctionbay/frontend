@@ -1,9 +1,9 @@
-"use client";
+'use client';
 
-import { useMutation } from "@tanstack/react-query";
-import { userAPI } from "@/services/api";
-import { useAuctionValidation } from "@/hooks/useAuctionValidation";
-import { normalizeAuctionError } from "@/utils/errorUtils";
+import { useAuctionValidation } from '@/hooks/useAuctionValidation';
+import { userAPI } from '@/services/api';
+import { normalizeAuctionError } from '@/utils/errorUtils';
+import { useMutation } from '@tanstack/react-query';
 
 export interface ProfilePictureUploadError {
   message: string;
@@ -16,7 +16,9 @@ export interface UseProfilePictureUploadOptions {
   onError?: (error: ProfilePictureUploadError) => void;
 }
 
-export function useProfilePictureUpload(options: UseProfilePictureUploadOptions = {}) {
+export function useProfilePictureUpload(
+  options: UseProfilePictureUploadOptions = {},
+) {
   const { onSuccess, onError } = options;
   const { validateImage } = useAuctionValidation('create');
 
@@ -30,7 +32,7 @@ export function useProfilePictureUpload(options: UseProfilePictureUploadOptions 
       if (validationError) {
         const error: ProfilePictureUploadError = {
           message: validationError,
-          code: 'VALIDATION_ERROR'
+          code: 'VALIDATION_ERROR',
         };
         throw error;
       }

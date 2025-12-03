@@ -1,8 +1,9 @@
-"use client";
+'use client';
 
-import { useQuery } from "@tanstack/react-query";
-import { auctionsAPI } from "@/services/api";
-import { QUERY_CONSTANTS } from "@/constants/query";
+import { QUERY_CONSTANTS } from '@/constants/query';
+import { auctionsAPI } from '@/services/api';
+import { useQuery } from '@tanstack/react-query';
+import { AxiosError } from 'axios';
 
 interface UseAuctionDetailQueryOptions {
   enabled?: boolean;
@@ -12,16 +13,16 @@ interface UseAuctionDetailQueryOptions {
 
 export function useAuctionDetailQuery(
   auctionId: string,
-  options: UseAuctionDetailQueryOptions = {}
+  options: UseAuctionDetailQueryOptions = {},
 ) {
   const {
     enabled = true,
     staleTime = QUERY_CONSTANTS.CACHE_TIMES.MEDIUM,
-    refetchInterval = QUERY_CONSTANTS.REFRESH_INTERVALS.MEDIUM
+    refetchInterval = QUERY_CONSTANTS.REFRESH_INTERVALS.MEDIUM,
   } = options;
 
   return useQuery({
-    queryKey: ["auction", auctionId],
+    queryKey: ['auction', auctionId],
     queryFn: () => auctionsAPI.getAuctionById(auctionId),
     enabled: enabled && !!auctionId,
     staleTime,
@@ -29,7 +30,7 @@ export function useAuctionDetailQuery(
     refetchIntervalInBackground: true,
     retry: (failureCount, error) => {
       if (error && typeof error === 'object' && 'response' in error) {
-        const status = (error as any).response?.status;
+        const status = (error as AxiosError).response?.status;
         if (status && status >= 400 && status < 500) {
           return false;
         }
@@ -37,6 +38,9 @@ export function useAuctionDetailQuery(
       return failureCount < QUERY_CONSTANTS.RETRY.MAX_ATTEMPTS;
     },
     retryDelay: (attemptIndex) =>
-      Math.min(QUERY_CONSTANTS.RETRY.BASE_DELAY * 2 ** attemptIndex, QUERY_CONSTANTS.RETRY.MAX_DELAY)
+      Math.min(
+        QUERY_CONSTANTS.RETRY.BASE_DELAY * 2 ** attemptIndex,
+        QUERY_CONSTANTS.RETRY.MAX_DELAY,
+      ),
   });
 }

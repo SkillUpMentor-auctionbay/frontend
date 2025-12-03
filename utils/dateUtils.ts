@@ -1,15 +1,22 @@
 export const SLOVENIAN_LOCALE = 'sl-SI';
 
-
 export function formatDateForDisplay(date: Date | string): string {
   return new Date(date).toLocaleDateString(SLOVENIAN_LOCALE);
 }
 
-
 export function formatBidDate(dateString: string): string {
   const date = new Date(dateString);
-  const time = date.toLocaleTimeString(SLOVENIAN_LOCALE, { hour: '2-digit', minute: '2-digit' });
-  const dateStr = date.toLocaleDateString(SLOVENIAN_LOCALE, { day: 'numeric', month: 'numeric', year: 'numeric' }).replace(/\//g, '.');
+  const time = date.toLocaleTimeString(SLOVENIAN_LOCALE, {
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+  const dateStr = date
+    .toLocaleDateString(SLOVENIAN_LOCALE, {
+      day: 'numeric',
+      month: 'numeric',
+      year: 'numeric',
+    })
+    .replace(/\//g, '.');
   return `${time} ${dateStr}`;
 }
 
@@ -31,9 +38,11 @@ export function createMidnightUTCDate(dateString: string): Date | null {
   const constructedMonth = Number.parseInt(month, 10);
   const constructedYear = Number.parseInt(year, 10);
 
-  if (date.getUTCDate() !== constructedDay ||
-      date.getUTCMonth() + 1 !== constructedMonth ||
-      date.getUTCFullYear() !== constructedYear) {
+  if (
+    date.getUTCDate() !== constructedDay ||
+    date.getUTCMonth() + 1 !== constructedMonth ||
+    date.getUTCFullYear() !== constructedYear
+  ) {
     return null;
   }
 

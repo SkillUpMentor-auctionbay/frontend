@@ -13,7 +13,12 @@ export const AUCTION_VALIDATION = {
 
   IMAGE: {
     MAX_SIZE_BYTES: 5 * 1024 * 1024, // 5MB
-    ALLOWED_TYPES: ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'] as const,
+    ALLOWED_TYPES: [
+      'image/jpeg',
+      'image/jpg',
+      'image/png',
+      'image/webp',
+    ] as const,
   },
 
   MESSAGES: {

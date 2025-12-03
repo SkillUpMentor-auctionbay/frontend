@@ -1,13 +1,13 @@
-import { useQuery } from "@tanstack/react-query";
-import { notificationsAPI } from "@/services/api";
-import { notificationDtoToNotification } from "@/types/notification";
-import { useAuth } from "@/contexts/auth-context";
+import { useAuth } from '@/contexts/auth-context';
+import { notificationsAPI } from '@/services/api';
+import { notificationDtoToNotification } from '@/types/notification';
+import { useQuery } from '@tanstack/react-query';
 
 export const useNotificationsQuery = () => {
   const { user } = useAuth();
 
   return useQuery({
-    queryKey: ["notifications", user?.id],
+    queryKey: ['notifications', user?.id],
     queryFn: async () => {
       const response = await notificationsAPI.getNotifications();
 
@@ -15,7 +15,9 @@ export const useNotificationsQuery = () => {
 
       const backendNotifications = responseData?.notifications || [];
 
-      const notifications = backendNotifications.map(notificationDtoToNotification);
+      const notifications = backendNotifications.map(
+        notificationDtoToNotification,
+      );
 
       return {
         notifications,
@@ -25,9 +27,8 @@ export const useNotificationsQuery = () => {
     staleTime: 5 * 60 * 1000,
     refetchInterval: false,
     refetchOnWindowFocus: false,
-    enabled: !!user?.id
+    enabled: !!user?.id,
   });
 };
 
-export const useRefetchNotifications = () => {
-};
+export const useRefetchNotifications = () => {};

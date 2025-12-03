@@ -1,11 +1,11 @@
-"use client";
+'use client';
 
-import { use } from "react";
-import { AppLayout } from "@/components/features/layout/app-layout";
-import { useAuctionDetailQuery } from "../../../hooks/useAuctionDetailQuery";
-import { AuctionImage } from "@/components/features/auctions/auction-image";
-import { AuctionDetails } from "@/components/features/auctions/auction-details";
-import { BiddingHistory } from "@/components/features/auctions/bidding-history";
+import { AuctionDetails } from '@/components/features/auctions/auction-details';
+import { AuctionImage } from '@/components/features/auctions/auction-image';
+import { BiddingHistory } from '@/components/features/auctions/bidding-history';
+import { AppLayout } from '@/components/features/layout/app-layout';
+import { use } from 'react';
+import { useAuctionDetailQuery } from '../../../hooks/useAuctionDetailQuery';
 
 interface AuctionPageProps {
   readonly params: Promise<{
@@ -15,7 +15,11 @@ interface AuctionPageProps {
 
 export default function AuctionPage({ params }: AuctionPageProps) {
   const resolvedParams = use(params);
-  const { data: auction, isLoading, error } = useAuctionDetailQuery(resolvedParams.id);
+  const {
+    data: auction,
+    isLoading,
+    error,
+  } = useAuctionDetailQuery(resolvedParams.id);
 
   if (isLoading) {
     return (
@@ -44,8 +48,8 @@ export default function AuctionPage({ params }: AuctionPageProps) {
               <h2 className="text-xl font-bold mb-2">Error Loading Auction</h2>
               <p>
                 {typeof error === 'object' && 'message' in error
-                  ? (error as any).message
-                  : "Failed to load auction details. Please try again later."}
+                  ? error.message
+                  : 'Failed to load auction details. Please try again later.'}
               </p>
             </div>
           </div>
@@ -64,7 +68,10 @@ export default function AuctionPage({ params }: AuctionPageProps) {
           <div className="flex-1 px-8 pb-8 flex items-center justify-center">
             <div className="text-gray-600 text-center">
               <h2 className="text-xl font-bold mb-2">Auction Not Found</h2>
-              <p>The auction you're looking for doesn't exist or has been removed.</p>
+              <p>
+                The auction you're looking for doesn't exist or has been
+                removed.
+              </p>
             </div>
           </div>
         </div>
@@ -78,10 +85,7 @@ export default function AuctionPage({ params }: AuctionPageProps) {
         <div className="flex-1 px-8 pb-8">
           <div className="flex h-full gap-4">
             <div className="w-1/2">
-              <AuctionImage
-                imageUrl={auction.imageUrl}
-                title={auction.title}
-              />
+              <AuctionImage imageUrl={auction.imageUrl} title={auction.title} />
             </div>
 
             <div className="w-1/2 flex flex-col gap-4">

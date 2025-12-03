@@ -1,21 +1,24 @@
-"use client";
+'use client';
 
-import * as React from "react";
 import {
   Dialog,
   DialogContent,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/overlays/dialog";
-import { AddAuctionCard } from "./add-auction-card";
-import { type AuctionFormData } from "@/types/auction";
+} from '@/components/ui/overlays/dialog';
+import { type AuctionFormData } from '@/types/auction';
+import * as React from 'react';
+import { AddAuctionCard } from './add-auction-card';
 
 interface CreateAuctionDialogProps {
   readonly children: React.ReactNode;
   readonly onSubmit?: (data: AuctionFormData) => void;
 }
 
-export function CreateAuctionDialog({ children, onSubmit }: CreateAuctionDialogProps) {
+export function CreateAuctionDialog({
+  children,
+  onSubmit,
+}: CreateAuctionDialogProps) {
   const [open, setOpen] = React.useState(false);
 
   const handleSubmit = async (data: AuctionFormData) => {
@@ -31,9 +34,7 @@ export function CreateAuctionDialog({ children, onSubmit }: CreateAuctionDialogP
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        {children}
-      </DialogTrigger>
+      <DialogTrigger asChild>{children}</DialogTrigger>
       <DialogContent className="max-w-[600px] p-0 border-none bg-transparent shadow-none">
         <div className="bg-white rounded-2xl p-4 flex flex-col gap-4 w-full max-w-[533px]">
           <div className="flex items-center justify-between">
@@ -41,7 +42,7 @@ export function CreateAuctionDialog({ children, onSubmit }: CreateAuctionDialogP
               Add auction
             </DialogTitle>
           </div>
-          
+
           <AddAuctionCard
             onSubmit={handleSubmit}
             onCancel={handleCancel}

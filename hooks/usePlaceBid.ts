@@ -1,16 +1,18 @@
-"use client";
+'use client';
 
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { biddingAPI } from "@/services/api";
-import { toast } from "sonner";
+import { biddingAPI } from '@/services/api';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { toast } from 'sonner';
 import type {
+  AuctionData,
+  AuctionError,
+  AuctionsResponse,
+  BidFormData,
+  DetailedAuctionResponse,
+  FormValidationErrors,
   PlaceBidRequest,
   PlaceBidResponse,
-  AuctionError,
-  BidFormData,
-  FormValidationErrors,
-  DetailedAuctionResponse,
-} from "../types/auction";
+} from '../types/auction';
 
 interface PlaceBidMutationVariables {
   formData: BidFormData;
@@ -26,7 +28,9 @@ const formatCurrency = (amount: number): string => {
   return `${amount.toFixed(2)}€`;
 };
 
-const showValidationErrorToast = (validationErrors: FormValidationErrors): void => {
+const showValidationErrorToast = (
+  validationErrors: FormValidationErrors,
+): void => {
   const fieldMessages = Object.values(validationErrors).filter(Boolean);
 
   if (fieldMessages.length > 0) {
@@ -42,7 +46,10 @@ const showValidationErrorToast = (validationErrors: FormValidationErrors): void 
   }
 };
 
-const validateBidAmount = (amount: number, currentPrice: number): string | null => {
+const validateBidAmount = (
+  amount: number,
+  currentPrice: number,
+): string | null => {
   if (amount <= currentPrice) {
     return `Bid must be higher than current price (${formatCurrency(currentPrice)})`;
   }
@@ -58,24 +65,27 @@ const validateBidAmount = (amount: number, currentPrice: number): string | null 
   return null;
 };
 
-const validateBidForm = (formData: BidFormData, currentPrice: number): FormValidationErrors => {
+const validateBidForm = (
+  formData: BidFormData,
+  currentPrice: number,
+): FormValidationErrors => {
   const errors: FormValidationErrors = {};
 
   if (!formData.amount?.trim()) {
-    errors.amount = "Bid amount is required";
+    errors.amount = 'Bid amount is required';
     return errors;
   }
 
   const amountStr = formData.amount.trim();
 
   if (!/^-?\d*\.?\d*$/.test(amountStr)) {
-    errors.amount = "Bid amount must be a valid number (e.g., 10.50)";
+    errors.amount = 'Bid amount must be a valid number (e.g., 10.50)';
     return errors;
   }
 
   const amount = Number.parseFloat(amountStr);
   if (Number.isNaN(amount)) {
-    errors.amount = "Bid amount must be a valid number";
+    errors.amount = 'Bid amount must be a valid number';
     return errors;
   }
 
@@ -97,7 +107,11 @@ const convertFormDataToRequest = (formData: BidFormData): PlaceBidRequest => ({
   amount: Number.parseFloat(formData.amount),
 });
 
-export function usePlaceBid(auctionId: string, initialCurrentPrice: number, auction?: DetailedAuctionResponse) {
+export function usePlaceBid(
+  auctionId: string,
+  initialCurrentPrice: number,
+  auction?: DetailedAuctionResponse,
+) {
   const queryClient = useQueryClient();
 
   const placeBidMutation = useMutation<
@@ -110,33 +124,41 @@ export function usePlaceBid(auctionId: string, initialCurrentPrice: number, auct
       return await biddingAPI.placeBid(auctionId, requestData);
     },
     onMutate: async ({ formData }) => {
-      await queryClient.cancelQueries({ queryKey: ["auction", auctionId] });
-      await queryClient.cancelQueries({ queryKey: ["auctions"] });
+      await queryClient.cancelQueries({ queryKey: ['auction', auctionId] });
+      await queryClient.cancelQueries({ queryKey: ['auctions'] });
 
-      const previousAuction = queryClient.getQueryData(["auction", auctionId]);
-      const previousAuctions = queryClient.getQueryData(["auctions"]);
+      const previousAuction = queryClient.getQueryData(['auction', auctionId]);
+      const previousAuctions = queryClient.getQueryData(['auctions']);
 
       const newPrice = Number.parseFloat(formData.amount);
 
-      queryClient.setQueryData(["auction", auctionId], (old: any) => ({
+      queryClient.setQueryData(['auction', auctionId], (old: AuctionData) => ({
         ...old,
         currentPrice: newPrice,
         status: old.status === 'IN_PROGRESS' ? 'WINNING' : old.status,
       }));
 
-      const oldAuctions = queryClient.getQueryData(["auctions"]);
-      if (oldAuctions && typeof oldAuctions === 'object' && 'auctions' in oldAuctions && Array.isArray(oldAuctions.auctions)) {
-        queryClient.setQueryData(["auctions"], (old: any) => ({
+      const oldAuctions = queryClient.getQueryData(['auctions']);
+      if (
+        oldAuctions &&
+        typeof oldAuctions === 'object' &&
+        'auctions' in oldAuctions &&
+        Array.isArray(oldAuctions.auctions)
+      ) {
+        queryClient.setQueryData(['auctions'], (old: AuctionsResponse) => ({
           ...old,
-          auctions: old.auctions.map((auctionItem: any) =>
+          auctions: old.auctions.map((auctionItem: AuctionData) =>
             auctionItem.id === auctionId
               ? {
                   ...auctionItem,
                   currentPrice: newPrice,
                   price: formatCurrency(newPrice),
-                  status: auctionItem.status === 'IN_PROGRESS' ? 'WINNING' : auctionItem.status,
+                  status:
+                    auctionItem.status === 'IN_PROGRESS'
+                      ? 'WINNING'
+                      : auctionItem.status,
                 }
-              : auctionItem
+              : auctionItem,
           ),
         }));
       }
@@ -149,17 +171,28 @@ export function usePlaceBid(auctionId: string, initialCurrentPrice: number, auct
         return;
       }
 
-      queryClient.invalidateQueries({ queryKey: ["auction", auctionId], refetchType: "active" });
-      queryClient.invalidateQueries({ queryKey: ["auctions"], refetchType: "active" });
-      queryClient.invalidateQueries({ queryKey: ["user-statistics"], refetchType: "active" });
+      queryClient.invalidateQueries({
+        queryKey: ['auction', auctionId],
+        refetchType: 'active',
+      });
+      queryClient.invalidateQueries({
+        queryKey: ['auctions'],
+        refetchType: 'active',
+      });
+      queryClient.invalidateQueries({
+        queryKey: ['user-statistics'],
+        refetchType: 'active',
+      });
     },
     onError: (error, variables, context: any) => {
-
       if (context?.previousAuction) {
-        queryClient.setQueryData(["auction", auctionId], context.previousAuction);
+        queryClient.setQueryData(
+          ['auction', auctionId],
+          context.previousAuction,
+        );
       }
       if (context?.previousAuctions) {
-        queryClient.setQueryData(["auctions"], context.previousAuctions);
+        queryClient.setQueryData(['auctions'], context.previousAuctions);
       }
     },
   });
@@ -171,8 +204,8 @@ export function usePlaceBid(auctionId: string, initialCurrentPrice: number, auct
     if (Object.keys(validationErrors).length > 0) {
       showValidationErrorToast(validationErrors);
       const error: AuctionError = {
-        message: "Validation failed",
-        code: "VALIDATION_ERROR",
+        message: 'Validation failed',
+        code: 'VALIDATION_ERROR',
         details: validationErrors,
       };
       throw error;
@@ -183,8 +216,8 @@ export function usePlaceBid(auctionId: string, initialCurrentPrice: number, auct
     if ('validationErrors' in result) {
       showValidationErrorToast(result.validationErrors);
       const error: AuctionError = {
-        message: "Validation failed",
-        code: "VALIDATION_ERROR",
+        message: 'Validation failed',
+        code: 'VALIDATION_ERROR',
         details: result.validationErrors,
       };
       throw error;
@@ -192,7 +225,6 @@ export function usePlaceBid(auctionId: string, initialCurrentPrice: number, auct
 
     return result;
   };
-
 
   return {
     placeBid,

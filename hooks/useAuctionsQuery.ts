@@ -1,10 +1,14 @@
-"use client";
+'use client';
 
-import { useQuery } from "@tanstack/react-query";
-import { auctionsAPI } from "@/services/api";
-import { AuctionData, AuctionFilter } from "@/components/features/auctions/auction-tab-content";
-import { formatTimeLeft, isTimeUrgent } from "@/utils/timeUtils";
-import { QUERY_CONSTANTS } from "@/constants/query";
+import {
+  AuctionData,
+  AuctionFilter,
+} from '@/components/features/auctions/auction-tab-content';
+import { QUERY_CONSTANTS } from '@/constants/query';
+import { auctionsAPI } from '@/services/api';
+import { AuctionsResponse } from '@/types/auction';
+import { formatTimeLeft, isTimeUrgent } from '@/utils/timeUtils';
+import { useQuery } from '@tanstack/react-query';
 
 interface UseAuctionsQueryOptions {
   enabled?: boolean;
@@ -12,23 +16,22 @@ interface UseAuctionsQueryOptions {
   refetchInterval?: number | false;
 }
 
-function mapApiStatusToCardStatus(apiStatus: string): AuctionData["status"] {
+function mapApiStatusToCardStatus(apiStatus: string): AuctionData['status'] {
   switch (apiStatus) {
-    case "IN_PROGRESS":
-      return "in-progress";
-    case "DONE":
-      return "done";
-    case "OUTBID":
-      return "outbid";
-    case "WINNING":
-      return "winning";
+    case 'IN_PROGRESS':
+      return 'in-progress';
+    case 'DONE':
+      return 'done';
+    case 'OUTBID':
+      return 'outbid';
+    case 'WINNING':
+      return 'winning';
     default:
-      return "in-progress";
+      return 'in-progress';
   }
 }
 
-
-function transformAuctionData(response: any): AuctionData[] {
+function transformAuctionData(response: AuctionsResponse): AuctionData[] {
   if (!response?.auctions) return [];
 
   const transformedAuctions = response.auctions.map((item: any) => {
@@ -49,7 +52,7 @@ function transformAuctionData(response: any): AuctionData[] {
       updatedAt: item.updatedAt || new Date().toISOString(),
       price: `${item.currentPrice || 0} €`,
       timeLeft,
-      isTimeUrgent: timeIsUrgent
+      isTimeUrgent: timeIsUrgent,
     };
   });
 
@@ -60,31 +63,30 @@ export function useAuctionsQuery(
   filter: AuctionFilter,
   page = 1,
   limit = 500,
-  options: UseAuctionsQueryOptions = {}
+  options: UseAuctionsQueryOptions = {},
 ) {
   const {
     enabled = true,
     staleTime = 5 * 60 * 1000,
-    refetchInterval = QUERY_CONSTANTS.REFRESH_INTERVALS.SLOW
+    refetchInterval = QUERY_CONSTANTS.REFRESH_INTERVALS.SLOW,
   } = options;
 
   return useQuery({
-    queryKey: ["auctions", filter, page, limit],
+    queryKey: ['auctions', filter, page, limit],
     queryFn: async () => {
-        const response = await auctionsAPI.getAuctions(filter, page, limit);
+      const response = await auctionsAPI.getAuctions(filter, page, limit);
 
-        const transformedData = {
-          auctions: transformAuctionData(response),
-          pagination: response.pagination || {
-            page: page,
-            limit: limit,
-            total: 0,
-            totalPages: 0
-          }
-        };
+      const transformedData = {
+        auctions: transformAuctionData(response),
+        pagination: response.pagination || {
+          page: page,
+          limit: limit,
+          total: 0,
+          totalPages: 0,
+        },
+      };
 
-        return transformedData;
-       
+      return transformedData;
     },
     enabled,
     staleTime,
@@ -93,12 +95,15 @@ export function useAuctionsQuery(
     retry: (failureCount, error) => {
       if (error && typeof error === 'object' && 'response' in error) {
         const axiosError = error as any;
-        if (axiosError.response?.status === 404 || axiosError.response?.status === 401) {
+        if (
+          axiosError.response?.status === 404 ||
+          axiosError.response?.status === 401
+        ) {
           return false;
         }
       }
       return failureCount < 2;
     },
-    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 5000)
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 5000),
   });
 }

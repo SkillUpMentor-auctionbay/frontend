@@ -1,5 +1,5 @@
-import React from 'react';
 import { cn } from '@/lib/utils';
+import React from 'react';
 
 interface ImageFallbackProps {
   children?: React.ReactNode;
@@ -16,16 +16,17 @@ export function ImageFallback({
   text = 'No Image!',
   initials,
   className = '',
-  size = 'full'
+  size = 'full',
 }: ImageFallbackProps) {
   const sizeClasses = {
     sm: 'w-8 h-8 text-xs',
     md: 'w-16 h-16 text-sm',
     lg: 'w-32 h-32 text-base',
-    full: 'w-full h-full text-base'
+    full: 'w-full h-full text-base',
   };
 
-  const baseClasses = 'flex items-center justify-center bg-gray-200 text-gray-500 rounded';
+  const baseClasses =
+    'flex items-center justify-center bg-gray-200 text-gray-500 rounded';
   const classes = cn(baseClasses, sizeClasses[size], className);
 
   if (fallbackType === 'initials' && initials) {
@@ -36,9 +37,5 @@ export function ImageFallback({
     );
   }
 
-  return (
-    <div className={classes}>
-      {children || <span>{text}</span>}
-    </div>
-  );
+  return <div className={classes}>{children || <span>{text}</span>}</div>;
 }

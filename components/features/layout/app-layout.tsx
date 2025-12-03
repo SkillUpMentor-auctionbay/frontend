@@ -1,21 +1,21 @@
-"use client";
+'use client';
 
-import * as React from "react";
-import { useRouter, usePathname } from "next/navigation";
-import { Navbar } from "./navbar";
-import { ProtectedRoute } from "@/components/features/auth/protected-route";
-import { useNotificationsStream } from "@/hooks/useNotificationsStream";
+import { ProtectedRoute } from '@/components/features/auth/protected-route';
+import { useNotificationsStream } from '@/hooks/useNotificationsStream';
+import { usePathname, useRouter } from 'next/navigation';
+import * as React from 'react';
+import { Navbar } from './navbar';
 
 export interface AppLayoutProps {
   children: React.ReactNode;
   showProtectedRoute?: boolean;
 }
 
-type ActiveTab = "auctions" | "profile" | null;
+type ActiveTab = 'auctions' | 'profile' | null;
 
 const AppLayout: React.FC<AppLayoutProps> = ({
   children,
-  showProtectedRoute = true
+  showProtectedRoute = true,
 }) => {
   const router = useRouter();
   const pathname = usePathname();
@@ -23,37 +23,32 @@ const AppLayout: React.FC<AppLayoutProps> = ({
   useNotificationsStream();
 
   const getActiveTab = (): ActiveTab => {
-    if (pathname === "/profile") {
-      return "profile";
+    if (pathname === '/profile') {
+      return 'profile';
     }
-    if (pathname === "/auctions") {
-      return "auctions";
+    if (pathname === '/auctions') {
+      return 'auctions';
     }
-    if (pathname.startsWith("/auctions/") && pathname !== "/auctions") {
+    if (pathname.startsWith('/auctions/') && pathname !== '/auctions') {
       return null;
     }
-    return "auctions";
+    return 'auctions';
   };
 
   const activeTab = getActiveTab();
 
-  const handleTabChange = (tab: "auctions" | "profile") => {
-    if (tab === "auctions") {
-      router.push("/auctions");
-    } else if (tab === "profile") {
-      router.push("/profile");
+  const handleTabChange = (tab: 'auctions' | 'profile') => {
+    if (tab === 'auctions') {
+      router.push('/auctions');
+    } else if (tab === 'profile') {
+      router.push('/profile');
     }
   };
 
   const content = (
     <div className="min-h-screen bg-background">
-      <Navbar
-        activeTab={activeTab}
-        onTabChange={handleTabChange}
-      />
-      <main className="h-[calc(100vh-104px)]">
-        {children}
-      </main>
+      <Navbar activeTab={activeTab} onTabChange={handleTabChange} />
+      <main className="h-[calc(100vh-104px)]">{children}</main>
     </div>
   );
 

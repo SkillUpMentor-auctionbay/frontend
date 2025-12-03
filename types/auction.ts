@@ -145,3 +145,15 @@ export interface PlaceBidResponse {
 export interface BidFormData {
   amount: string;
 }
+
+export interface AuctionPagination {
+  page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
+}
+
+export interface AuctionsResponse {
+  auctions: AuctionData[];
+  pagination: AuctionPagination;
+}

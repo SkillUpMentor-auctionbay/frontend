@@ -1,10 +1,14 @@
-"use client";
+'use client';
 
-import { DetailedAuctionResponse } from "@/types/auction";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/primitives/avatar";
-import { getProfilePictureUrl } from "@/utils/imageUtils";
-import { ScrollArea } from "@/components/ui/layout/scroll-area";
-import { formatBidDate } from "@/utils/dateUtils";
+import { ScrollArea } from '@/components/ui/layout/scroll-area';
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+} from '@/components/ui/primitives/avatar';
+import { DetailedAuctionResponse } from '@/types/auction';
+import { formatBidDate } from '@/utils/dateUtils';
+import { getProfilePictureUrl } from '@/utils/imageUtils';
 
 interface BiddingHistoryProps {
   readonly bids: DetailedAuctionResponse['bids'];
@@ -16,8 +20,8 @@ interface BidHistoryItemProps {
 }
 
 function BidHistoryItem({ bid }: BidHistoryItemProps) {
-
-  const bidderInitials = `${bid.bidder.name?.[0] || ''}${bid.bidder.surname?.[0] || ''}`.toUpperCase();
+  const bidderInitials =
+    `${bid.bidder.name?.[0] || ''}${bid.bidder.surname?.[0] || ''}`.toUpperCase();
   const profilePictureUrl = getProfilePictureUrl(bid.bidder.profilePictureUrl);
 
   return (
@@ -57,20 +61,28 @@ function BidHistoryItem({ bid }: BidHistoryItemProps) {
 export function BiddingHistory({ bids, className }: BiddingHistoryProps) {
   if (!bids || bids.length === 0) {
     return (
-      <div className={`${className} bg-background-2 p-4 flex flex-col gap-4 items-start rounded-2xl h-full`}>
+      <div
+        className={`${className} bg-background-2 p-4 flex flex-col gap-4 items-start rounded-2xl h-full`}
+      >
         <h4 className="font-bold text-[23px] leading-[1.2] text-black">
           Bidding history(0)
         </h4>
         <div className=" p-8 text-center w-full flex flex-col h-full justify-center gap-2">
-          <h5 className=" text-[18px] font-semibold text-text-primary">No bids yet!</h5>
-          <p className="text-gray-40 text-[16px] font-light">Place your bid to have a chance to get this item.</p>
+          <h5 className=" text-[18px] font-semibold text-text-primary">
+            No bids yet!
+          </h5>
+          <p className="text-gray-40 text-[16px] font-light">
+            Place your bid to have a chance to get this item.
+          </p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className={`${className} bg-background-2 p-4 text-black flex flex-col gap-4 items-start rounded-2xl h-full`}>
+    <div
+      className={`${className} bg-background-2 p-4 text-black flex flex-col gap-4 items-start rounded-2xl h-full`}
+    >
       <div className="flex flex-col gap-4 items-start w-full">
         <h4 className="font-bold text-[23px] leading-[1.2] text-black">
           Bidding history({bids.length || 0})

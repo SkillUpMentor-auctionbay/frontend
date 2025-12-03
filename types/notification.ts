@@ -1,33 +1,35 @@
 export interface NotificationDto {
-  id: string
-  price?: number | null
-  createdAt: string
+  id: string;
+  price?: number | null;
+  createdAt: string;
   auction: {
-    id: string
-    title: string
-    imageUrl?: string
-    endTime: string
-  }
+    id: string;
+    title: string;
+    imageUrl?: string;
+    endTime: string;
+  };
 }
 
 export interface NotificationsResponse {
-  notifications: NotificationDto[]
-  total: number
+  notifications: NotificationDto[];
+  total: number;
 }
 
 export interface Notification {
-  id: string
-  auctionId: string
-  auctionTitle: string
-  imageUrl?: string
-  endTime: string
-  price: number | null
-  createdAt: string
+  id: string;
+  auctionId: string;
+  auctionTitle: string;
+  imageUrl?: string;
+  endTime: string;
+  price: number | null;
+  createdAt: string;
 }
 
-export type NotificationStatus = 'won' | 'outbid'
+export type NotificationStatus = 'won' | 'outbid';
 
-export const notificationDtoToNotification = (dto: NotificationDto): Notification => {
+export const notificationDtoToNotification = (
+  dto: NotificationDto,
+): Notification => {
   const notification = {
     id: dto.id,
     auctionId: dto.auction.id,
@@ -39,4 +41,4 @@ export const notificationDtoToNotification = (dto: NotificationDto): Notificatio
   };
 
   return notification;
-}
+};

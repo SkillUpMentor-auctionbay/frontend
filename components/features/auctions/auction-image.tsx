@@ -1,8 +1,9 @@
-"use client";
+'use client';
 
-import * as React from "react";
-import { getImageUrl } from "@/utils/imageUtils";
-import { ImageFallback } from "@/components/ui/primitives/image-fallback";
+import { ImageFallback } from '@/components/ui/primitives/image-fallback';
+import { getImageUrl } from '@/utils/imageUtils';
+import Image from 'next/image';
+import * as React from 'react';
 
 interface AuctionImageProps {
   readonly imageUrl?: string;
@@ -10,7 +11,11 @@ interface AuctionImageProps {
   readonly className?: string;
 }
 
-export function AuctionImage({ imageUrl, title, className }: AuctionImageProps) {
+export function AuctionImage({
+  imageUrl,
+  title,
+  className,
+}: AuctionImageProps) {
   const [imageError, setImageError] = React.useState(false);
 
   const handleImageError = React.useCallback(() => {
@@ -18,15 +23,14 @@ export function AuctionImage({ imageUrl, title, className }: AuctionImageProps) 
   }, []);
 
   return (
-    <div className={`h-full ${className}`}>
+    <div className={`h-full relative ${className}`}>
       {imageUrl && !imageError ? (
-        <img
-          src={getImageUrl(imageUrl)}
+        <Image
+          src={getImageUrl(imageUrl)!}
           alt={title}
-          className="w-full h-full object-cover rounded-2xl"
-          loading="lazy"
-          decoding="async"
           onError={handleImageError}
+          fill
+          className="absolute inset-0 w-full h-full object-cover rounded-xl"
         />
       ) : (
         <ImageFallback

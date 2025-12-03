@@ -1,12 +1,12 @@
-"use client";
+'use client';
 
-import * as React from "react";
-import { DetailedAuctionResponse, BidFormData } from "@/types/auction";
-import { Badge } from "@/components/ui/primitives/badge";
-import { Button } from "@/components/ui/primitives/button";
-import { useAuth } from "@/hooks/useAuth";
-import { usePlaceBid } from "@/hooks/usePlaceBid";
-import { useAuctionTimer } from "@/hooks/useAuctionTimer";
+import { Badge } from '@/components/ui/primitives/badge';
+import { Button } from '@/components/ui/primitives/button';
+import { useAuctionTimer } from '@/hooks/useAuctionTimer';
+import { useAuth } from '@/hooks/useAuth';
+import { usePlaceBid } from '@/hooks/usePlaceBid';
+import { BidFormData, DetailedAuctionResponse } from '@/types/auction';
+import * as React from 'react';
 
 interface AuctionDetailsProps {
   auction: DetailedAuctionResponse;
@@ -28,11 +28,11 @@ export function AuctionDetails({ auction, className }: AuctionDetailsProps) {
   const { placeBid, isLoading } = usePlaceBid(
     auction.id,
     auction.currentPrice,
-    auction
+    auction,
   );
 
   const handleBidAmountChange = (value: string) => {
-    setBidFormData(prev => ({ ...prev, amount: value }));
+    setBidFormData((prev) => ({ ...prev, amount: value }));
   };
 
   const handlePlaceBid = async () => {
@@ -45,7 +45,7 @@ export function AuctionDetails({ auction, className }: AuctionDetailsProps) {
 
   React.useEffect(() => {
     const newMinimumBid = (auction.currentPrice + 1).toFixed(2);
-    setBidFormData(prev => {
+    setBidFormData((prev) => {
       const currentAmount = Number.parseFloat(prev.amount);
       const minimumAmount = Number.parseFloat(newMinimumBid);
 
@@ -57,22 +57,37 @@ export function AuctionDetails({ auction, className }: AuctionDetailsProps) {
     });
   }, [auction.currentPrice]);
 
-  
   return (
     <div className={`${className} p-4 flex flex-col gap-4 h-full`}>
       <div className="flex justify-between gap-2">
         <Badge
-          variant={auction.status === 'IN_PROGRESS' ? 'in-progress' :
-            auction.status === 'OUTBID' ? 'outbid' :
-            auction.status === 'WINNING' ? 'winning' : 'done'}
+          variant={
+            auction.status === 'IN_PROGRESS'
+              ? 'in-progress'
+              : auction.status === 'OUTBID'
+                ? 'outbid'
+                : auction.status === 'WINNING'
+                  ? 'winning'
+                  : 'done'
+          }
           size="default"
         >
-          {auction.status === 'IN_PROGRESS' ? 'In progress' :
-            auction.status === 'OUTBID' ? 'Outbid' :
-            auction.status === 'WINNING' ? 'Winning' : 'Done'}
+          {auction.status === 'IN_PROGRESS'
+            ? 'In progress'
+            : auction.status === 'OUTBID'
+              ? 'Outbid'
+              : auction.status === 'WINNING'
+                ? 'Winning'
+                : 'Done'}
         </Badge>
         <Badge
-          variant={auction.status === 'DONE' ? 'time-outbid' : isTimeUrgent ? 'time-urgent' : 'time'}
+          variant={
+            auction.status === 'DONE'
+              ? 'time-outbid'
+              : isTimeUrgent
+                ? 'time-urgent'
+                : 'time'
+          }
           size="default"
           showTimeIcon={true}
         >
@@ -81,7 +96,9 @@ export function AuctionDetails({ auction, className }: AuctionDetailsProps) {
       </div>
 
       <div className="space-y-4">
-        <h1 className="text-2xl font-bold text-black text-[32px]">{auction.title}</h1>
+        <h1 className="text-2xl font-bold text-black text-[32px]">
+          {auction.title}
+        </h1>
         <div className="text-black font-light text-[16px]">
           {auction.description}
         </div>
@@ -106,7 +123,7 @@ export function AuctionDetails({ auction, className }: AuctionDetailsProps) {
               onClick={handlePlaceBid}
               disabled={isLoading}
             >
-              {isLoading ? "Placing..." : "Place bid"}
+              {isLoading ? 'Placing...' : 'Place bid'}
             </Button>
           </div>
         </div>

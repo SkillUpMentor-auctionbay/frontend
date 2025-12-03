@@ -1,7 +1,7 @@
-"use client";
+'use client';
 
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { userAPI } from "@/services/api";
+import { userAPI } from '@/services/api';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 
 export interface UserStatistics {
   totalEarnings: number;
@@ -32,10 +32,20 @@ const QUERY_CONFIG = {
 const validateStatisticsData = (data: any): UserStatistics => {
   const safeData = data || {};
   return {
-    totalEarnings: typeof safeData.totalEarnings === 'number' ? safeData.totalEarnings : 0,
-    totalPostedAuctions: typeof safeData.totalPostedAuctions === 'number' ? safeData.totalPostedAuctions : 0,
-    currentlyBidding: typeof safeData.currentlyBidding === 'number' ? safeData.currentlyBidding : 0,
-    currentlyWinning: typeof safeData.currentlyWinning === 'number' ? safeData.currentlyWinning : 0,
+    totalEarnings:
+      typeof safeData.totalEarnings === 'number' ? safeData.totalEarnings : 0,
+    totalPostedAuctions:
+      typeof safeData.totalPostedAuctions === 'number'
+        ? safeData.totalPostedAuctions
+        : 0,
+    currentlyBidding:
+      typeof safeData.currentlyBidding === 'number'
+        ? safeData.currentlyBidding
+        : 0,
+    currentlyWinning:
+      typeof safeData.currentlyWinning === 'number'
+        ? safeData.currentlyWinning
+        : 0,
   };
 };
 
@@ -44,9 +54,11 @@ const shouldRetry = (failureCount: number, error: any): boolean => {
     return false;
   }
 
-  if (error?.response?.status === 401 ||
-      error?.response?.status === 403 ||
-      error?.response?.status >= 500) {
+  if (
+    error?.response?.status === 401 ||
+    error?.response?.status === 403 ||
+    error?.response?.status >= 500
+  ) {
     return false;
   }
 
@@ -77,13 +89,13 @@ const statisticsAPI = {
 export const useUserStatistics = (
   options: UseUserStatisticsOptions = {},
   isAuthenticated?: boolean,
-  isLoggingOut?: boolean
+  isLoggingOut?: boolean,
 ) => {
   const { enabled = true, staleTime = QUERY_CONFIG.STALE_TIME } = options;
   const queryEnabled = enabled && !!isAuthenticated && !isLoggingOut;
 
   return useQuery<UserStatistics, Error>({
-    queryKey: ["user-statistics"],
+    queryKey: ['user-statistics'],
     queryFn: statisticsAPI.fetchWithFallback,
     enabled: queryEnabled,
     staleTime,
@@ -98,7 +110,7 @@ export const usePrefetchUserStatistics = () => {
 
   const prefetchStatistics = () => {
     queryClient.prefetchQuery({
-      queryKey: ["user-statistics"],
+      queryKey: ['user-statistics'],
       queryFn: statisticsAPI.fetchWithFallback,
       staleTime: QUERY_CONFIG.STALE_TIME,
       retry: false,

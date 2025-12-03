@@ -64,5 +64,4 @@ export interface AuthError {
   details?: Record<string, any>;
 }
 
-
 export type AuthContextUser = User | null | undefined;

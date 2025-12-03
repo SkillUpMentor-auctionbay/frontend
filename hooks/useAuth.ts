@@ -1,26 +1,33 @@
-"use client";
+'use client';
 
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useRouter } from "next/navigation";
-import { authAPI } from "@/services/api";
-import { User, LoginRequest, RegisterRequest, LoginResponse, RegisterResponse, AuthError } from "@/types/auth";
-import { useCallback, useRef, useEffect } from "react";
-import { storeToken, clearToken, getToken } from "@/utils/tokenValidation";
+import { authAPI } from '@/services/api';
+import {
+  AuthError,
+  LoginRequest,
+  LoginResponse,
+  RegisterRequest,
+  RegisterResponse,
+  User,
+} from '@/types/auth';
+import { clearToken, getToken, storeToken } from '@/utils/tokenValidation';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useRouter } from 'next/navigation';
+import { useCallback, useEffect, useRef } from 'react';
 
 const handleAuthSuccess = (
   data: LoginResponse | RegisterResponse,
   queryClient: any,
-  router: any
+  router: any,
 ) => {
   const tokenStored = storeToken(data.access_token);
   if (!tokenStored) {
     return;
   }
 
-  queryClient.setQueryData(["user"], data.user);
-  queryClient.invalidateQueries({ queryKey: ["user"], refetchType: "active" });
+  queryClient.setQueryData(['user'], data.user);
+  queryClient.invalidateQueries({ queryKey: ['user'], refetchType: 'active' });
 
-  router.push("/auctions");
+  router.push('/auctions');
 };
 
 export function useAuthMutation() {
@@ -31,7 +38,9 @@ export function useAuthMutation() {
   const loginMutation = useMutation({
     mutationFn: (data: LoginRequest) => {
       if (activeOperation.current) {
-        return Promise.reject(new Error('Authentication operation already in progress'));
+        return Promise.reject(
+          new Error('Authentication operation already in progress'),
+        );
       }
       activeOperation.current = 'login';
       return authAPI.login(data);
@@ -53,7 +62,9 @@ export function useAuthMutation() {
   const registerMutation = useMutation({
     mutationFn: (data: RegisterRequest) => {
       if (activeOperation.current) {
-        return Promise.reject(new Error('Authentication operation already in progress'));
+        return Promise.reject(
+          new Error('Authentication operation already in progress'),
+        );
       }
       activeOperation.current = 'register';
       return authAPI.register(data);
@@ -77,13 +88,13 @@ export function useAuthMutation() {
     onSuccess: () => {
       clearToken();
       queryClient.clear();
-      router.push("/");
+      router.push('/');
       activeOperation.current = null;
     },
     onError: (error: AuthError) => {
       clearToken();
       queryClient.clear();
-      router.push("/");
+      router.push('/');
       activeOperation.current = null;
     },
     onSettled: () => {
@@ -91,11 +102,9 @@ export function useAuthMutation() {
     },
   });
 
-
   const logout = useCallback(async () => {
     await logoutMutation.mutateAsync();
   }, [logoutMutation]);
-
 
   const clearErrors = useRef(() => {
     loginMutation.reset();
@@ -124,12 +133,16 @@ export function useAuthQuery() {
 
   useEffect(() => {
     if (hasToken) {
-      queryClient.cancelQueries({ queryKey: ["user"] });
+      queryClient.cancelQueries({ queryKey: ['user'] });
     }
   }, [hasToken, queryClient]);
 
-  const { data: user, isLoading, error } = useQuery<User | undefined, Error>({
-    queryKey: ["user"],
+  const {
+    data: user,
+    isLoading,
+    error,
+  } = useQuery<User | undefined, Error>({
+    queryKey: ['user'],
     queryFn: authAPI.me,
     enabled: !!hasToken,
     retry: false,

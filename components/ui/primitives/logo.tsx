@@ -1,29 +1,29 @@
-"use client";
+'use client';
 
-import * as React from "react";
-import Image from "next/image";
-import { cn } from "@/lib/utils";
+import { cn } from '@/lib/utils';
+import Image from 'next/image';
+import * as React from 'react';
 
 export interface LogoProps {
-  size?: "sm" | "md" | "lg";
+  size?: 'sm' | 'md' | 'lg';
   className?: string;
 }
 
 const Logo = React.forwardRef<HTMLDivElement, LogoProps>(
-  ({ size = "md", className, ...props }, ref) => {
+  ({ size = 'md', className, ...props }, ref) => {
     const sizeConfig = {
       sm: {
-        container: "w-12 h-12 p-3",
-        image: 24
+        container: 'w-12 h-12 p-3',
+        image: 24,
       },
       md: {
-        container: "w-16 h-16 p-4",
-        image: 32
+        container: 'w-16 h-16 p-4',
+        image: 32,
       },
       lg: {
-        container: "w-20 h-20 p-5",
-        image: 40
-      }
+        container: 'w-20 h-20 p-5',
+        image: 40,
+      },
     };
 
     const config = sizeConfig[size];
@@ -32,9 +32,9 @@ const Logo = React.forwardRef<HTMLDivElement, LogoProps>(
       <div
         ref={ref}
         className={cn(
-          "rounded-full bg-primary flex items-center justify-center",
+          'rounded-full bg-primary flex items-center justify-center',
           config.container,
-          className
+          className,
         )}
         {...props}
       >
@@ -46,9 +46,9 @@ const Logo = React.forwardRef<HTMLDivElement, LogoProps>(
         />
       </div>
     );
-  }
+  },
 );
 
-Logo.displayName = "Logo";
+Logo.displayName = 'Logo';
 
 export { Logo };

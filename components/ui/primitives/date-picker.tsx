@@ -1,14 +1,14 @@
-"use client";
+'use client';
 
-import * as React from "react";
-import { format, parse, isValid } from "date-fns";
-import { Calendar as CalendarComponent } from "@/components/ui/primitives/calendar";
-import { InputField } from "@/components/ui/primitives/input";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@/components/ui/overlays/popover";
+} from '@/components/ui/overlays/popover';
+import { Calendar as CalendarComponent } from '@/components/ui/primitives/calendar';
+import { InputField } from '@/components/ui/primitives/input';
+import { format, isValid, parse } from 'date-fns';
+import * as React from 'react';
 
 export interface DatePickerProps {
   value: string;
@@ -26,34 +26,37 @@ export interface DatePickerProps {
 }
 
 const DatePicker = React.forwardRef<HTMLDivElement, DatePickerProps>(
-  ({
-    value,
-    onChange,
-    disabled = false,
-    placeholder = "dd.MM.yyyy",
-    className,
-    error,
-    label,
-    required = false,
-    disabledDates = [],
-    minDate,
-    maxDate,
-    isLoading = false,
-    ...props
-  }, ref) => {
+  (
+    {
+      value,
+      onChange,
+      disabled = false,
+      placeholder = 'dd.MM.yyyy',
+      className,
+      error,
+      label,
+      required = false,
+      disabledDates = [],
+      minDate,
+      maxDate,
+      isLoading = false,
+      ...props
+    },
+    ref,
+  ) => {
     const [open, setOpen] = React.useState(false);
 
     // Helper function to parse dd.MM.yyyy format (extracted from edit-auction-card)
     const parseDate = (dateString: string): Date | undefined => {
       if (!dateString) return undefined;
-      const parsed = parse(dateString, "dd.MM.yyyy", new Date());
+      const parsed = parse(dateString, 'dd.MM.yyyy', new Date());
       return isValid(parsed) ? parsed : undefined;
     };
 
     // Helper function to format Date to dd.mm.yyyy (extracted from edit-auction-card)
     const formatDate = (date: Date | undefined): string => {
-      if (!date) return "";
-      return format(date, "dd.MM.yyyy");
+      if (!date) return '';
+      return format(date, 'dd.MM.yyyy');
     };
 
     // Prepare disabled dates for calendar
@@ -97,18 +100,21 @@ const DatePicker = React.forwardRef<HTMLDivElement, DatePickerProps>(
                 disabled={disabled || isLoading}
                 required={required}
               />
-              {error && (
-                <p className="text-red-500 text-sm mt-1">{error}</p>
-              )}
+              {error && <p className="text-red-500 text-sm mt-1">{error}</p>}
             </div>
           </PopoverTrigger>
-          <PopoverContent className="p-0" align="start" side="top" sideOffset={-26}>
+          <PopoverContent
+            className="p-0"
+            align="start"
+            side="top"
+            sideOffset={-26}
+          >
             <CalendarComponent
               mode="single"
               selected={parseDate(value)}
               defaultMonth={parseDate(value) || new Date()}
               onSelect={(date) => {
-                onChange(date ? formatDate(date) : "");
+                onChange(date ? formatDate(date) : '');
                 setOpen(false);
               }}
               disabled={calendarDisabled}
@@ -117,9 +123,9 @@ const DatePicker = React.forwardRef<HTMLDivElement, DatePickerProps>(
         </Popover>
       </div>
     );
-  }
+  },
 );
 
-DatePicker.displayName = "DatePicker";
+DatePicker.displayName = 'DatePicker';
 
 export { DatePicker };

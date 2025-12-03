@@ -1,21 +1,22 @@
-"use client";
+'use client';
 
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { auctionsAPI } from "@/services/api";
+import { AUCTION_VALIDATION } from '@/constants/validation';
+import { useAuctionValidation } from '@/hooks/useAuctionValidation';
+import { auctionsAPI } from '@/services/api';
+import { createMidnightUTCDate } from '@/utils/dateUtils';
+import { normalizeAuctionError } from '@/utils/errorUtils';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import {
-  CreateAuctionRequest,
-  CreateAuctionResponse,
   AuctionError,
   AuctionFormData,
+  CreateAuctionRequest,
+  CreateAuctionResponse,
   FormValidationErrors,
-} from "../types/auction";
-import { useAuctionValidation } from "@/hooks/useAuctionValidation";
-import { normalizeAuctionError } from "@/utils/errorUtils";
-import { createMidnightUTCDate } from "@/utils/dateUtils";
-import { AUCTION_VALIDATION } from "@/constants/validation";
+} from '../types/auction';
 
-
-function convertFormDataToRequest(formData: AuctionFormData): CreateAuctionRequest {
+function convertFormDataToRequest(
+  formData: AuctionFormData,
+): CreateAuctionRequest {
   const endDate = createMidnightUTCDate(formData.endDate);
 
   if (!endDate) {
@@ -34,14 +35,18 @@ export function useCreateAuction() {
   const queryClient = useQueryClient();
   const { validateEntireForm } = useAuctionValidation('create');
 
-  const createAuctionMutation = useMutation<CreateAuctionResponse, AuctionError, { formData: AuctionFormData }>({
+  const createAuctionMutation = useMutation<
+    CreateAuctionResponse,
+    AuctionError,
+    { formData: AuctionFormData }
+  >({
     mutationFn: async ({ formData }) => {
       const validationErrors = validateEntireForm(formData);
       if (Object.keys(validationErrors).length > 0) {
         const error: AuctionError = {
           message: AUCTION_VALIDATION.MESSAGES.VALIDATION_FAILED,
           code: 'VALIDATION_ERROR',
-          details: validationErrors
+          details: validationErrors,
         };
         throw error;
       }
@@ -52,7 +57,10 @@ export function useCreateAuction() {
         const createResponse = await auctionsAPI.createAuction(requestData);
 
         if (formData.image) {
-          await auctionsAPI.uploadAuctionImage(createResponse.auction.id, formData.image);
+          await auctionsAPI.uploadAuctionImage(
+            createResponse.auction.id,
+            formData.image,
+          );
         }
 
         return createResponse;
@@ -61,18 +69,32 @@ export function useCreateAuction() {
       }
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["auctions"], refetchType: "active" });
-      queryClient.invalidateQueries({ queryKey: ["auctions", "OWN"], refetchType: "active" });
-      queryClient.invalidateQueries({ queryKey: ["user-statistics"], refetchType: "active" });
-    }
+      queryClient.invalidateQueries({
+        queryKey: ['auctions'],
+        refetchType: 'active',
+      });
+      queryClient.invalidateQueries({
+        queryKey: ['auctions', 'OWN'],
+        refetchType: 'active',
+      });
+      queryClient.invalidateQueries({
+        queryKey: ['user-statistics'],
+        refetchType: 'active',
+      });
+    },
   });
 
-  const createAuction = async (formData: AuctionFormData): Promise<CreateAuctionResponse> => {
+  const createAuction = async (
+    formData: AuctionFormData,
+  ): Promise<CreateAuctionResponse> => {
     return await createAuctionMutation.mutateAsync({ formData });
   };
 
   const getValidationErrors = (): FormValidationErrors => {
-    if (createAuctionMutation.error?.code === "VALIDATION_ERROR" && createAuctionMutation.error.details) {
+    if (
+      createAuctionMutation.error?.code === 'VALIDATION_ERROR' &&
+      createAuctionMutation.error.details
+    ) {
       const details = createAuctionMutation.error.details;
       if (details && typeof details === 'object' && !Array.isArray(details)) {
         return details as FormValidationErrors;

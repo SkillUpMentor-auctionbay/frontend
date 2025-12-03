@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
-import { useMemo } from "react";
-import { useAuth } from "@/hooks/useAuth";
-import { getProfilePictureUrl } from "@/utils/imageUtils";
+import { useAuth } from '@/hooks/useAuth';
+import { getProfilePictureUrl } from '@/utils/imageUtils';
+import { useMemo } from 'react';
 
 export function useProfilePicture() {
   const { user } = useAuth();

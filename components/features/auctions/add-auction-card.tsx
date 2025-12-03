@@ -1,16 +1,16 @@
-"use client";
+'use client';
 
-import * as React from "react";
-import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/primitives/button";
-import { InputField } from "@/components/ui/primitives/input";
-import { TextAreaField } from "@/components/ui/primitives/textarea-field";
-import { useCreateAuction } from "@/hooks/useCreateAuction";
-import { AuctionFormData, AuctionError } from "@/types/auction";
-import { AuctionImageUpload } from "./auction-image-upload";
-import { useAuctionImage } from "@/hooks/useAuctionImage";
-import { useAuctionValidation } from "@/hooks/useAuctionValidation";
-import { DatePicker } from "@/components/ui/primitives/date-picker";
+import { Button } from '@/components/ui/primitives/button';
+import { DatePicker } from '@/components/ui/primitives/date-picker';
+import { InputField } from '@/components/ui/primitives/input';
+import { TextAreaField } from '@/components/ui/primitives/textarea-field';
+import { useAuctionImage } from '@/hooks/useAuctionImage';
+import { useAuctionValidation } from '@/hooks/useAuctionValidation';
+import { useCreateAuction } from '@/hooks/useCreateAuction';
+import { cn } from '@/lib/utils';
+import { AuctionError, AuctionFormData } from '@/types/auction';
+import * as React from 'react';
+import { AuctionImageUpload } from './auction-image-upload';
 
 export interface AddAuctionCardProps {
   className?: string;
@@ -20,27 +20,34 @@ export interface AddAuctionCardProps {
 
 const AddAuctionCard = React.forwardRef<HTMLDivElement, AddAuctionCardProps>(
   ({ className, onSubmit, onCancel, ...props }, ref) => {
-    const { createAuction, isLoading, error, validationErrors, hasValidationErrors } = useCreateAuction();
+    const {
+      createAuction,
+      isLoading,
+      error,
+      validationErrors,
+      hasValidationErrors,
+    } = useCreateAuction();
 
     const [formData, setFormData] = React.useState<AuctionFormData>({
-      title: "",
-      description: "",
-      startingPrice: "",
-      endDate: "",
+      title: '',
+      description: '',
+      startingPrice: '',
+      endDate: '',
     });
 
     const { clearFieldError, validateField } = useAuctionValidation('create');
 
-    const { imageState, handleImageSelect, handleImageDelete } = useAuctionImage();
+    const { imageState, handleImageSelect, handleImageDelete } =
+      useAuctionImage();
 
     const handleInputChange = (field: keyof AuctionFormData, value: string) => {
-      setFormData(prev => ({ ...prev, [field]: value }));
+      setFormData((prev) => ({ ...prev, [field]: value }));
       clearFieldError(field);
     };
 
     const handleImageChange = (file: File) => {
       handleImageSelect(file);
-      setFormData(prev => ({ ...prev, image: file }));
+      setFormData((prev) => ({ ...prev, image: file }));
     };
 
     const handleSubmit = async () => {
@@ -62,12 +69,12 @@ const AddAuctionCard = React.forwardRef<HTMLDivElement, AddAuctionCardProps>(
       <div
         ref={ref}
         className={cn(
-          "bg-white rounded-2xl p-4 flex flex-col gap-4 w-full max-w-[533px]",
-          className
+          'bg-white rounded-2xl p-4 flex flex-col gap-4 w-full max-w-[533px]',
+          className,
         )}
         {...props}
       >
-              <AuctionImageUpload
+        <AuctionImageUpload
           imagePreview={imageState.preview}
           existingImageUrl={imageState.existingUrl}
           onImageChange={handleImageChange}
@@ -83,10 +90,12 @@ const AddAuctionCard = React.forwardRef<HTMLDivElement, AddAuctionCardProps>(
               label="Title"
               placeholder="Write item name here"
               value={formData.title}
-              onChange={(e) => handleInputChange("title", e.target.value)}
+              onChange={(e) => handleInputChange('title', e.target.value)}
             />
             {validationErrors?.title && (
-              <p className="text-red-500 text-sm mt-1">{validationErrors.title}</p>
+              <p className="text-red-500 text-sm mt-1">
+                {validationErrors.title}
+              </p>
             )}
           </div>
 
@@ -95,11 +104,13 @@ const AddAuctionCard = React.forwardRef<HTMLDivElement, AddAuctionCardProps>(
               label="Description"
               placeholder="Write description here..."
               value={formData.description}
-              onChange={(e) => handleInputChange("description", e.target.value)}
+              onChange={(e) => handleInputChange('description', e.target.value)}
               rows={5}
             />
             {validationErrors?.description && (
-              <p className="text-red-500 text-sm mt-1">{validationErrors.description}</p>
+              <p className="text-red-500 text-sm mt-1">
+                {validationErrors.description}
+              </p>
             )}
           </div>
 
@@ -110,22 +121,30 @@ const AddAuctionCard = React.forwardRef<HTMLDivElement, AddAuctionCardProps>(
                 type="number"
                 placeholder="Price"
                 value={formData.startingPrice}
-                onChange={(e) => handleInputChange("startingPrice", e.target.value)}
+                onChange={(e) =>
+                  handleInputChange('startingPrice', e.target.value)
+                }
                 rightIcon="Eur"
                 rightIconClickable={false}
                 className={cn(
-                  "w-42",
-                  validateField('startingPrice', formData.startingPrice, formData)
+                  'w-42',
+                  validateField(
+                    'startingPrice',
+                    formData.startingPrice,
+                    formData,
+                  ),
                 )}
               />
               {validationErrors?.startingPrice && (
-                <p className="text-red-500 text-sm mt-1">{validationErrors.startingPrice}</p>
+                <p className="text-red-500 text-sm mt-1">
+                  {validationErrors.startingPrice}
+                </p>
               )}
             </div>
 
             <DatePicker
               value={formData.endDate}
-              onChange={(value) => handleInputChange("endDate", value)}
+              onChange={(value) => handleInputChange('endDate', value)}
               label="End date"
               isLoading={isLoading}
               error={validationErrors?.endDate}
@@ -141,11 +160,7 @@ const AddAuctionCard = React.forwardRef<HTMLDivElement, AddAuctionCardProps>(
         )}
 
         <div className="flex justify-end gap-4">
-          <Button
-            variant="alternative"
-            onClick={onCancel}
-            disabled={isLoading}
-          >
+          <Button variant="alternative" onClick={onCancel} disabled={isLoading}>
             Cancel
           </Button>
           <Button
@@ -160,15 +175,15 @@ const AddAuctionCard = React.forwardRef<HTMLDivElement, AddAuctionCardProps>(
                 Creating...
               </div>
             ) : (
-              "Start auction"
+              'Start auction'
             )}
           </Button>
         </div>
       </div>
     );
-  }
+  },
 );
 
-AddAuctionCard.displayName = "AddAuctionCard";
+AddAuctionCard.displayName = 'AddAuctionCard';
 
 export { AddAuctionCard };

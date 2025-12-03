@@ -1,8 +1,12 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { notificationsAPI } from "@/services/api";
-import { useAuth } from "@/contexts/auth-context";
-import { showNotificationsClearedToast, showNotificationsErrorToast, createEmptyNotificationsCache } from "@/utils/notificationUtils";
-import { createNotificationQueryKey } from "@/constants/notifications";
+import { createNotificationQueryKey } from '@/constants/notifications';
+import { useAuth } from '@/contexts/auth-context';
+import { notificationsAPI } from '@/services/api';
+import {
+  createEmptyNotificationsCache,
+  showNotificationsClearedToast,
+  showNotificationsErrorToast,
+} from '@/utils/notificationUtils';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 export const useClearAllNotificationsMutation = () => {
   const queryClient = useQueryClient();
@@ -13,11 +17,11 @@ export const useClearAllNotificationsMutation = () => {
     onSuccess: () => {
       queryClient.setQueryData(
         createNotificationQueryKey(user?.id || ''),
-        createEmptyNotificationsCache()
+        createEmptyNotificationsCache(),
       );
 
       queryClient.invalidateQueries({
-        queryKey: createNotificationQueryKey(user?.id || '')
+        queryKey: createNotificationQueryKey(user?.id || ''),
       });
 
       showNotificationsClearedToast();

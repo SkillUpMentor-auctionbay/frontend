@@ -1,14 +1,18 @@
-"use client";
+'use client';
 
-import * as React from "react";
 import {
   Dialog,
   DialogContent,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/overlays/dialog";
-import { EditAuctionCard } from "./edit-auction-card";
-import { EditAuctionFormData, AuctionData } from "@/types/auction";
+} from '@/components/ui/overlays/dialog';
+import {
+  AuctionData,
+  AuctionError,
+  EditAuctionFormData,
+} from '@/types/auction';
+import * as React from 'react';
+import { EditAuctionCard } from './edit-auction-card';
 
 interface EditAuctionDialogProps {
   readonly children?: React.ReactNode;
@@ -23,7 +27,7 @@ export function EditAuctionDialog({
   auction,
   onSubmit,
   open: controlledOpen,
-  onOpenChange
+  onOpenChange,
 }: EditAuctionDialogProps) {
   const [internalOpen, setInternalOpen] = React.useState(false);
   const open = controlledOpen !== undefined ? controlledOpen : internalOpen;
@@ -39,7 +43,7 @@ export function EditAuctionDialog({
         setOpen(false);
       }
     } catch (error) {
-      if ((error as any)?.code === 'VALIDATION_ERROR') {
+      if ((error as AuctionError)?.code === 'VALIDATION_ERROR') {
         return;
       }
     }
@@ -51,15 +55,12 @@ export function EditAuctionDialog({
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      {children && (
-        <DialogTrigger asChild>
-          {children}
-        </DialogTrigger>
-      )}
+      {children && <DialogTrigger asChild>{children}</DialogTrigger>}
       <DialogContent className="max-w-[600px] p-0 border-none bg-transparent shadow-none">
-        
         <div className="bg-white rounded-2xl p-4 flex flex-col gap-4 w-full max-w-[533px]">
-          <DialogTitle className="font-bold text-[23px]">Edit auction</DialogTitle>
+          <DialogTitle className="font-bold text-[23px]">
+            Edit auction
+          </DialogTitle>
 
           {auction ? (
             <EditAuctionCard

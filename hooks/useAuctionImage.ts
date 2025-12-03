@@ -1,4 +1,5 @@
-import { useState, useCallback } from 'react';
+import { AuctionFormData, EditAuctionFormData } from '@/types/auction';
+import { useCallback, useState } from 'react';
 import { useAuctionValidation } from './useAuctionValidation';
 
 interface ImageState {
@@ -9,7 +10,10 @@ interface ImageState {
   validationError: string | null;
 }
 
-export function useAuctionImage(existingImageUrl?: string, mode: 'create' | 'edit' = 'create') {
+export function useAuctionImage(
+  existingImageUrl?: string,
+  mode: 'create' | 'edit' = 'create',
+) {
   const [imageState, setImageState] = useState<ImageState>({
     preview: null,
     existingUrl: existingImageUrl,
@@ -20,48 +24,51 @@ export function useAuctionImage(existingImageUrl?: string, mode: 'create' | 'edi
 
   const { validateField } = useAuctionValidation(mode);
 
-  const handleImageSelect = useCallback((file: File) => {
-    const validationError = validateField('image', '', {
-      title: '',
-      description: '',
-      startingPrice: '',
-      endDate: '',
-      image: file
-    } as any);
+  const handleImageSelect = useCallback(
+    (file: File) => {
+      const validationError = validateField('image', '', {
+        title: '',
+        description: '',
+        startingPrice: '',
+        endDate: '',
+        image: file,
+      } as EditAuctionFormData | AuctionFormData);
 
-    if (validationError) {
-      setImageState(prev => ({
-        ...prev,
-        error: true,
-        preview: null,
-        validationError: validationError,
-      }));
-      return;
-    }
+      if (validationError) {
+        setImageState((prev) => ({
+          ...prev,
+          error: true,
+          preview: null,
+          validationError: validationError,
+        }));
+        return;
+      }
 
-    const reader = new FileReader();
-    reader.onload = () => {
-      setImageState(prev => ({
-        ...prev,
-        preview: reader.result as string,
-        error: false,
-        hasChanges: true,
-        validationError: null,
-      }));
-    };
-    reader.onerror = () => {
-      setImageState(prev => ({
-        ...prev,
-        error: true,
-        preview: null,
-        validationError: 'Failed to read image file',
-      }));
-    };
-    reader.readAsDataURL(file);
-  }, [validateField]);
+      const reader = new FileReader();
+      reader.onload = () => {
+        setImageState((prev) => ({
+          ...prev,
+          preview: reader.result as string,
+          error: false,
+          hasChanges: true,
+          validationError: null,
+        }));
+      };
+      reader.onerror = () => {
+        setImageState((prev) => ({
+          ...prev,
+          error: true,
+          preview: null,
+          validationError: 'Failed to read image file',
+        }));
+      };
+      reader.readAsDataURL(file);
+    },
+    [validateField],
+  );
 
   const handleImageDelete = useCallback(() => {
-    setImageState(prev => ({
+    setImageState((prev) => ({
       ...prev,
       preview: null,
       existingUrl: undefined,

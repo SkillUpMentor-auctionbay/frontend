@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import React from 'react';
 
@@ -12,7 +12,10 @@ interface ErrorBoundaryProps {
   fallback?: React.ComponentType<{ error?: Error; reset: () => void }>;
 }
 
-class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundaryState> {
+class ErrorBoundary extends React.Component<
+  ErrorBoundaryProps,
+  ErrorBoundaryState
+> {
   constructor(props: ErrorBoundaryProps) {
     super(props);
     this.state = { hasError: false };
@@ -40,7 +43,13 @@ class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundarySta
   }
 }
 
-function DefaultErrorFallback({ error, reset }: { error?: Error; reset: () => void }) {
+function DefaultErrorFallback({
+  error,
+  reset,
+}: {
+  error?: Error;
+  reset: () => void;
+}) {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50">
       <div className="bg-white p-8 rounded-lg shadow-md max-w-md w-full">
@@ -50,13 +59,18 @@ function DefaultErrorFallback({ error, reset }: { error?: Error; reset: () => vo
             Something went wrong
           </h2>
           <p className="text-gray-600 mb-6">
-            We encountered an unexpected error. Please try refreshing the page or contact support if the problem persists.
+            We encountered an unexpected error. Please try refreshing the page
+            or contact support if the problem persists.
           </p>
 
           {error && (
             <details className="text-left mb-6 p-4 bg-gray-100 rounded text-sm">
-              <summary className="font-medium cursor-pointer mb-2">Error Details</summary>
-              <pre className="whitespace-pre-wrap text-red-600">{error.message}</pre>
+              <summary className="font-medium cursor-pointer mb-2">
+                Error Details
+              </summary>
+              <pre className="whitespace-pre-wrap text-red-600">
+                {error.message}
+              </pre>
             </details>
           )}
 

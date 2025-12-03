@@ -1,162 +1,181 @@
-"use client"
+'use client';
 
-import * as React from "react"
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/primitives/avatar"
-import { InputField } from "@/components/ui/primitives/input"
-import { Button } from "@/components/ui/primitives/button"
-import { useAuth } from "@/contexts/auth-context"
-import { useProfilePicture } from "@/hooks/useProfilePicture"
-import { useProfilePictureUpload } from "@/hooks/useProfilePictureUpload"
-import { generateInitials } from "@/utils/imageUtils"
-import { useQueryClient } from "@tanstack/react-query"
-import { userAPI } from "@/services/api"
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+} from '@/components/ui/primitives/avatar';
+import { Button } from '@/components/ui/primitives/button';
+import { InputField } from '@/components/ui/primitives/input';
+import { useAuth } from '@/contexts/auth-context';
+import { useProfilePicture } from '@/hooks/useProfilePicture';
+import { useProfilePictureUpload } from '@/hooks/useProfilePictureUpload';
+import { userAPI } from '@/services/api';
+import { generateInitials } from '@/utils/imageUtils';
+import { useQueryClient } from '@tanstack/react-query';
+import * as React from 'react';
 
 export interface ProfileSettingsProps {
-  className?: string
-  onSubmit?: (data: ProfileSettingsData | PasswordData) => Promise<void>
-  onCancel?: () => void
-  onViewChange?: (view: ViewType) => void
+  className?: string;
+  onSubmit?: (data: ProfileSettingsData | PasswordData) => Promise<void>;
+  onCancel?: () => void;
+  onViewChange?: (view: ViewType) => void;
 }
 
 export interface ProfileSettingsData {
-  name: string
-  surname: string
-  email: string
+  name: string;
+  surname: string;
+  email: string;
 }
 
 export interface PasswordData {
-  currentPassword: string
-  newPassword: string
-  repeatNewPassword: string
+  currentPassword: string;
+  newPassword: string;
+  repeatNewPassword: string;
 }
 
-export type ViewType = 'profile' | 'password' | 'picture'
+export type ViewType = 'profile' | 'password' | 'picture';
 
 const getViewTitle = (view: ViewType): string => {
   switch (view) {
     case 'password':
-      return 'Change password'
+      return 'Change password';
     case 'picture':
-      return 'Change profile picture'
+      return 'Change profile picture';
     default:
-      return 'Profile settings'
+      return 'Profile settings';
   }
-}
+};
 
 const ProfileSettings = React.forwardRef<HTMLDivElement, ProfileSettingsProps>(
   ({ className, onSubmit, onCancel, onViewChange, ...props }, ref) => {
-    const { user } = useAuth()
-    const { data: profilePictureUrl, isLoading, error } = useProfilePicture()
-    const queryClient = useQueryClient()
+    const { user } = useAuth();
+    const { data: profilePictureUrl, isLoading, error } = useProfilePicture();
+    const queryClient = useQueryClient();
 
-    const [currentView, setCurrentView] = React.useState<ViewType>('profile')
+    const [currentView, setCurrentView] = React.useState<ViewType>('profile');
     const [formData, setFormData] = React.useState<ProfileSettingsData>({
-      name: user?.name || "",
-      surname: user?.surname || "",
-      email: user?.email || "",
-    })
+      name: user?.name || '',
+      surname: user?.surname || '',
+      email: user?.email || '',
+    });
 
     const [passwordData, setPasswordData] = React.useState<PasswordData>({
-      currentPassword: "",
-      newPassword: "",
-      repeatNewPassword: "",
-    })
+      currentPassword: '',
+      newPassword: '',
+      repeatNewPassword: '',
+    });
 
-    const [errors, setErrors] = React.useState<Partial<ProfileSettingsData | PasswordData>>({})
-    const [showNameError, setShowNameError] = React.useState(false)
-    const [showSurnameError, setShowSurnameError] = React.useState(false)
-    const [showEmailError, setShowEmailError] = React.useState(false)
-    const [showCurrentPasswordError, setShowCurrentPasswordError] = React.useState(false)
-    const [showNewPasswordError, setShowNewPasswordError] = React.useState(false)
-    const [showRepeatPasswordError, setShowRepeatPasswordError] = React.useState(false)
-    const [isSubmitting, setIsSubmitting] = React.useState(false)
+    const [errors, setErrors] = React.useState<
+      Partial<ProfileSettingsData | PasswordData>
+    >({});
+    const [showNameError, setShowNameError] = React.useState(false);
+    const [showSurnameError, setShowSurnameError] = React.useState(false);
+    const [showEmailError, setShowEmailError] = React.useState(false);
+    const [showCurrentPasswordError, setShowCurrentPasswordError] =
+      React.useState(false);
+    const [showNewPasswordError, setShowNewPasswordError] =
+      React.useState(false);
+    const [showRepeatPasswordError, setShowRepeatPasswordError] =
+      React.useState(false);
+    const [isSubmitting, setIsSubmitting] = React.useState(false);
 
-    const [profilePictureFile, setProfilePictureFile] = React.useState<File | null>(null)
-    const [profilePicturePreview, setProfilePicturePreview] = React.useState<string | null>(null)
-    const [uploadError, setUploadError] = React.useState<string | null>(null)
+    const [profilePictureFile, setProfilePictureFile] =
+      React.useState<File | null>(null);
+    const [profilePicturePreview, setProfilePicturePreview] = React.useState<
+      string | null
+    >(null);
+    const [uploadError, setUploadError] = React.useState<string | null>(null);
 
     const {
       uploadProfilePicture,
       isUploading: isProfilePictureUploading,
       error: uploadErrorData,
       data: uploadResult,
-      reset: resetUpload
+      reset: resetUpload,
     } = useProfilePictureUpload({
       onSuccess: async (profilePictureUrl) => {
         setUploadError(null);
-        queryClient.setQueryData(["user"], (oldData: any) => {
+        queryClient.setQueryData(['user'], (oldData: any) => {
           if (!oldData) return { profilePictureUrl };
           return {
             ...oldData,
-            profilePictureUrl: profilePictureUrl
+            profilePictureUrl: profilePictureUrl,
           };
         });
-        queryClient.invalidateQueries({ queryKey: ["user"] });
+        queryClient.invalidateQueries({ queryKey: ['user'] });
         onCancel?.();
       },
       onError: (error) => {
         setUploadError(error.message);
-      }
+      },
     });
 
-    const initials = generateInitials(user?.name, user?.surname)
-    const showProfilePicture = profilePictureUrl && !error && !isLoading
+    const initials = generateInitials(user?.name, user?.surname);
+    const showProfilePicture = profilePictureUrl && !error && !isLoading;
 
-    const fileInputRef = React.useRef<HTMLInputElement>(null)
+    const fileInputRef = React.useRef<HTMLInputElement>(null);
 
-    const handleInputChange = (field: keyof ProfileSettingsData) => (
-      e: React.ChangeEvent<HTMLInputElement>
-    ) => {
-      setFormData(prev => ({
-        ...prev,
-        [field]: e.target.value
-      }))
+    const handleInputChange =
+      (field: keyof ProfileSettingsData) =>
+      (e: React.ChangeEvent<HTMLInputElement>) => {
+        setFormData((prev) => ({
+          ...prev,
+          [field]: e.target.value,
+        }));
 
-      if (field === "name") setShowNameError(false)
-      if (field === "surname") setShowSurnameError(false)
-      if (field === "email") setShowEmailError(false)
-    }
+        if (field === 'name') setShowNameError(false);
+        if (field === 'surname') setShowSurnameError(false);
+        if (field === 'email') setShowEmailError(false);
+      };
 
-    const handlePasswordChange = (field: keyof PasswordData) => (
-      e: React.ChangeEvent<HTMLInputElement>
-    ) => {
-      setPasswordData(prev => ({
-        ...prev,
-        [field]: e.target.value
-      }))
+    const handlePasswordChange =
+      (field: keyof PasswordData) =>
+      (e: React.ChangeEvent<HTMLInputElement>) => {
+        setPasswordData((prev) => ({
+          ...prev,
+          [field]: e.target.value,
+        }));
 
-      if (field === "currentPassword") setShowCurrentPasswordError(false)
-      if (field === "newPassword") setShowNewPasswordError(false)
-      if (field === "repeatNewPassword") setShowRepeatPasswordError(false)
-    }
+        if (field === 'currentPassword') setShowCurrentPasswordError(false);
+        if (field === 'newPassword') setShowNewPasswordError(false);
+        if (field === 'repeatNewPassword') setShowRepeatPasswordError(false);
+      };
 
     const handleViewChange = (view: ViewType) => {
-      setCurrentView(view)
-      setErrors({})
-      setShowNameError(false)
-      setShowSurnameError(false)
-      setShowEmailError(false)
-      setShowCurrentPasswordError(false)
-      setShowNewPasswordError(false)
-      setShowRepeatPasswordError(false)
-      setUploadError(null)
-      onViewChange?.(view)
-    }
+      setCurrentView(view);
+      setErrors({});
+      setShowNameError(false);
+      setShowSurnameError(false);
+      setShowEmailError(false);
+      setShowCurrentPasswordError(false);
+      setShowNewPasswordError(false);
+      setShowRepeatPasswordError(false);
+      setUploadError(null);
+      onViewChange?.(view);
+    };
 
-    const handleProfilePictureChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleProfilePictureChange = (
+      e: React.ChangeEvent<HTMLInputElement>,
+    ) => {
       const file = e.target.files?.[0];
       if (!file) return;
 
       const maxSizeInBytes = 5 * 1024 * 1024; // 5MB
-      const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+      const allowedTypes = [
+        'image/jpeg',
+        'image/jpg',
+        'image/png',
+        'image/webp',
+      ];
 
       if (file.size > maxSizeInBytes) {
-        setUploadError("Image must be less than 5MB");
+        setUploadError('Image must be less than 5MB');
         return;
       }
 
       if (!allowedTypes.includes(file.type)) {
-        setUploadError("Image must be in JPEG, JPG, PNG, or WebP format");
+        setUploadError('Image must be in JPEG, JPG, PNG, or WebP format');
         return;
       }
 
@@ -168,155 +187,150 @@ const ProfileSettings = React.forwardRef<HTMLDivElement, ProfileSettingsProps>(
 
       setProfilePictureFile(file);
       setUploadError(null);
-    }
+    };
 
     const validateForm = (): boolean => {
-      let isValid = true
+      let isValid = true;
 
       if (!formData.name.trim()) {
-        setShowNameError(true)
-        isValid = false
+        setShowNameError(true);
+        isValid = false;
       }
 
       if (!formData.surname.trim()) {
-        setShowSurnameError(true)
-        isValid = false
+        setShowSurnameError(true);
+        isValid = false;
       }
 
       if (!formData.email.trim()) {
-        setShowEmailError(true)
-        isValid = false
+        setShowEmailError(true);
+        isValid = false;
       } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-        setShowEmailError(true)
-        isValid = false
+        setShowEmailError(true);
+        isValid = false;
       }
 
-      return isValid
-    }
+      return isValid;
+    };
 
     const validatePasswordForm = (): boolean => {
-      let isValid = true
+      let isValid = true;
 
       if (!passwordData.currentPassword.trim()) {
-        setShowCurrentPasswordError(true)
-        isValid = false
+        setShowCurrentPasswordError(true);
+        isValid = false;
       }
 
       if (!passwordData.newPassword.trim()) {
-        setShowNewPasswordError(true)
-        isValid = false
+        setShowNewPasswordError(true);
+        isValid = false;
       } else if (passwordData.newPassword.length < 6) {
-        setShowNewPasswordError(true)
-        isValid = false
+        setShowNewPasswordError(true);
+        isValid = false;
       }
 
-      if (passwordData.newPassword && passwordData.currentPassword &&
-          passwordData.newPassword === passwordData.currentPassword) {
-        setShowNewPasswordError(true)
-        isValid = false
+      if (
+        passwordData.newPassword &&
+        passwordData.currentPassword &&
+        passwordData.newPassword === passwordData.currentPassword
+      ) {
+        setShowNewPasswordError(true);
+        isValid = false;
       }
 
       if (!passwordData.repeatNewPassword.trim()) {
-        setShowRepeatPasswordError(true)
-        isValid = false
+        setShowRepeatPasswordError(true);
+        isValid = false;
       } else if (passwordData.repeatNewPassword !== passwordData.newPassword) {
-        setShowRepeatPasswordError(true)
-        isValid = false
+        setShowRepeatPasswordError(true);
+        isValid = false;
       }
 
-      return isValid
-    }
+      return isValid;
+    };
 
     const handleSubmit = async (e: React.FormEvent) => {
-      e.preventDefault()
+      e.preventDefault();
 
       try {
         if (currentView === 'profile') {
           const isDataUnchanged =
             formData.name === user?.name &&
             formData.surname === user?.surname &&
-            formData.email === user?.email
+            formData.email === user?.email;
 
           if (isDataUnchanged) {
-            onCancel?.()
-            return
+            onCancel?.();
+            return;
           }
 
           if (!validateForm()) {
-            return
+            return;
           }
 
-          setIsSubmitting(true)
+          setIsSubmitting(true);
 
           await userAPI.updateUserProfile({
             name: formData.name,
             surname: formData.surname,
             email: formData.email,
-          })
+          });
 
-          queryClient.invalidateQueries({ queryKey: ["user"] })
+          queryClient.invalidateQueries({ queryKey: ['user'] });
 
-          onCancel?.()
-
+          onCancel?.();
         } else if (currentView === 'password') {
           if (!validatePasswordForm()) {
-            return
+            return;
           }
 
-          setIsSubmitting(true)
+          setIsSubmitting(true);
 
           await userAPI.changePassword({
             currentPassword: passwordData.currentPassword,
             newPassword: passwordData.newPassword,
-          })
+          });
 
-          onCancel?.()
-
+          onCancel?.();
         } else if (currentView === 'picture' && profilePictureFile) {
-          setIsSubmitting(true)
-          uploadProfilePicture(profilePictureFile)
+          setIsSubmitting(true);
+          uploadProfilePicture(profilePictureFile);
         }
       } finally {
-        setIsSubmitting(false)
+        setIsSubmitting(false);
       }
-    }
+    };
 
     const handleCancel = () => {
       setFormData({
-        name: user?.name || "",
-        surname: user?.surname || "",
-        email: user?.email || "",
-      })
+        name: user?.name || '',
+        surname: user?.surname || '',
+        email: user?.email || '',
+      });
       setPasswordData({
-        currentPassword: "",
-        newPassword: "",
-        repeatNewPassword: "",
-      })
-      setCurrentView('profile')
-      setErrors({})
-      setShowNameError(false)
-      setShowSurnameError(false)
-      setShowEmailError(false)
-      setShowCurrentPasswordError(false)
-      setShowNewPasswordError(false)
-      setShowRepeatPasswordError(false)
+        currentPassword: '',
+        newPassword: '',
+        repeatNewPassword: '',
+      });
+      setCurrentView('profile');
+      setErrors({});
+      setShowNameError(false);
+      setShowSurnameError(false);
+      setShowEmailError(false);
+      setShowCurrentPasswordError(false);
+      setShowNewPasswordError(false);
+      setShowRepeatPasswordError(false);
 
-      setProfilePictureFile(null)
-      setProfilePicturePreview(null)
-      setUploadError(null)
+      setProfilePictureFile(null);
+      setProfilePicturePreview(null);
+      setUploadError(null);
 
-      
-      onCancel?.()
-    }
+      onCancel?.();
+    };
 
     return (
-      <div
-        ref={ref}
-        className={className}
-        {...props}
-      >
+      <div ref={ref} className={className} {...props}>
         <form onSubmit={handleSubmit} className="flex flex-col gap-8">
-
           <div className="flex flex-col gap-6">
             {currentView === 'profile' && (
               <>
@@ -326,7 +340,7 @@ const ProfileSettings = React.forwardRef<HTMLDivElement, ProfileSettingsProps>(
                       <InputField
                         label="Name"
                         value={formData.name}
-                        onChange={handleInputChange("name")}
+                        onChange={handleInputChange('name')}
                         placeholder="Enter your name"
                         disabled={isSubmitting}
                       />
@@ -341,7 +355,7 @@ const ProfileSettings = React.forwardRef<HTMLDivElement, ProfileSettingsProps>(
                       <InputField
                         label="Surname"
                         value={formData.surname}
-                        onChange={handleInputChange("surname")}
+                        onChange={handleInputChange('surname')}
                         placeholder="Enter your surname"
                         disabled={isSubmitting}
                       />
@@ -357,14 +371,16 @@ const ProfileSettings = React.forwardRef<HTMLDivElement, ProfileSettingsProps>(
                     <InputField
                       label="Email"
                       value={formData.email}
-                      onChange={handleInputChange("email")}
+                      onChange={handleInputChange('email')}
                       placeholder="Enter your email"
                       type="email"
                       disabled={isSubmitting}
                     />
                     {showEmailError && (
                       <p className="text-sm text-coral-50">
-                        {!formData.email.trim() ? "Email is required" : "Invalid email format"}
+                        {!formData.email.trim()
+                          ? 'Email is required'
+                          : 'Invalid email format'}
                       </p>
                     )}
                   </div>
@@ -393,7 +409,7 @@ const ProfileSettings = React.forwardRef<HTMLDivElement, ProfileSettingsProps>(
                   <InputField
                     label="Current password"
                     value={passwordData.currentPassword}
-                    onChange={handlePasswordChange("currentPassword")}
+                    onChange={handlePasswordChange('currentPassword')}
                     type="password"
                     disabled={isSubmitting}
                   />
@@ -408,17 +424,18 @@ const ProfileSettings = React.forwardRef<HTMLDivElement, ProfileSettingsProps>(
                   <InputField
                     label="New password"
                     value={passwordData.newPassword}
-                    onChange={handlePasswordChange("newPassword")}
+                    onChange={handlePasswordChange('newPassword')}
                     type="password"
                     disabled={isSubmitting}
                   />
                   {showNewPasswordError && (
                     <p className="text-sm text-coral-50">
                       {!passwordData.newPassword.trim()
-                        ? "New password is required"
-                        : passwordData.newPassword === passwordData.currentPassword
-                        ? "New password must be different from current password"
-                        : "New password must be at least 6 characters long"}
+                        ? 'New password is required'
+                        : passwordData.newPassword ===
+                            passwordData.currentPassword
+                          ? 'New password must be different from current password'
+                          : 'New password must be at least 6 characters long'}
                     </p>
                   )}
                 </div>
@@ -427,15 +444,15 @@ const ProfileSettings = React.forwardRef<HTMLDivElement, ProfileSettingsProps>(
                   <InputField
                     label="Repeat new password"
                     value={passwordData.repeatNewPassword}
-                    onChange={handlePasswordChange("repeatNewPassword")}
+                    onChange={handlePasswordChange('repeatNewPassword')}
                     type="password"
                     disabled={isSubmitting}
                   />
                   {showRepeatPasswordError && (
                     <p className="text-sm text-coral-50">
                       {!passwordData.repeatNewPassword.trim()
-                        ? "Please repeat your new password"
-                        : "Passwords do not match"}
+                        ? 'Please repeat your new password'
+                        : 'Passwords do not match'}
                     </p>
                   )}
                 </div>
@@ -452,10 +469,7 @@ const ProfileSettings = React.forwardRef<HTMLDivElement, ProfileSettingsProps>(
                         alt="Profile picture preview"
                       />
                     ) : showProfilePicture ? (
-                      <AvatarImage
-                        src={profilePictureUrl}
-                        alt="User avatar"
-                      />
+                      <AvatarImage src={profilePictureUrl} alt="User avatar" />
                     ) : (
                       <AvatarFallback className="bg-primary-50 text-gray-90 font-medium text-lg">
                         {initials}
@@ -478,7 +492,9 @@ const ProfileSettings = React.forwardRef<HTMLDivElement, ProfileSettingsProps>(
                   onClick={() => fileInputRef.current?.click()}
                   className="w-full max-w-[200px]"
                 >
-                  {isProfilePictureUploading ? "Uploading..." : "Upload new picture"}
+                  {isProfilePictureUploading
+                    ? 'Uploading...'
+                    : 'Upload new picture'}
                 </Button>
 
                 {uploadError && (
@@ -486,8 +502,7 @@ const ProfileSettings = React.forwardRef<HTMLDivElement, ProfileSettingsProps>(
                     {uploadError}
                   </p>
                 )}
-
-                </div>
+              </div>
             )}
           </div>
 
@@ -499,21 +514,16 @@ const ProfileSettings = React.forwardRef<HTMLDivElement, ProfileSettingsProps>(
             >
               Cancel
             </Button>
-            <Button
-              type="submit"
-              variant="primary"
-              disabled={isSubmitting}
-
-            >
-              {isSubmitting ? "Saving..." : "Save Changes"}
+            <Button type="submit" variant="primary" disabled={isSubmitting}>
+              {isSubmitting ? 'Saving...' : 'Save Changes'}
             </Button>
           </div>
         </form>
       </div>
-    )
-  }
-)
+    );
+  },
+);
 
-ProfileSettings.displayName = "ProfileSettings"
+ProfileSettings.displayName = 'ProfileSettings';
 
-export { ProfileSettings, getViewTitle }
+export { getViewTitle, ProfileSettings };

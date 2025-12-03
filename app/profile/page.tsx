@@ -1,20 +1,32 @@
-"use client";
+'use client';
 
-import { useAuth } from "@/contexts/auth-context";
-import { AppLayout } from "@/components/features/layout/app-layout";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/navigation/tabs";
-import { Card, CardContent } from "@/components/ui/primitives/card";
-import { AuctionTabContent, AuctionData } from "@/components/features/auctions/auction-tab-content";
-import { EditAuctionDialog } from "@/components/features/auctions/edit-auction-dialog";
-import { useAuctionsQuery } from "@/hooks/useAuctionsQuery";
-import { useUserStatistics } from "@/hooks/useUserStatistics";
-import { useAuctionMutations, useAuctionPrefetcher } from "@/hooks/useAuctionMutations";
-import { useState, useEffect, useMemo, Suspense } from "react";
-import { useSearchParams, useRouter } from "next/navigation";
+import {
+  AuctionData,
+  AuctionTabContent,
+} from '@/components/features/auctions/auction-tab-content';
+import { EditAuctionDialog } from '@/components/features/auctions/edit-auction-dialog';
+import { AppLayout } from '@/components/features/layout/app-layout';
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from '@/components/ui/navigation/tabs';
+import { Card, CardContent } from '@/components/ui/primitives/card';
+import { useAuth } from '@/contexts/auth-context';
+import {
+  useAuctionMutations,
+  useAuctionPrefetcher,
+} from '@/hooks/useAuctionMutations';
+import { useAuctionsQuery } from '@/hooks/useAuctionsQuery';
+import { useUserStatistics } from '@/hooks/useUserStatistics';
+import { EditAuctionFormData } from '@/types/auction';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { Suspense, useCallback, useEffect, useMemo, useState } from 'react';
 
 const VALID_TAB_VALUES = ['my-auctions', 'bidding', 'won'] as const;
 
-type TabValue = typeof VALID_TAB_VALUES[number];
+type TabValue = (typeof VALID_TAB_VALUES)[number];
 
 interface AuctionsResponse {
   auctions: AuctionData[];
@@ -49,8 +61,11 @@ function ProfilePageSkeleton() {
         <div className="flex-1">
           <div className="flex justify-center mb-4">
             <div className="flex space-x-1">
-              {[... Array(3)].map((_, i) => (
-                <div key={i} className="h-10 w-24 bg-gray-200 rounded animate-pulse"></div>
+              {[...Array(3)].map((_, i) => (
+                <div
+                  key={i}
+                  className="h-10 w-24 bg-gray-200 rounded animate-pulse"
+                ></div>
               ))}
             </div>
           </div>
@@ -71,46 +86,47 @@ function ProfileContent() {
   const urlFilter = searchParams.get('filter');
   const [activeTab, setActiveTab] = useState<TabValue>(() => {
     return VALID_TAB_VALUES.includes(urlFilter as TabValue)
-      ? urlFilter as TabValue
+      ? (urlFilter as TabValue)
       : 'my-auctions';
   });
-  const [editingAuction, setEditingAuction] = useState<AuctionData | null>(null);
+  const [editingAuction, setEditingAuction] = useState<AuctionData | null>(
+    null,
+  );
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
 
-  const {
-    data: statistics,
-    isLoading: isStatisticsLoading,
-  } = useUserStatistics({}, !!user, isLoggingOut);
+  const { data: statistics, isLoading: isStatisticsLoading } =
+    useUserStatistics({}, !!user, isLoggingOut);
 
   const {
     data: myAuctionsData,
     isLoading: isLoadingMyAuctions,
     error: myAuctionsError,
-  } = useAuctionsQuery("OWN", 1, 500, {
-    enabled: activeTab === "my-auctions",
-    refetchInterval: 30 * 1000
+  } = useAuctionsQuery('OWN', 1, 500, {
+    enabled: activeTab === 'my-auctions',
+    refetchInterval: 30 * 1000,
   });
 
   const {
     data: biddingAuctionsData,
     isLoading: isLoadingBidding,
     error: biddingError,
-  } = useAuctionsQuery("BID", 1, 500, {
-    enabled: activeTab === "bidding",
-    refetchInterval: 30 * 1000
+  } = useAuctionsQuery('BID', 1, 500, {
+    enabled: activeTab === 'bidding',
+    refetchInterval: 30 * 1000,
   });
 
   const {
     data: wonAuctionsData,
     isLoading: isLoadingWon,
     error: wonError,
-  } = useAuctionsQuery("WON", 1, 500, {
-    enabled: activeTab === "won",
-    refetchInterval: 30 * 1000
+  } = useAuctionsQuery('WON', 1, 500, {
+    enabled: activeTab === 'won',
+    refetchInterval: 30 * 1000,
   });
 
   const myAuctions = (myAuctionsData as AuctionsResponse)?.auctions || [];
-  const biddingAuctions = (biddingAuctionsData as AuctionsResponse)?.auctions || [];
+  const biddingAuctions =
+    (biddingAuctionsData as AuctionsResponse)?.auctions || [];
   const wonAuctions = (wonAuctionsData as AuctionsResponse)?.auctions || [];
 
   const totalEarnings = statistics?.totalEarnings || 0;
@@ -118,18 +134,26 @@ function ProfileContent() {
   const biddingCount = statistics?.currentlyBidding || 0;
   const winningCount = statistics?.currentlyWinning || 0;
 
+  const updateURL = useCallback(
+    (tabValue: string) => {
+      const params = new URLSearchParams(searchParams.toString());
+      params.set('filter', tabValue);
+      router.replace(`/profile?${params.toString()}`);
+    },
+    [searchParams, router],
+  );
 
   useEffect(() => {
     const timer = setTimeout(() => {
-      if (activeTab === "my-auctions") {
-        prefetchAuctions("BID");
-        prefetchAuctions("WON");
-      } else if (activeTab === "bidding") {
-        prefetchAuctions("OWN");
-        prefetchAuctions("WON");
-      } else if (activeTab === "won") {
-        prefetchAuctions("OWN");
-        prefetchAuctions("BID");
+      if (activeTab === 'my-auctions') {
+        prefetchAuctions('BID');
+        prefetchAuctions('WON');
+      } else if (activeTab === 'bidding') {
+        prefetchAuctions('OWN');
+        prefetchAuctions('WON');
+      } else if (activeTab === 'won') {
+        prefetchAuctions('OWN');
+        prefetchAuctions('BID');
       }
     }, 2000);
 
@@ -139,7 +163,7 @@ function ProfileContent() {
   useEffect(() => {
     const urlFilter = searchParams.get('filter');
     const validTab = VALID_TAB_VALUES.includes(urlFilter as TabValue)
-      ? urlFilter as TabValue
+      ? (urlFilter as TabValue)
       : 'my-auctions';
 
     if (!urlFilter) {
@@ -149,17 +173,17 @@ function ProfileContent() {
     if (validTab !== activeTab) {
       setActiveTab(validTab);
     }
-  }, [searchParams, activeTab]);
+  }, [searchParams, activeTab, updateURL]);
 
   const handleEditAuction = (auctionId: string) => {
-    const auction = myAuctions?.find(a => a.id === auctionId);
+    const auction = myAuctions?.find((a) => a.id === auctionId);
     if (auction) {
       setEditingAuction(auction);
       setIsEditDialogOpen(true);
     }
   };
 
-  const handleEditSubmit = async (formData: any) => {
+  const handleEditSubmit = async (formData: EditAuctionFormData) => {
     if (formData.success) {
       setEditingAuction(null);
       setIsEditDialogOpen(false);
@@ -173,25 +197,28 @@ function ProfileContent() {
     }
   };
 
-  const convertToEditAuctionData = useMemo(() => (auction: AuctionData) => ({
-    id: auction.id,
-    title: auction.title,
-    description: auction.description || '',
-    startingPrice: auction.startingPrice || Number.parseFloat(auction.price.replace(' €', '').replace(',', '')) || 0,
-    currentPrice: auction.currentPrice || Number.parseFloat(auction.price.replace(' €', '').replace(',', '')) || 0,
-    endTime: auction.endTime || new Date().toISOString(),
-    imageUrl: auction.imageUrl,
-    sellerId: auction.sellerId || '',
-    status: auction.status || 'in-progress',
-    createdAt: auction.createdAt || new Date().toISOString(),
-    updatedAt: auction.updatedAt || new Date().toISOString(),
-  }), []);
-
-  const updateURL = (tabValue: string) => {
-    const params = new URLSearchParams(searchParams.toString());
-    params.set('filter', tabValue);
-    router.replace(`/profile?${params.toString()}`);
-  };
+  const convertToEditAuctionData = useMemo(
+    () => (auction: AuctionData) => ({
+      id: auction.id,
+      title: auction.title,
+      description: auction.description || '',
+      startingPrice:
+        auction.startingPrice ||
+        Number.parseFloat(auction.price.replace(' €', '').replace(',', '')) ||
+        0,
+      currentPrice:
+        auction.currentPrice ||
+        Number.parseFloat(auction.price.replace(' €', '').replace(',', '')) ||
+        0,
+      endTime: auction.endTime || new Date().toISOString(),
+      imageUrl: auction.imageUrl,
+      sellerId: auction.sellerId || '',
+      status: auction.status || 'in-progress',
+      createdAt: auction.createdAt || new Date().toISOString(),
+      updatedAt: auction.updatedAt || new Date().toISOString(),
+    }),
+    [],
+  );
 
   const handleDeleteAuction = async (auctionId: string) => {
     await deleteAuction(auctionId);
@@ -217,7 +244,7 @@ function ProfileContent() {
         <h1 className="text-3xl font-bold mt-4 px-8">
           Hello {user?.name} {user?.surname} !
         </h1>
-        
+
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 px-8">
           <Card className="bg-gray-50 h-[202px]">
             <CardContent className="flex flex-col justify-between w-full h-full text-primary">
@@ -226,7 +253,9 @@ function ProfileContent() {
                 <h4 className=" text-base font-light">All-time</h4>
               </div>
               <div className="text-[80px] font-bold leading-none">
-                <h1>{isStatisticsLoading ? "..." : totalEarnings.toFixed(0)} €</h1>
+                <h1>
+                  {isStatisticsLoading ? '...' : totalEarnings.toFixed(0)} €
+                </h1>
               </div>
             </CardContent>
           </Card>
@@ -238,7 +267,7 @@ function ProfileContent() {
                 <h4 className=" text-base font-light">All-time</h4>
               </div>
               <div className="text-[80px] font-bold leading-none">
-                <h1>{isStatisticsLoading ? "..." : postedAuctionsCount}</h1>
+                <h1>{isStatisticsLoading ? '...' : postedAuctionsCount}</h1>
               </div>
             </CardContent>
           </Card>
@@ -249,7 +278,7 @@ function ProfileContent() {
                 <h4 className=" text-xl font-bold">Currently bidding</h4>
               </div>
               <div className="text-[80px] font-bold leading-none">
-                <h1>{isStatisticsLoading ? "..." : biddingCount}</h1>
+                <h1>{isStatisticsLoading ? '...' : biddingCount}</h1>
               </div>
             </CardContent>
           </Card>
@@ -259,14 +288,20 @@ function ProfileContent() {
               <div>
                 <h4 className=" text-xl font-bold">Currently winning</h4>
               </div>
-              <div className={`text-[80px] font-bold leading-none ${winningCount != 0 && 'text-green-card-winning'}`}>
+              <div
+                className={`text-[80px] font-bold leading-none ${winningCount != 0 && 'text-green-card-winning'}`}
+              >
                 <h1>{winningCount}</h1>
               </div>
             </CardContent>
           </Card>
         </div>
 
-        <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full h-[calc(100%-286px)]">
+        <Tabs
+          value={activeTab}
+          onValueChange={handleTabChange}
+          className="w-full h-[calc(100%-286px)]"
+        >
           <div className="flex justify-center">
             <TabsList className="mb-4">
               <TabsTrigger value="my-auctions">My auctions</TabsTrigger>
@@ -307,7 +342,9 @@ function ProfileContent() {
       </div>
 
       <EditAuctionDialog
-        auction={editingAuction ? convertToEditAuctionData(editingAuction) : null}
+        auction={
+          editingAuction ? convertToEditAuctionData(editingAuction) : null
+        }
         onSubmit={handleEditSubmit}
         open={isEditDialogOpen}
         onOpenChange={handleEditDialogChange}

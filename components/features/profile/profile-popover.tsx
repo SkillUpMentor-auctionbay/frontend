@@ -1,60 +1,53 @@
-"use client"
+'use client';
 
-import * as React from "react"
-import { Button } from "@/components/ui/primitives/button"
-import { Icon } from "@/components/ui/primitives/icon"
-import { useAuth } from "@/contexts/auth-context"
-import { ProfileSettingsDialog } from "./profile-settings-dialog"
+import { Button } from '@/components/ui/primitives/button';
+import { Icon } from '@/components/ui/primitives/icon';
+import { useAuth } from '@/contexts/auth-context';
+import * as React from 'react';
+import { ProfileSettingsDialog } from './profile-settings-dialog';
 
 export interface ProfilePopoverProps {
-  className?: string
-  onSettingsClick?: () => void
-  onLogoutClick?: () => void
+  className?: string;
+  onSettingsClick?: () => void;
+  onLogoutClick?: () => void;
 }
 
 const ProfilePopover = React.forwardRef<HTMLDivElement, ProfilePopoverProps>(
   ({ className, onSettingsClick, onLogoutClick, ...props }, ref) => {
-    const { logout, isLoggingOut } = useAuth()
-    const [isSettingsDialogOpen, setIsSettingsDialogOpen] = React.useState(false)
+    const { logout, isLoggingOut } = useAuth();
+    const [isSettingsDialogOpen, setIsSettingsDialogOpen] =
+      React.useState(false);
 
     const handleSettingsClick = () => {
       if (onSettingsClick) {
-        onSettingsClick()
+        onSettingsClick();
       } else {
-        setIsSettingsDialogOpen(true)
+        setIsSettingsDialogOpen(true);
       }
-    }
+    };
 
-  const handleProfileSettingsDialogChange = (open: boolean) => {
-      setIsSettingsDialogOpen(open)
-    }
+    const handleProfileSettingsDialogChange = (open: boolean) => {
+      setIsSettingsDialogOpen(open);
+    };
 
     const handleLogoutClick = async () => {
       if (onLogoutClick) {
-        onLogoutClick()
+        onLogoutClick();
       } else {
-        await logout()
+        await logout();
       }
-    }
+    };
 
     return (
       <>
-        <div
-          ref={ref}
-          className={className}
-          {...props}
-        >
+        <div ref={ref} className={className} {...props}>
           <div className="flex flex-col gap-[17px] items-start p-4">
             <Button
               variant="ghost"
               onClick={handleSettingsClick}
               className="w-full"
             >
-              <Icon
-                name="Settings"
-                size={16}
-                className="shrink-0"
-              />
+              <Icon name="Settings" size={16} className="shrink-0" />
               <span className="font-medium text-base leading-6 text-gray-90">
                 Profile settings
               </span>
@@ -76,10 +69,10 @@ const ProfilePopover = React.forwardRef<HTMLDivElement, ProfilePopoverProps>(
           onOpenChange={handleProfileSettingsDialogChange}
         />
       </>
-    )
-  }
-)
+    );
+  },
+);
 
-ProfilePopover.displayName = "ProfilePopover"
+ProfilePopover.displayName = 'ProfilePopover';
 
-export { ProfilePopover }
+export { ProfilePopover };
