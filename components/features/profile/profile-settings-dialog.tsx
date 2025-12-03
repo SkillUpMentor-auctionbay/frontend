@@ -5,9 +5,9 @@ import {
   DialogContent,
   DialogTitle,
 } from '@/components/ui/overlays/dialog';
+import { type PasswordData } from '@/hooks/usePasswordChange';
 import * as React from 'react';
 import {
-  type PasswordData,
   ProfileSettings,
   type ProfileSettingsData,
   type ViewType,
