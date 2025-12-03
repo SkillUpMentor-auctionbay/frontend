@@ -80,34 +80,18 @@ const ProfileSettings = React.forwardRef<HTMLDivElement, ProfileSettingsProps>(
       React.useState(false);
     const [isSubmitting, setIsSubmitting] = React.useState(false);
 
-    const [profilePictureFile, setProfilePictureFile] =
-      React.useState<File | null>(null);
-    const [profilePicturePreview, setProfilePicturePreview] = React.useState<
-      string | null
-    >(null);
-    const [uploadError, setUploadError] = React.useState<string | null>(null);
-
+    
     const {
-      uploadProfilePicture,
-      isUploading: isProfilePictureUploading,
-      error: uploadErrorData,
-      data: uploadResult,
-      reset: resetUpload,
+      previewUrl,
+      selectedFile,
+      error: uploadError,
+      isUploading,
+      generatePreview,
+      uploadSelectedFile,
+      clearPreview,
     } = useProfilePictureUpload({
-      onSuccess: async (profilePictureUrl) => {
-        setUploadError(null);
-        queryClient.setQueryData(['user'], (oldData: any) => {
-          if (!oldData) return { profilePictureUrl };
-          return {
-            ...oldData,
-            profilePictureUrl: profilePictureUrl,
-          };
-        });
-        queryClient.invalidateQueries({ queryKey: ['user'] });
+      onSuccess: () => {
         onCancel?.();
-      },
-      onError: (error) => {
-        setUploadError(error.message);
       },
     });
 
@@ -151,42 +135,22 @@ const ProfileSettings = React.forwardRef<HTMLDivElement, ProfileSettingsProps>(
       setShowCurrentPasswordError(false);
       setShowNewPasswordError(false);
       setShowRepeatPasswordError(false);
-      setUploadError(null);
       onViewChange?.(view);
     };
 
-    const handleProfilePictureChange = (
+    const handleProfilePictureChange = async (
       e: React.ChangeEvent<HTMLInputElement>,
     ) => {
       const file = e.target.files?.[0];
       if (!file) return;
 
-      const maxSizeInBytes = 5 * 1024 * 1024; // 5MB
-      const allowedTypes = [
-        'image/jpeg',
-        'image/jpg',
-        'image/png',
-        'image/webp',
-      ];
+      await generatePreview(file);
+    };
 
-      if (file.size > maxSizeInBytes) {
-        setUploadError('Image must be less than 5MB');
-        return;
-      }
-
-      if (!allowedTypes.includes(file.type)) {
-        setUploadError('Image must be in JPEG, JPG, PNG, or WebP format');
-        return;
-      }
-
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setProfilePicturePreview(reader.result as string);
-      };
-      reader.readAsDataURL(file);
-
-      setProfilePictureFile(file);
-      setUploadError(null);
+    const handleSelectPictureClick = (e: React.MouseEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      fileInputRef.current?.click();
     };
 
     const validateForm = (): boolean => {
@@ -292,9 +256,11 @@ const ProfileSettings = React.forwardRef<HTMLDivElement, ProfileSettingsProps>(
           });
 
           onCancel?.();
-        } else if (currentView === 'picture' && profilePictureFile) {
+        } else if (currentView === 'picture' && selectedFile) {
           setIsSubmitting(true);
-          uploadProfilePicture(profilePictureFile);
+          uploadSelectedFile();
+        } else if (currentView === 'picture') {
+          onCancel?.();
         }
       } finally {
         setIsSubmitting(false);
@@ -321,9 +287,7 @@ const ProfileSettings = React.forwardRef<HTMLDivElement, ProfileSettingsProps>(
       setShowNewPasswordError(false);
       setShowRepeatPasswordError(false);
 
-      setProfilePictureFile(null);
-      setProfilePicturePreview(null);
-      setUploadError(null);
+      clearPreview();
 
       onCancel?.();
     };
@@ -463,9 +427,9 @@ const ProfileSettings = React.forwardRef<HTMLDivElement, ProfileSettingsProps>(
               <div className="flex flex-col items-center gap-6">
                 <div className="relative">
                   <Avatar size="lg" className="size-14">
-                    {profilePicturePreview ? (
+                    {previewUrl ? (
                       <AvatarImage
-                        src={profilePicturePreview}
+                        src={previewUrl}
                         alt="Profile picture preview"
                       />
                     ) : showProfilePicture ? (
@@ -487,16 +451,17 @@ const ProfileSettings = React.forwardRef<HTMLDivElement, ProfileSettingsProps>(
                 />
 
                 <Button
+                  type="button"
                   variant="tertiary"
-                  disabled={isSubmitting || isProfilePictureUploading}
-                  onClick={() => fileInputRef.current?.click()}
+                  disabled={isSubmitting || isUploading}
+                  onClick={handleSelectPictureClick}
                   className="w-full max-w-[200px]"
                 >
-                  {isProfilePictureUploading
+                  {isUploading
                     ? 'Uploading...'
-                    : 'Upload new picture'}
+                    : "Select new picture"
+                    }
                 </Button>
-
                 {uploadError && (
                   <p className="text-sm text-coral-50 text-center max-w-[200px]">
                     {uploadError}
@@ -514,8 +479,8 @@ const ProfileSettings = React.forwardRef<HTMLDivElement, ProfileSettingsProps>(
             >
               Cancel
             </Button>
-            <Button type="submit" variant="primary" disabled={isSubmitting}>
-              {isSubmitting ? 'Saving...' : 'Save Changes'}
+            <Button type="submit" variant="primary" disabled={isSubmitting || isUploading || !!uploadError}>
+              {isSubmitting || isUploading ? 'Saving...' : 'Save Changes'}
             </Button>
           </div>
         </form>
